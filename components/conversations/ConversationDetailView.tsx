@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
 import { CloseConversationButton } from './CloseConversationButton'
 import { MessageForm } from './MessageForm'
+import { ContactDetailsModal } from './ContactDetailsModal'
+import { toggleConversationAI } from '@/app/actions/conversations'
+import { useRouter } from 'next/navigation'
 
 interface Conversation {
   id: string
@@ -42,8 +45,12 @@ interface ConversationDetailViewProps {
 export function ConversationDetailView({ conversation, onClose }: ConversationDetailViewProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
+  const [aiEnabled, setAiEnabled] = useState(conversation.ai_assistant_enabled)
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [togglingAI, setTogglingAI] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
     loadMessages()
@@ -120,6 +127,24 @@ export function ConversationDetailView({ conversation, onClose }: ConversationDe
     loadMessages()
   }
 
+  const handleToggleAI = async () => {
+    setTogglingAI(true)
+    try {
+      const result = await toggleConversationAI(conversation.id, !aiEnabled)
+      if (result.success) {
+        setAiEnabled(!aiEnabled)
+        router.refresh()
+      } else {
+        alert('Erro ao atualizar IA: ' + (result.error || 'Erro desconhecido'))
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar IA:', error)
+      alert('Erro ao atualizar IA')
+    } finally {
+      setTogglingAI(false)
+    }
+  }
+
   return (
     <div className="flex h-full flex-col bg-white">
       {/* Header */}
@@ -144,18 +169,41 @@ export function ConversationDetailView({ conversation, onClose }: ConversationDe
               <span className="capitalize">{conversation.channel}</span>
               <span>•</span>
               <span className="capitalize">{conversation.status}</span>
-              {conversation.ai_assistant_enabled && (
-                <>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <span>🤖</span>
-                    <span>IA Ativa</span>
-                  </span>
-                </>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-2 ml-4">
+            {/* Botão Ver Detalhes do Contato */}
+            <button
+              onClick={() => setShowContactModal(true)}
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              title="Ver detalhes do contato"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+            
+            {/* Toggle IA */}
+            <button
+              onClick={handleToggleAI}
+              disabled={togglingAI}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                aiEnabled
+                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              } disabled:opacity-50`}
+              title={aiEnabled ? 'Desativar IA' : 'Ativar IA'}
+            >
+              {togglingAI ? (
+                <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <span>🤖</span>
+                  <span>{aiEnabled ? 'IA Ativa' : 'IA Inativa'}</span>
+                </span>
+              )}
+            </button>
+            
             {conversation.status !== 'closed' && (
               <CloseConversationButton conversationId={conversation.id} />
             )}
@@ -244,6 +292,17 @@ export function ConversationDetailView({ conversation, onClose }: ConversationDe
           />
         </div>
       )}
+
+      {/* Modal de detalhes do contato */}
+      <ContactDetailsModal
+        contactId={conversation.contact_id}
+        isOpen={showContactModal}
+        onClose={() => setShowContactModal(false)}
+        onUpdate={() => {
+          // Recarregar mensagens caso o contato tenha sido atualizado
+          loadMessages()
+        }}
+      />
     </div>
   )
 }

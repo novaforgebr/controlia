@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Se não encontrou conversa, criar uma nova
+    // Se não encontrou conversa, tentar buscar por channel_thread_id antes de criar
     if (!conversation && contact_id_final) {
       // Tentar obter channel_id de várias fontes
       const finalChannelId = channel_id || chatData.id?.toString() || fromData.id?.toString()
@@ -203,34 +203,53 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Criar nova conversa (company_id é opcional)
-      const conversationData: Record<string, unknown> = {
-        contact_id: contact_id_final,
-        channel: finalChannel,
-        channel_thread_id: finalChannelId,
-        status: 'open',
-        priority: 'normal',
-        ai_assistant_enabled: true,
-      }
-      conversationData.company_id = company_id
-      
-      const { data: newConversation, error: convError } = await serviceClient
+      // IMPORTANTE: Tentar buscar conversa existente por channel_thread_id antes de criar
+      const { data: existingConversation } = await serviceClient
         .from('conversations')
-        .insert(conversationData)
         .select('id, channel_thread_id, contact_id, channel')
-        .single()
+        .eq('company_id', company_id)
+        .eq('contact_id', contact_id_final)
+        .eq('channel', finalChannel)
+        .eq('channel_thread_id', finalChannelId)
+        .eq('status', 'open')
+        .order('opened_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
-      if (convError) {
-        console.error('Erro ao criar conversa:', convError)
-        return NextResponse.json(
-          { error: 'Erro ao criar conversa', details: convError.message },
-          { status: 500 }
-        )
+      if (existingConversation) {
+        conversation = existingConversation
+        conversation_id_final = existingConversation.id
+        finalChannel = existingConversation.channel || finalChannel
+      } else {
+        // Criar nova conversa apenas se não existir uma aberta com o mesmo channel_thread_id
+        const conversationData: Record<string, unknown> = {
+          contact_id: contact_id_final,
+          channel: finalChannel,
+          channel_thread_id: finalChannelId,
+          status: 'open',
+          priority: 'normal',
+          ai_assistant_enabled: true,
+        }
+        conversationData.company_id = company_id
+        
+        const { data: newConversation, error: convError } = await serviceClient
+          .from('conversations')
+          .insert(conversationData)
+          .select('id, channel_thread_id, contact_id, channel')
+          .single()
+
+        if (convError) {
+          console.error('Erro ao criar conversa:', convError)
+          return NextResponse.json(
+            { error: 'Erro ao criar conversa', details: convError.message },
+            { status: 500 }
+          )
+        }
+
+        conversation = newConversation
+        conversation_id_final = newConversation.id
+        finalChannel = newConversation.channel || finalChannel
       }
-
-      conversation = newConversation
-      conversation_id_final = newConversation.id
-      finalChannel = newConversation.channel || finalChannel
     }
 
     if (!conversation) {

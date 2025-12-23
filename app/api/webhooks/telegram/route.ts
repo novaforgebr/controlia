@@ -148,26 +148,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar ou criar conversa
+    // IMPORTANTE: Buscar por channel_thread_id para garantir que reutilizamos a mesma conversa
+    const channelThreadId = chat.id.toString()
+    
     let { data: conversation } = await supabase
       .from('conversations')
       .select('id')
       .eq('company_id', contact.company_id)
       .eq('contact_id', contact.id)
       .eq('channel', 'telegram')
+      .eq('channel_thread_id', channelThreadId)
       .eq('status', 'open')
       .order('opened_at', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
 
     if (!conversation) {
-      // Criar nova conversa
+      // Criar nova conversa apenas se não existir uma aberta com o mesmo channel_thread_id
       const { data: newConversation, error: convError } = await supabase
         .from('conversations')
         .insert({
           company_id: contact.company_id,
           contact_id: contact.id,
           channel: 'telegram',
-          channel_thread_id: chat.id.toString(),
+          channel_thread_id: channelThreadId,
           status: 'open',
           priority: 'normal',
           ai_assistant_enabled: true,

@@ -239,6 +239,54 @@ export async function getConversation(conversationId: string): Promise<Conversat
 }
 
 /**
+ * Toggle IA Assistant na conversa
+ */
+export async function toggleConversationAI(conversationId: string, enabled: boolean) {
+  try {
+    const company = await getCurrentCompany()
+    if (!company) {
+      return { error: 'Empresa não encontrada' }
+    }
+
+    const user = await getUser()
+    if (!user) {
+      return { error: 'Usuário não autenticado' }
+    }
+
+    const supabase = await createClient()
+
+    const { data: updatedConversation, error } = await supabase
+      .from('conversations')
+      .update({ ai_assistant_enabled: enabled })
+      .eq('id', conversationId)
+      .eq('company_id', company.id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Erro ao atualizar IA da conversa:', error)
+      return { error: 'Erro ao atualizar IA da conversa' }
+    }
+
+    await logHumanAction(
+      company.id,
+      user.id,
+      enabled ? 'enable_ai_conversation' : 'disable_ai_conversation',
+      'conversation',
+      conversationId,
+      { ai_assistant_enabled: enabled }
+    )
+
+    revalidatePath('/conversations')
+    revalidatePath(`/conversations/${conversationId}`)
+    return { success: true, data: updatedConversation }
+  } catch (error) {
+    console.error('Erro ao atualizar IA da conversa:', error)
+    return { error: 'Erro ao atualizar IA da conversa' }
+  }
+}
+
+/**
  * Listar conversas com filtros
  */
 export async function listConversations(filters?: {
