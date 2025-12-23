@@ -447,11 +447,13 @@ export async function POST(request: NextRequest) {
       console.log('🎯 Automação selecionada:', {
         id: automation.id,
         name: automation.name,
-        url: automation.n8n_webhook_url?.substring(0, 80) + '...'
+        url: automation.n8n_webhook_url?.substring(0, 80) + '...',
+        has_url: !!automation.n8n_webhook_url
       })
       
       if (automation.n8n_webhook_url) {
-        console.log('📤 Enviando para n8n:', automation.n8n_webhook_url)
+        console.log('📤 PREPARANDO envio para n8n')
+        console.log('📤 URL completa:', automation.n8n_webhook_url)
         try {
           // Preparar headers
           const headers: Record<string, string> = {
@@ -472,49 +474,55 @@ export async function POST(request: NextRequest) {
 
           // Preparar URL do webhook
           let webhookUrl = automation.n8n_webhook_url
+          console.log('🔗 URL do webhook (original):', webhookUrl)
           
           // O n8n pode esperar o secret de três formas:
           // 1. Como query parameter na URL (?secret=xxx) - quando Authentication é "None"
           // 2. Como header HTTP (X-Webhook-Secret) - quando Authentication é "Header Auth"
           // 3. Sem autenticação (None) - não recomendado
-          if (n8nWebhookSecret) {
-            try {
-              const urlObj = new URL(webhookUrl)
-              const hasSecretInUrl = urlObj.searchParams.has('secret')
-              
-              // Se o secret já está na URL, provavelmente o n8n está usando query parameter
-              // Se não está na URL, provavelmente está usando Header Auth
-              if (hasSecretInUrl) {
-                // Secret na URL = usar query parameter (Authentication: None)
-                console.log('🔐 Secret encontrado na URL - usando query parameter (Authentication: None)')
-                // Não adicionar headers, apenas usar o query parameter
-              } else {
-                // Secret não na URL = usar Header Auth
-                console.log('🔐 Secret não na URL - usando Header Auth')
-                // O n8n está configurado para aceitar "X-Webhook-Secret" como nome do header
-                // Enviar APENAS o header correto para evitar confusão
-                headers['X-Webhook-Secret'] = n8nWebhookSecret
-                console.log('🔐 Secret enviado como header HTTP: X-Webhook-Secret')
-                console.log('🔐 Valor do secret completo:', n8nWebhookSecret)
-                console.log('🔐 Tamanho do secret:', n8nWebhookSecret.length, 'caracteres')
-                console.log('🔐 Secret em bytes (para verificar encoding):', Buffer.from(n8nWebhookSecret).toString('hex'))
-              }
-            } catch (urlError) {
-              console.warn('⚠️ Erro ao processar URL do webhook, usando URL original:', urlError)
-              // Fallback: enviar como header
-              headers['X-Webhook-Secret'] = n8nWebhookSecret
-              headers['X-n8n-Webhook-Secret'] = n8nWebhookSecret
-              console.log('🔐 Secret enviado como headers HTTP (fallback)')
+          
+          // Verificar se o secret já está na URL
+          let hasSecretInUrl = false
+          try {
+            const urlObj = new URL(webhookUrl)
+            hasSecretInUrl = urlObj.searchParams.has('secret')
+            console.log('🔍 Verificação da URL:')
+            console.log('   - Secret na URL?', hasSecretInUrl)
+            if (hasSecretInUrl) {
+              const secretFromUrl = urlObj.searchParams.get('secret')
+              console.log('   - Secret extraído da URL:', secretFromUrl ? secretFromUrl.substring(0, 5) + '...' : 'null')
             }
+          } catch (urlError) {
+            console.warn('⚠️ Erro ao processar URL do webhook:', urlError)
+            hasSecretInUrl = webhookUrl.includes('secret=')
+            console.log('   - Fallback: verificando se URL contém "secret=":', hasSecretInUrl)
+          }
+          
+          if (hasSecretInUrl) {
+            // Secret na URL = usar query parameter (Authentication: None no n8n)
+            console.log('🔐 Secret encontrado na URL - usando query parameter (Authentication: None)')
+            console.log('🔐 NÃO adicionando headers de autenticação - o secret já está na URL')
+            // Não adicionar headers, apenas usar o query parameter que já está na URL
+          } else if (n8nWebhookSecret) {
+            // Secret não na URL = usar Header Auth
+            console.log('🔐 Secret não na URL - usando Header Auth')
+            console.log('🔐 Secret das settings:', n8nWebhookSecret.substring(0, 5) + '...')
+            // O n8n está configurado para aceitar "X-Webhook-Secret" como nome do header
+            headers['X-Webhook-Secret'] = n8nWebhookSecret
+            console.log('🔐 Secret enviado como header HTTP: X-Webhook-Secret')
+            console.log('🔐 Valor do secret completo:', n8nWebhookSecret)
+            console.log('🔐 Tamanho do secret:', n8nWebhookSecret.length, 'caracteres')
           } else {
-            // Tentar extrair secret da própria URL do webhook (pode estar já incluído)
+            // Nenhum secret configurado
+            console.warn('⚠️ Nenhum secret configurado nas settings da empresa')
+            console.warn('⚠️ Verificando se o secret está na URL do webhook...')
             try {
               const urlObj = new URL(webhookUrl)
               if (urlObj.searchParams.has('secret')) {
-                console.log('🔐 Secret encontrado na URL do webhook')
+                console.log('✅ Secret encontrado na URL do webhook - será usado automaticamente')
               } else {
-                console.warn('⚠️ Nenhum secret configurado. O n8n pode rejeitar a requisição se exigir autenticação.')
-                console.warn('💡 Configure n8n_webhook_secret nas settings da empresa ou adicione ?secret=xxx na URL do webhook')
+                console.error('❌ Nenhum secret encontrado! O n8n pode rejeitar a requisição.')
+                console.error('💡 Configure n8n_webhook_secret nas settings da empresa ou adicione ?secret=xxx na URL do webhook')
               }
             } catch (urlError) {
               console.warn('⚠️ Não foi possível processar URL do webhook:', urlError)
@@ -543,17 +551,26 @@ export async function POST(request: NextRequest) {
             },
           }
 
-          console.log('📤 Enviando para n8n:')
+          console.log('📤 ENVIANDO para n8n:')
           console.log('   URL:', webhookUrl)
           console.log('   Headers:', JSON.stringify(headers, null, 2))
-          console.log('   Payload:', JSON.stringify(n8nPayload, null, 2))
+          console.log('   Payload (resumo):', {
+            update_id: n8nPayload.update_id,
+            message_text: n8nPayload.message?.text,
+            controlia_company_id: n8nPayload.controlia?.company_id,
+            controlia_contact_id: n8nPayload.controlia?.contact_id,
+            controlia_conversation_id: n8nPayload.controlia?.conversation_id,
+            controlia_callback_url: n8nPayload.controlia?.callback_url
+          })
 
           // Enviar para o n8n no formato que seu workflow espera
+          console.log('🚀 Fazendo requisição HTTP POST para n8n...')
           const n8nResponse = await fetch(webhookUrl, {
             method: 'POST',
             headers,
             body: JSON.stringify(n8nPayload),
           })
+          console.log('✅ Requisição HTTP concluída')
 
           console.log('📡 Resposta do n8n:')
           console.log('   Status:', n8nResponse.status, n8nResponse.statusText)
