@@ -8,8 +8,8 @@ SELECT
   polpermissive AS permissive,
   polcmd AS cmd,
   polroles AS roles,
-  qual,
-  with_check
+  pg_get_expr(polqual, polrelid) AS qual,
+  pg_get_expr(polwithcheck, polrelid) AS with_check
 FROM pg_policy
 WHERE polrelid::regclass::text = 'messages'
 ORDER BY polname;

@@ -37,7 +37,14 @@ export async function POST(request: NextRequest) {
     if (!message) {
       // Pode ser outro tipo de update (callback_query, etc)
       console.log('⚠️ Update não processado (sem message)')
+      console.log('⚠️ Body recebido:', JSON.stringify(body, null, 2))
       return NextResponse.json({ success: true, message: 'Update não processado' })
+    }
+
+    // Verificar se é mensagem de bot (ignorar)
+    if (message.from?.is_bot === true) {
+      console.log('⚠️ Mensagem ignorada (é de um bot):', message.from.id)
+      return NextResponse.json({ success: true, message: 'Mensagem de bot ignorada' })
     }
 
     const {
@@ -53,7 +60,18 @@ export async function POST(request: NextRequest) {
       voice,
     } = message
 
+    console.log('📨 Processando mensagem do Telegram:', {
+      message_id: message_id,
+      from_id: from?.id,
+      from_name: `${from?.first_name || ''} ${from?.last_name || ''}`.trim() || from?.username,
+      from_is_bot: from?.is_bot,
+      text: text?.substring(0, 50),
+      date: date,
+      chat_id: chat?.id
+    })
+
     if (!from || !chat) {
+      console.error('❌ Erro: from ou chat são obrigatórios')
       return NextResponse.json(
         { error: 'from e chat são obrigatórios' },
         { status: 400 }
@@ -345,6 +363,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Mensagem criada com sucesso:', newMessage.id, 'Content:', content.substring(0, 50))
+    console.log('✅ Mensagem inbound salva no banco - ID:', newMessage.id, 'Direction:', newMessage.direction, 'Sender:', newMessage.sender_type)
 
     // Buscar automações ativas para processar mensagens
     console.log('🔍 Buscando automações para company_id:', contact.company_id)
@@ -584,18 +603,39 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!newMessage || !conversation) {
+    if (!newMessage) {
+      console.error('❌ CRÍTICO: newMessage é null após todas as tentativas de criação')
+      console.error('❌ Isso significa que a mensagem NÃO foi salva no banco!')
       return NextResponse.json(
-        { error: 'Erro ao criar mensagem ou conversa' },
+        { error: 'Erro ao criar mensagem no banco de dados' },
+        { status: 500 }
+      )
+    }
+
+    if (!conversation || !conversation.id) {
+      console.error('❌ CRÍTICO: conversation é null ou inválida')
+      return NextResponse.json(
+        { error: 'Erro ao obter ou criar conversa' },
         { status: 500 }
       )
     }
 
     console.log('✅ Webhook Telegram processado com sucesso')
+    console.log('✅ Resumo final da mensagem inbound criada:')
+    console.log('   - Mensagem ID:', newMessage.id)
+    console.log('   - Conversa ID:', conversation.id)
+    console.log('   - Contato ID:', contact.id)
+    console.log('   - Direction:', newMessage.direction)
+    console.log('   - Sender Type:', newMessage.sender_type)
+    console.log('   - Content:', newMessage.content?.substring(0, 50))
+    console.log('   - Company ID:', newMessage.company_id)
+    
     return NextResponse.json({
       success: true,
       message_id: newMessage.id,
       conversation_id: conversation.id,
+      direction: newMessage.direction,
+      sender_type: newMessage.sender_type,
     })
   } catch (error) {
     console.error('❌ Erro no webhook do Telegram:', error)
