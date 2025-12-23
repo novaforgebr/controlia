@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
           priority: 'normal',
           ai_assistant_enabled: true,
         })
-        .select()
+        .select('id, company_id') // IMPORTANTE: Selecionar company_id também
         .single()
 
       if (convError) {
@@ -285,8 +285,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar mensagem (usando service client para bypass RLS)
+    // IMPORTANTE: Garantir que company_id seja o mesmo da conversa para consistência
+    // Usar contact.company_id como fallback (conversation já tem o mesmo company_id)
     const messageData = {
-      company_id: contact.company_id,
+      company_id: contact.company_id, // Usar company_id do contato (conversation tem o mesmo)
       conversation_id: conversation.id,
       contact_id: contact.id,
       content: content,
@@ -298,6 +300,11 @@ export async function POST(request: NextRequest) {
       status: 'delivered',
       created_at: new Date(date * 1000).toISOString(), // Telegram usa timestamp Unix
     }
+    
+    // Log para debug
+    console.log('📋 Company IDs para mensagem:')
+    console.log('   - contact.company_id:', contact.company_id)
+    console.log('   - messageData.company_id (final):', messageData.company_id)
 
     console.log('📋 Dados para inserção de mensagem:')
     console.log('   company_id:', messageData.company_id)
