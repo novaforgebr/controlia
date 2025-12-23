@@ -368,8 +368,11 @@ export async function POST(request: NextRequest) {
           // 3. Sem autenticação (None) - não recomendado
           if (n8nWebhookSecret) {
             // Adicionar secret como header (para Header Auth no n8n)
+            // Tentar múltiplos nomes de header comuns
             headers['X-Webhook-Secret'] = n8nWebhookSecret
-            headers['X-n8n-Webhook-Secret'] = n8nWebhookSecret // Alternativa comum
+            headers['X-n8n-Webhook-Secret'] = n8nWebhookSecret
+            headers['webhook-secret'] = n8nWebhookSecret
+            headers['secret'] = n8nWebhookSecret
             
             // Também adicionar como query parameter (para compatibilidade)
             try {
@@ -382,10 +385,10 @@ export async function POST(request: NextRequest) {
               } else {
                 console.log('🔐 Secret já presente na URL do webhook')
               }
-              console.log('🔐 Secret também enviado como header HTTP (para Header Auth)')
+              console.log('🔐 Secret enviado como headers HTTP:', ['X-Webhook-Secret', 'X-n8n-Webhook-Secret', 'webhook-secret', 'secret'].join(', '))
             } catch (urlError) {
               console.warn('⚠️ Erro ao processar URL do webhook, usando URL original:', urlError)
-              console.log('🔐 Secret enviado apenas como header HTTP')
+              console.log('🔐 Secret enviado apenas como headers HTTP')
             }
           } else {
             // Tentar extrair secret da própria URL do webhook (pode estar já incluído)
