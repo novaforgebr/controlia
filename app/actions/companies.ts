@@ -255,6 +255,7 @@ export async function updateCompanySettings(formData: FormData) {
       'telegram_bot_token',
       'telegram_webhook_url',
       'telegram_webhook_secret',
+      'n8n_webhook_secret',
       'email_smtp_host',
       'email_smtp_port',
       'email_smtp_secure',

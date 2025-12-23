@@ -177,6 +177,41 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
           </div>
         </div>
 
+        {/* n8n */}
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+                <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">n8n</h3>
+                <p className="text-sm text-gray-500">Configurações de integração com n8n (Automações)</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label htmlFor="n8n_webhook_secret" className="block text-sm font-medium text-gray-700">
+                Webhook Secret do n8n
+              </label>
+              <input
+                type="password"
+                id="n8n_webhook_secret"
+                name="n8n_webhook_secret"
+                defaultValue={(settings.n8n_webhook_secret as string) || ''}
+                placeholder="••••••••"
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Secret configurado no webhook do n8n para autenticação. Encontre nas configurações do nó "Webhook" no seu workflow n8n.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Email */}
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <div className="flex items-center justify-between mb-4">
