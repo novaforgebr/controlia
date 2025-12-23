@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { createMessage } from '@/app/actions/messages'
 
 /**
@@ -248,8 +248,78 @@ export async function POST(request: NextRequest) {
     let channelMessageId: string | null = null
 
     if (finalChannel === 'telegram') {
-      // Tentar obter bot token das settings ou de variável de ambiente
-      const telegramBotToken = (settings.telegram_bot_token as string) || process.env.TELEGRAM_BOT_TOKEN
+      // Tentar obter bot token de várias fontes (em ordem de prioridade)
+      let telegramBotToken: string | undefined = undefined
+      
+      // 1. Primeiro: variável de ambiente (mais alta prioridade)
+      telegramBotToken = process.env.TELEGRAM_BOT_TOKEN as string | undefined
+      
+      // 2. Segundo: settings da empresa atual (se tiver company_id)
+      if (!telegramBotToken && settings.telegram_bot_token) {
+        telegramBotToken = settings.telegram_bot_token as string
+      }
+      
+      // 3. Terceiro: buscar em qualquer empresa que tenha o token configurado
+      // Usar service role para bypass RLS (webhooks não têm usuário autenticado)
+      if (!telegramBotToken) {
+        try {
+          console.log('Buscando bot token em todas as empresas (usando service role)...')
+          
+          // Usar service role client para bypass RLS
+          const serviceClient = createServiceRoleClient()
+          const { data: companies, error: companiesError } = await serviceClient
+            .from('companies')
+            .select('id, name, settings')
+            .limit(100)
+          
+          if (companiesError) {
+            console.error('Erro ao buscar empresas para bot token:', companiesError)
+          } else if (companies && companies.length > 0) {
+            console.log(`Verificando ${companies.length} empresas...`)
+            for (const comp of companies) {
+              try {
+                const compSettings = (comp.settings as Record<string, unknown>) || {}
+                const token = compSettings.telegram_bot_token
+                
+                if (token && typeof token === 'string' && token.trim() !== '') {
+                  telegramBotToken = token.trim()
+                  console.log(`✅ Bot token encontrado na empresa: ${comp.name || comp.id}`)
+                  break
+                }
+              } catch (compError) {
+                console.error(`Erro ao processar empresa ${comp.id}:`, compError)
+                continue
+              }
+            }
+            if (!telegramBotToken) {
+              console.log('❌ Bot token não encontrado em nenhuma empresa')
+            }
+          } else {
+            console.log('Nenhuma empresa encontrada no banco')
+          }
+        } catch (searchError) {
+          console.error('Erro ao buscar bot token em empresas:', searchError)
+          // Se service role não estiver configurada, tentar com cliente normal
+          if (searchError instanceof Error && searchError.message.includes('SERVICE_ROLE')) {
+            console.log('Service role não configurada, tentando com cliente normal...')
+            const { data: companies } = await supabase
+              .from('companies')
+              .select('id, name, settings')
+              .limit(100)
+            
+            if (companies && companies.length > 0) {
+              for (const comp of companies) {
+                const compSettings = (comp.settings as Record<string, unknown>) || {}
+                const token = compSettings.telegram_bot_token
+                if (token && typeof token === 'string' && token.trim() !== '') {
+                  telegramBotToken = token.trim()
+                  break
+                }
+              }
+            }
+          }
+        }
+      }
 
       if (!telegramBotToken) {
         return NextResponse.json(
