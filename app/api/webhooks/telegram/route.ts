@@ -217,6 +217,8 @@ export async function POST(request: NextRequest) {
     let contentType = 'text'
     let mediaUrl = null
 
+    console.log('📝 Conteúdo da mensagem:', { text, photo: !!photo, document: !!document, audio: !!audio, video: !!video, voice: !!voice })
+
     if (photo && photo.length > 0) {
       // Pegar a foto de maior resolução
       const largestPhoto = photo[photo.length - 1]
@@ -241,6 +243,13 @@ export async function POST(request: NextRequest) {
       content = '[Mensagem de voz]'
     }
 
+    // Garantir que sempre há conteúdo
+    if (!content || content.trim() === '') {
+      content = '[Mensagem sem texto]'
+    }
+
+    console.log('📦 Conteúdo final:', { content, contentType, mediaUrl })
+
     if (!conversation) {
       return NextResponse.json(
         { error: 'Erro ao obter ou criar conversa' },
@@ -249,33 +258,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar mensagem (usando service client para bypass RLS)
+    const messageData = {
+      company_id: contact.company_id,
+      conversation_id: conversation.id,
+      contact_id: contact.id,
+      content: content,
+      content_type: contentType,
+      direction: 'inbound',
+      sender_type: 'human',
+      channel_message_id: message_id.toString(),
+      media_url: mediaUrl,
+      status: 'delivered',
+      created_at: new Date(date * 1000).toISOString(), // Telegram usa timestamp Unix
+    }
+
+    console.log('💾 Tentando inserir mensagem:', JSON.stringify(messageData, null, 2))
+
     const { data: newMessage, error: msgError } = await supabase
       .from('messages')
-      .insert({
-        company_id: contact.company_id,
-        conversation_id: conversation.id,
-        contact_id: contact.id,
-        content: content,
-        content_type: contentType,
-        direction: 'inbound',
-        sender_type: 'human',
-        channel_message_id: message_id.toString(),
-        media_url: mediaUrl,
-        status: 'delivered',
-        created_at: new Date(date * 1000).toISOString(), // Telegram usa timestamp Unix
-      })
+      .insert(messageData)
       .select()
       .single()
 
     if (msgError) {
       console.error('❌ Erro ao criar mensagem:', msgError)
+      console.error('❌ Detalhes do erro:', JSON.stringify(msgError, null, 2))
       return NextResponse.json(
         { error: 'Erro ao criar mensagem', details: msgError.message },
         { status: 500 }
       )
     }
 
-    console.log('✅ Mensagem criada:', newMessage.id)
+    console.log('✅ Mensagem criada com sucesso:', newMessage.id, 'Content:', content.substring(0, 50))
 
     // Buscar automações ativas para processar mensagens
     const { data: automations } = await supabase
