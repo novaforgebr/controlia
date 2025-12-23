@@ -292,7 +292,7 @@ export async function POST(request: NextRequest) {
     console.log('💾 Tentando inserir mensagem:', JSON.stringify(messageData, null, 2))
 
     // IMPORTANTE: Usar serviceClient para bypass RLS (webhooks não têm usuário autenticado)
-    const { data: newMessage, error: msgError } = await serviceClient
+    let { data: newMessage, error: msgError } = await serviceClient
       .from('messages')
       .insert(messageData)
       .select()
@@ -305,24 +305,42 @@ export async function POST(request: NextRequest) {
       console.error('❌ Detalhes completos:', JSON.stringify(msgError, null, 2))
       console.error('❌ Dados que tentaram ser inseridos:', JSON.stringify(messageData, null, 2))
       
-      // Não retornar erro 500, apenas logar - a mensagem pode ter sido processada parcialmente
-      // Retornar sucesso para o Telegram não reenviar
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Erro ao criar mensagem no banco', 
-          details: msgError.message,
-          code: msgError.code 
-        },
-        { status: 200 } // Retornar 200 para Telegram não reenviar
-      )
+      // Tentar novamente sem created_at (pode ser problema de timezone)
+      console.log('🔄 Tentando novamente sem created_at customizado...')
+      const { created_at, ...messageDataRetry } = messageData
+      
+      const retryResult = await serviceClient
+        .from('messages')
+        .insert(messageDataRetry)
+        .select()
+        .single()
+      
+      if (retryResult.error) {
+        console.error('❌ Erro na segunda tentativa:', retryResult.error)
+        // Retornar 500 para Telegram reenviar (a mensagem é importante)
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Erro ao criar mensagem no banco', 
+            details: retryResult.error.message,
+            code: retryResult.error.code 
+          },
+          { status: 500 } // Retornar 500 para Telegram reenviar
+        )
+      }
+      
+      console.log('✅ Mensagem criada na segunda tentativa:', retryResult.data?.id)
+      // Continuar com retryMessage
+      newMessage = retryResult.data
+      msgError = null
     }
 
     if (!newMessage) {
-      console.error('❌ Mensagem não foi criada (newMessage é null)')
+      console.error('❌ Mensagem não foi criada (newMessage é null após todas as tentativas)')
+      // Retornar 500 para Telegram reenviar
       return NextResponse.json(
         { success: false, error: 'Mensagem não foi criada' },
-        { status: 200 }
+        { status: 500 }
       )
     }
 

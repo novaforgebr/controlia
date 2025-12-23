@@ -74,32 +74,7 @@ Execute no **Supabase SQL Editor**:
 
 ```sql
 -- Verificar se há mensagens sendo criadas (mesmo com erro)
-SELECT 
-  m.id,
-  m.conversation_id,
-  m.direction,
-  m.sender_type,
-  m.content,
-  m.created_at,
-  m.company_id,
-  m.contact_id
-FROM messages m
-WHERE m.created_at > NOW() - INTERVAL '1 hour'
-ORDER BY m.created_at DESC
-LIMIT 10;
-
--- Verificar se contato e conversa existem
-SELECT 
-  c.id as contact_id,
-  c.company_id as contact_company_id,
-  c.name as contact_name,
-  conv.id as conversation_id,
-  conv.company_id as conversation_company_id
-FROM contacts c
-LEFT JOIN conversations conv ON conv.contact_id = c.id
-WHERE c.custom_fields->>'telegram_id' IS NOT NULL
-ORDER BY c.created_at DESC
-LIMIT 5;
+c
 ```
 
 ### Passo 4: Verificar RLS Policies
