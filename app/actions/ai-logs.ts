@@ -95,11 +95,34 @@ export async function listAILogs(filters?: {
   try {
     const company = await getCurrentCompany()
     if (!company) {
-      return { error: 'Empresa não encontrada', data: [] }
+      return { error: 'Empresa não encontrada', data: [], count: 0 }
     }
 
     const supabase = await createClient()
 
+    // Construir query base para contagem
+    let countQuery = supabase
+      .from('ai_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('company_id', company.id)
+
+    if (filters?.conversation_id) {
+      countQuery = countQuery.eq('conversation_id', filters.conversation_id)
+    }
+
+    if (filters?.contact_id) {
+      countQuery = countQuery.eq('contact_id', filters.contact_id)
+    }
+
+    if (filters?.prompt_id) {
+      countQuery = countQuery.eq('prompt_id', filters.prompt_id)
+    }
+
+    if (filters?.status) {
+      countQuery = countQuery.eq('status', filters.status)
+    }
+
+    // Query para dados
     let query = supabase
       .from('ai_logs')
       .select('*, ai_prompts(name, version), conversations(id, subject), contacts(name)')
@@ -130,17 +153,24 @@ export async function listAILogs(filters?: {
       query = query.range(filters.offset, filters.offset + (filters.limit || 50) - 1)
     }
 
-    const { data, error } = await query
+    // Executar ambas as queries
+    const [countResult, dataResult] = await Promise.all([
+      countQuery,
+      query,
+    ])
+    
+    const count = countResult.count || 0
+    const { data, error } = dataResult
 
     if (error) {
       console.error('Erro ao listar logs de IA:', error)
-      return { error: 'Erro ao listar logs de IA', data: [] }
+      return { error: 'Erro ao listar logs de IA', data: [], count: 0 }
     }
 
-    return { data: data as any[] }
+    return { data: data as any[], count: count || 0 }
   } catch (error) {
     console.error('Erro ao listar logs de IA:', error)
-    return { error: 'Erro ao listar logs de IA', data: [] }
+    return { error: 'Erro ao listar logs de IA', data: [], count: 0 }
   }
 }
 
