@@ -108,7 +108,14 @@ export function ConversationsSplitView({
           return
         }
 
-        setConversations(initialConversations || [])
+        // Transformar arrays de relacionamentos em objetos únicos
+        const transformedConversations = (initialConversations || []).map((conv: any) => ({
+          ...conv,
+          contacts: Array.isArray(conv.contacts) ? (conv.contacts[0] || null) : conv.contacts,
+          user_profiles: Array.isArray(conv.user_profiles) ? (conv.user_profiles[0] || null) : conv.user_profiles,
+        }))
+
+        setConversations(transformedConversations)
         setLoading(false)
       } catch (error) {
         console.error('Erro:', error)
@@ -160,21 +167,32 @@ export function ConversationsSplitView({
               .single()
 
             if (updatedConversation) {
+              // Transformar arrays de relacionamentos em objetos únicos
+              const transformedConversation = {
+                ...updatedConversation,
+                contacts: Array.isArray(updatedConversation.contacts) 
+                  ? (updatedConversation.contacts[0] || null) 
+                  : updatedConversation.contacts,
+                user_profiles: Array.isArray(updatedConversation.user_profiles) 
+                  ? (updatedConversation.user_profiles[0] || null) 
+                  : updatedConversation.user_profiles,
+              }
+
               setConversations((prev) => {
                 const filtered = prev.filter((c) => {
-                  if (statusFilter !== 'all' && updatedConversation.status !== statusFilter) {
-                    return c.id !== updatedConversation.id
+                  if (statusFilter !== 'all' && transformedConversation.status !== statusFilter) {
+                    return c.id !== transformedConversation.id
                   }
-                  if (channelFilter !== 'all' && updatedConversation.channel !== channelFilter) {
-                    return c.id !== updatedConversation.id
+                  if (channelFilter !== 'all' && transformedConversation.channel !== channelFilter) {
+                    return c.id !== transformedConversation.id
                   }
                   return true
                 })
 
-                const existingIndex = filtered.findIndex((c) => c.id === updatedConversation.id)
+                const existingIndex = filtered.findIndex((c) => c.id === transformedConversation.id)
                 if (existingIndex >= 0) {
                   const newList = [...filtered]
-                  newList[existingIndex] = updatedConversation
+                  newList[existingIndex] = transformedConversation
                   return newList.sort(
                     (a, b) =>
                       new Date(b.last_message_at).getTime() -
@@ -182,10 +200,10 @@ export function ConversationsSplitView({
                   )
                 } else {
                   if (
-                    (statusFilter === 'all' || updatedConversation.status === statusFilter) &&
-                    (channelFilter === 'all' || updatedConversation.channel === channelFilter)
+                    (statusFilter === 'all' || transformedConversation.status === statusFilter) &&
+                    (channelFilter === 'all' || transformedConversation.channel === channelFilter)
                   ) {
-                    return [updatedConversation, ...filtered].sort(
+                    return [transformedConversation, ...filtered].sort(
                       (a, b) =>
                         new Date(b.last_message_at).getTime() -
                         new Date(a.last_message_at).getTime()
@@ -239,22 +257,33 @@ export function ConversationsSplitView({
             .single()
 
           if (conversation) {
+            // Transformar arrays de relacionamentos em objetos únicos
+            const transformedConversation = {
+              ...conversation,
+              contacts: Array.isArray(conversation.contacts) 
+                ? (conversation.contacts[0] || null) 
+                : conversation.contacts,
+              user_profiles: Array.isArray(conversation.user_profiles) 
+                ? (conversation.user_profiles[0] || null) 
+                : conversation.user_profiles,
+            }
+
             if (
-              (statusFilter === 'all' || conversation.status === statusFilter) &&
-              (channelFilter === 'all' || conversation.channel === channelFilter)
+              (statusFilter === 'all' || transformedConversation.status === statusFilter) &&
+              (channelFilter === 'all' || transformedConversation.channel === channelFilter)
             ) {
               setConversations((prev) => {
-                const existingIndex = prev.findIndex((c) => c.id === conversation.id)
+                const existingIndex = prev.findIndex((c) => c.id === transformedConversation.id)
                 if (existingIndex >= 0) {
                   const newList = [...prev]
-                  newList[existingIndex] = conversation
+                  newList[existingIndex] = transformedConversation
                   return newList.sort(
                     (a, b) =>
                       new Date(b.last_message_at).getTime() -
                       new Date(a.last_message_at).getTime()
                   )
                 } else {
-                  return [conversation, ...prev].sort(
+                  return [transformedConversation, ...prev].sort(
                     (a, b) =>
                       new Date(b.last_message_at).getTime() -
                       new Date(a.last_message_at).getTime()

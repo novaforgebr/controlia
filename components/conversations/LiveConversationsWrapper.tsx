@@ -76,7 +76,14 @@ export function LiveConversationsWrapper() {
           return
         }
 
-        setConversations(initialConversations || [])
+        // Transformar arrays de relacionamentos em objetos únicos
+        const transformedConversations = (initialConversations || []).map((conv: any) => ({
+          ...conv,
+          contacts: Array.isArray(conv.contacts) ? (conv.contacts[0] || null) : conv.contacts,
+          user_profiles: Array.isArray(conv.user_profiles) ? (conv.user_profiles[0] || null) : conv.user_profiles,
+        }))
+
+        setConversations(transformedConversations)
         setLoading(false)
       } catch (error) {
         console.error('Erro:', error)
@@ -126,22 +133,33 @@ export function LiveConversationsWrapper() {
               .single()
 
             if (updatedConversation) {
+              // Transformar arrays de relacionamentos em objetos únicos
+              const transformedConversation = {
+                ...updatedConversation,
+                contacts: Array.isArray(updatedConversation.contacts) 
+                  ? (updatedConversation.contacts[0] || null) 
+                  : updatedConversation.contacts,
+                user_profiles: Array.isArray(updatedConversation.user_profiles) 
+                  ? (updatedConversation.user_profiles[0] || null) 
+                  : updatedConversation.user_profiles,
+              }
+
               setConversations((prev) => {
-                if (updatedConversation.status !== 'open') {
-                  return prev.filter((c) => c.id !== updatedConversation.id)
+                if (transformedConversation.status !== 'open') {
+                  return prev.filter((c) => c.id !== transformedConversation.id)
                 }
 
-                const existingIndex = prev.findIndex((c) => c.id === updatedConversation.id)
+                const existingIndex = prev.findIndex((c) => c.id === transformedConversation.id)
                 if (existingIndex >= 0) {
                   const newList = [...prev]
-                  newList[existingIndex] = updatedConversation
+                  newList[existingIndex] = transformedConversation
                   return newList.sort(
                     (a, b) =>
                       new Date(b.last_message_at).getTime() -
                       new Date(a.last_message_at).getTime()
                   )
                 } else {
-                  return [updatedConversation, ...prev].sort(
+                  return [transformedConversation, ...prev].sort(
                     (a, b) =>
                       new Date(b.last_message_at).getTime() -
                       new Date(a.last_message_at).getTime()
@@ -189,18 +207,29 @@ export function LiveConversationsWrapper() {
             .single()
 
           if (conversation) {
+            // Transformar arrays de relacionamentos em objetos únicos
+            const transformedConversation = {
+              ...conversation,
+              contacts: Array.isArray(conversation.contacts) 
+                ? (conversation.contacts[0] || null) 
+                : conversation.contacts,
+              user_profiles: Array.isArray(conversation.user_profiles) 
+                ? (conversation.user_profiles[0] || null) 
+                : conversation.user_profiles,
+            }
+
             setConversations((prev) => {
-              const existingIndex = prev.findIndex((c) => c.id === conversation.id)
+              const existingIndex = prev.findIndex((c) => c.id === transformedConversation.id)
               if (existingIndex >= 0) {
                 const newList = [...prev]
-                newList[existingIndex] = conversation
-                return [conversation, ...newList.filter((c) => c.id !== conversation.id)].sort(
+                newList[existingIndex] = transformedConversation
+                return [transformedConversation, ...newList.filter((c) => c.id !== transformedConversation.id)].sort(
                   (a, b) =>
                     new Date(b.last_message_at).getTime() -
                     new Date(a.last_message_at).getTime()
                 )
               } else {
-                return [conversation, ...prev].sort(
+                return [transformedConversation, ...prev].sort(
                   (a, b) =>
                     new Date(b.last_message_at).getTime() -
                     new Date(a.last_message_at).getTime()
