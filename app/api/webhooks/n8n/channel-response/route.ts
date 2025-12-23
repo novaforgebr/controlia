@@ -441,7 +441,8 @@ export async function POST(request: NextRequest) {
         contact_id: conversation.contact_id || contact_id_final || '',
         content: output,
         sender_type: 'ai',
-        ai_agent_id: 'n8n-agent',
+        // ai_agent_id deve ser um UUID; enquanto não houver agente configurado, deixamos null
+        ai_agent_id: null,
         direction: 'outbound',
         status: 'sent',
         channel_message_id: channelMessageId || null,
