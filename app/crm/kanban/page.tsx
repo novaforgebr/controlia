@@ -1,0 +1,36 @@
+import { getCurrentCompany } from '@/lib/utils/company'
+import ProtectedLayout from '@/app/layout-protected'
+import { listPipelines } from '@/app/actions/pipelines'
+import { KanbanView } from '@/components/crm/KanbanView'
+
+export default async function KanbanPage({
+  searchParams,
+}: {
+  searchParams: { pipeline_id?: string }
+}) {
+  const company = await getCurrentCompany()
+  if (!company) {
+    return null
+  }
+
+  const { data: pipelines } = await listPipelines()
+  const selectedPipelineId = searchParams.pipeline_id || pipelines?.find((p: any) => p.is_default)?.id
+
+  return (
+    <ProtectedLayout>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Kanban</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Visualize e gerencie contatos organizados por estágios do pipeline
+            </p>
+          </div>
+        </div>
+
+        <KanbanView pipelines={pipelines || []} selectedPipelineId={selectedPipelineId} />
+      </div>
+    </ProtectedLayout>
+  )
+}
+

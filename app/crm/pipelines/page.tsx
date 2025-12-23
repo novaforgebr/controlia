@@ -1,0 +1,36 @@
+import { listPipelines } from '@/app/actions/pipelines'
+import ProtectedLayout from '@/app/layout-protected'
+import Link from 'next/link'
+import { PipelineList } from '@/components/crm/PipelineList'
+
+export default async function PipelinesPage() {
+  const { data: pipelines } = await listPipelines()
+
+  return (
+    <ProtectedLayout>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <Link
+              href="/crm"
+              className="text-sm font-medium text-gray-600 hover:text-[#039155] transition-colors"
+            >
+              ← Voltar para CRM
+            </Link>
+            <h1 className="mt-2 text-3xl font-bold text-gray-900">Pipelines</h1>
+            <p className="mt-2 text-sm text-gray-600">Configure e gerencie seus pipelines de vendas</p>
+          </div>
+          <Link
+            href="/crm/pipelines/new"
+            className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"
+          >
+            + Novo Pipeline
+          </Link>
+        </div>
+
+        <PipelineList pipelines={pipelines || []} />
+      </div>
+    </ProtectedLayout>
+  )
+}
+
