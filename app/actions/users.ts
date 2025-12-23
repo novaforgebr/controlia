@@ -82,16 +82,20 @@ export async function inviteUser(email: string, role: string = 'operator') {
       return { error: 'Apenas administradores podem convidar usuários' }
     }
 
-    // Verificar se email já existe no Supabase Auth
-    const { data: existingUser } = await supabase.auth.admin.getUserByEmail(email)
+    // Verificar se email já existe na tabela user_profiles
+    const { data: existingProfile } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .single()
 
-    if (existingUser?.user) {
+    if (existingProfile) {
       // Usuário já existe, apenas adicionar à empresa
       const { data: existingCompanyUser } = await supabase
         .from('company_users')
         .select('id')
         .eq('company_id', company.id)
-        .eq('user_id', existingUser.user.id)
+        .eq('user_id', existingProfile.id)
         .single()
 
       if (existingCompanyUser) {
@@ -103,7 +107,7 @@ export async function inviteUser(email: string, role: string = 'operator') {
         .from('company_users')
         .insert({
           company_id: company.id,
-          user_id: existingUser.user.id,
+          user_id: existingProfile.id,
           role: role as 'admin' | 'operator' | 'observer',
           is_active: true,
         })
