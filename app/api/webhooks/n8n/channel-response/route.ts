@@ -17,46 +17,182 @@ export async function POST(request: NextRequest) {
     
     // Dados do Controlia enviados no callback
     const controliaData = body.controlia || {}
-    const { company_id, contact_id, conversation_id, message_id, channel, channel_id } = controliaData
+    let { company_id, contact_id, conversation_id, message_id, channel, channel_id } = controliaData
 
-    if (!output || !company_id || !conversation_id) {
+    // Dados da mensagem do Telegram (se vier do Telegram Trigger direto)
+    const messageData = body.message || {}
+    const fromData = messageData.from || {}
+    const chatData = messageData.chat || {}
+
+    if (!output) {
       return NextResponse.json(
-        { error: 'Dados incompletos: output, company_id e conversation_id são obrigatórios' },
+        { error: 'Dados incompletos: output é obrigatório' },
         { status: 400 }
       )
     }
 
     const supabase = await createClient()
 
-    // Buscar configurações do canal da empresa
-    const { data: company } = await supabase
-      .from('companies')
-      .select('settings')
-      .eq('id', company_id)
-      .single()
+    // ============================================
+    // 1. Buscar ou criar empresa
+    // ============================================
+    let company = null
+    if (company_id) {
+      const { data } = await supabase
+        .from('companies')
+        .select('id, settings')
+        .eq('id', company_id)
+        .single()
+      company = data
+    }
 
+    // Se não encontrou empresa, buscar a primeira empresa disponível
+    // (ou você pode configurar uma empresa padrão)
     if (!company) {
-      return NextResponse.json(
-        { error: 'Empresa não encontrada' },
-        { status: 404 }
-      )
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('id, settings')
+        .limit(1)
+        .single()
+      
+      if (companies) {
+        company = companies
+        company_id = companies.id
+      } else {
+        return NextResponse.json(
+          { error: 'Nenhuma empresa encontrada no sistema' },
+          { status: 404 }
+        )
+      }
     }
 
     const settings = (company.settings as Record<string, unknown>) || {}
 
-    // Buscar informações da conversa para obter channel_id se não foi enviado
-    const { data: conversation } = await supabase
-      .from('conversations')
-      .select('channel_thread_id, contact_id, channel')
-      .eq('id', conversation_id)
-      .eq('company_id', company_id)
-      .single()
+    // ============================================
+    // 2. Buscar ou criar contato
+    // ============================================
+    let contact = null
+    if (contact_id) {
+      const { data } = await supabase
+        .from('contacts')
+        .select('id, company_id')
+        .eq('id', contact_id)
+        .eq('company_id', company_id)
+        .single()
+      contact = data
+    }
 
-    if (!conversation) {
+    // Se não encontrou contato, criar um novo baseado nos dados do Telegram
+    if (!contact && fromData.id) {
+      const telegramUserId = fromData.id.toString()
+      const telegramUsername = fromData.username || null
+      const firstName = fromData.first_name || ''
+      const lastName = fromData.last_name || ''
+      const fullName = `${firstName} ${lastName}`.trim() || fromData.username || 'Usuário Telegram'
+
+      // Verificar se já existe contato com este telegram_id
+      // Buscar todos os contatos da empresa e filtrar por telegram_id no código
+      const { data: allContacts } = await supabase
+        .from('contacts')
+        .select('id, company_id, custom_fields')
+        .eq('company_id', company_id)
+      
+      const existingContact = allContacts?.find((c) => {
+        const customFields = (c.custom_fields as Record<string, unknown>) || {}
+        return customFields.telegram_id === telegramUserId
+      })
+
+      if (existingContact) {
+        contact = existingContact
+        contact_id = existingContact.id
+      } else {
+        // Criar novo contato
+        const { data: newContact, error: contactError } = await supabase
+          .from('contacts')
+          .insert({
+            company_id: company_id,
+            name: fullName,
+            custom_fields: {
+              telegram_id: telegramUserId,
+              telegram_username: telegramUsername,
+            },
+            status: 'lead',
+            source: 'telegram',
+          })
+          .select('id, company_id')
+          .single()
+
+        if (contactError) {
+          console.error('Erro ao criar contato:', contactError)
+          return NextResponse.json(
+            { error: 'Erro ao criar contato', details: contactError.message },
+            { status: 500 }
+          )
+        }
+
+        contact = newContact
+        contact_id = newContact.id
+      }
+    }
+
+    if (!contact) {
       return NextResponse.json(
-        { error: 'Conversa não encontrada' },
-        { status: 404 }
+        { error: 'Não foi possível identificar ou criar o contato. É necessário company_id e dados do Telegram (message.from)' },
+        { status: 400 }
       )
+    }
+
+    // ============================================
+    // 3. Buscar ou criar conversa
+    // ============================================
+    let conversation = null
+    if (conversation_id) {
+      const { data } = await supabase
+        .from('conversations')
+        .select('id, channel_thread_id, contact_id, channel')
+        .eq('id', conversation_id)
+        .eq('company_id', company_id)
+        .single()
+      conversation = data
+    }
+
+    // Se não encontrou conversa, criar uma nova
+    if (!conversation) {
+      const finalChannel = channel || 'telegram'
+      // Tentar obter channel_id de várias fontes
+      const finalChannelId = channel_id || chatData.id?.toString() || fromData.id?.toString()
+
+      if (!finalChannelId) {
+        return NextResponse.json(
+          { error: 'Não foi possível identificar o channel_id (chat.id do Telegram). Verifique se channel_id ou message.chat.id está presente.' },
+          { status: 400 }
+        )
+      }
+
+      const { data: newConversation, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          company_id: company_id,
+          contact_id: contact_id,
+          channel: finalChannel,
+          channel_thread_id: finalChannelId,
+          status: 'open',
+          priority: 'normal',
+          ai_assistant_enabled: true,
+        })
+        .select('id, channel_thread_id, contact_id, channel')
+        .single()
+
+      if (convError) {
+        console.error('Erro ao criar conversa:', convError)
+        return NextResponse.json(
+          { error: 'Erro ao criar conversa', details: convError.message },
+          { status: 500 }
+        )
+      }
+
+      conversation = newConversation
+      conversation_id = newConversation.id
     }
 
     const finalChannel = channel || conversation.channel
@@ -74,11 +210,12 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      const telegramChatId = channel_id || conversation.channel_thread_id
+      // Obter chat_id de várias fontes possíveis
+      const telegramChatId = channel_id || conversation.channel_thread_id || chatData.id?.toString() || fromData.id?.toString()
 
       if (!telegramChatId) {
         return NextResponse.json(
-          { error: 'Chat ID do Telegram não encontrado' },
+          { error: 'Chat ID do Telegram não encontrado. Verifique se channel_id, conversation.channel_thread_id ou message.chat.id está presente.' },
           { status: 400 }
         )
       }
@@ -165,7 +302,7 @@ export async function POST(request: NextRequest) {
     // Criar mensagem da IA no Controlia
     const messageFormData = new FormData()
     messageFormData.append('conversation_id', conversation_id)
-    messageFormData.append('contact_id', conversation.contact_id || contact_id || '')
+    messageFormData.append('contact_id', conversation.contact_id || contact_id || contact.id)
     messageFormData.append('content', output)
     messageFormData.append('sender_type', 'ai')
     messageFormData.append('ai_agent_id', 'n8n-agent')
