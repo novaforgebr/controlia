@@ -85,6 +85,117 @@ export async function createMessage(formData: FormData) {
       return { error: 'Erro ao criar mensagem' }
     }
 
+    // Se for mensagem humana outbound, enviar para o canal externo (Telegram/WhatsApp)
+    try {
+      if (
+        company_id &&
+        validatedData.direction === 'outbound' &&
+        validatedData.sender_type === 'human'
+      ) {
+        // Buscar conversa para obter canal e identificador do canal
+        const { data: conversation } = await supabase
+          .from('conversations')
+          .select('channel, channel_thread_id, company_id')
+          .eq('id', validatedData.conversation_id)
+          .single()
+
+        if (conversation) {
+          const channel = conversation.channel
+          const channelThreadId = conversation.channel_thread_id as string | null
+
+          // Buscar settings da empresa para obter credenciais do canal
+          const { data: company } = await supabase
+            .from('companies')
+            .select('settings')
+            .eq('id', company_id)
+            .single()
+
+          const settings = (company?.settings as Record<string, unknown>) || {}
+
+          // Enviar para o canal apropriado
+          if (channel === 'telegram') {
+            const telegramBotToken = settings.telegram_bot_token as string | undefined
+            const chatId = channelThreadId
+
+            if (telegramBotToken && chatId) {
+              const telegramResponse = await fetch(
+                `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    chat_id: chatId,
+                    text: validatedData.content,
+                    parse_mode: 'HTML',
+                  }),
+                }
+              )
+
+              if (telegramResponse.ok) {
+                const data = await telegramResponse.json()
+                const channelMessageId = data.result?.message_id
+
+                if (channelMessageId) {
+                  await supabase
+                    .from('messages')
+                    .update({ channel_message_id: channelMessageId.toString() })
+                    .eq('id', message.id)
+                }
+              } else {
+                const err = await telegramResponse.text()
+                console.error('Erro ao enviar mensagem para Telegram (UI):', err)
+              }
+            } else {
+              console.warn(
+                'Telegram não configurado ou chat_id ausente para esta conversa; mensagem salva apenas no CRM.'
+              )
+            }
+          } else if (channel === 'whatsapp') {
+            const whatsappApiUrl = settings.whatsapp_api_url as string | undefined
+            const whatsappApiKey = settings.whatsapp_api_key as string | undefined
+            const to = channelThreadId
+
+            if (whatsappApiUrl && whatsappApiKey && to) {
+              const whatsappResponse = await fetch(`${whatsappApiUrl}/send`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${whatsappApiKey}`,
+                },
+                body: JSON.stringify({
+                  to,
+                  message: validatedData.content,
+                  type: 'text',
+                }),
+              })
+
+              if (whatsappResponse.ok) {
+                const data = await whatsappResponse.json()
+                const channelMessageId = data.messageId
+
+                if (channelMessageId) {
+                  await supabase
+                    .from('messages')
+                    .update({ channel_message_id: channelMessageId.toString() })
+                    .eq('id', message.id)
+                }
+              } else {
+                const err = await whatsappResponse.text()
+                console.error('Erro ao enviar mensagem para WhatsApp (UI):', err)
+              }
+            } else {
+              console.warn(
+                'WhatsApp não configurado ou número ausente para esta conversa; mensagem salva apenas no CRM.'
+              )
+            }
+          }
+        }
+      }
+    } catch (sendError) {
+      console.error('Erro ao enviar mensagem para canal externo (UI):', sendError)
+      // Não interromper fluxo; a mensagem já está salva no CRM
+    }
+
     // Registrar auditoria (apenas se tiver company_id)
     if (company_id) {
       if (validatedData.sender_type === 'ai') {
