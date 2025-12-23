@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 /**
  * Webhook para receber mensagens do WhatsApp
@@ -27,7 +27,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    // IMPORTANTE: Usar service role client para bypass RLS (webhooks não têm usuário autenticado)
+    const serviceClient = createServiceRoleClient()
+    const supabase = serviceClient // Usar service client para todas as operações
 
     // Buscar contato pelo WhatsApp
     const { data: contact } = await supabase
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Criar mensagem
+    // Criar mensagem (usando service client para bypass RLS)
     const { data: newMessage, error: msgError } = await supabase
       .from('messages')
       .insert({
@@ -115,7 +117,7 @@ export async function POST(request: NextRequest) {
     if (msgError) {
       console.error('Erro ao criar mensagem:', msgError)
       return NextResponse.json(
-        { error: 'Erro ao criar mensagem' },
+        { error: 'Erro ao criar mensagem', details: msgError.message },
         { status: 500 }
       )
     }

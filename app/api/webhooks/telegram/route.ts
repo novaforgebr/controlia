@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 /**
  * Webhook para receber mensagens do Telegram
@@ -30,11 +30,13 @@ import { createClient } from '@/lib/supabase/server'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('📥 Webhook Telegram recebido:', JSON.stringify(body, null, 2))
 
     // Estrutura do webhook do Telegram
     const message = body.message || body.edited_message
     if (!message) {
       // Pode ser outro tipo de update (callback_query, etc)
+      console.log('⚠️ Update não processado (sem message)')
       return NextResponse.json({ success: true, message: 'Update não processado' })
     }
 
@@ -58,22 +60,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    // IMPORTANTE: Usar service role client para bypass RLS (webhooks não têm usuário autenticado)
+    const serviceClient = createServiceRoleClient()
+    const supabase = serviceClient // Usar service client para todas as operações
 
     // Buscar empresa pela configuração do bot token (se necessário)
     // Por enquanto, vamos buscar contato pelo username ou ID do Telegram
     const telegramUserId = from.id.toString()
     const telegramUsername = from.username || null
 
-    // Buscar contato pelo ID do Telegram (precisamos adicionar campo telegram_id aos contatos)
-    // Por enquanto, vamos buscar por username se disponível
-    let contactQuery = supabase
-      .from('contacts')
-      .select('id, company_id')
-
-    // Tentar buscar por username do Telegram (se armazenado em custom_fields)
-    // Ou criar um campo telegram_id na tabela contacts
-    // Por enquanto, vamos buscar todas as empresas e verificar configurações
+    // Buscar todas as empresas e verificar configurações
     const { data: companies } = await supabase
       .from('companies')
       .select('id, settings')
@@ -132,20 +128,24 @@ export async function POST(request: NextRequest) {
       if (contactError) {
         console.error('Erro ao criar contato:', contactError)
         return NextResponse.json(
-          { error: 'Erro ao criar contato' },
+          { error: 'Erro ao criar contato', details: contactError.message },
           { status: 500 }
         )
       }
 
       contact = newContact
+      console.log('✅ Contato criado:', contact.id)
     }
 
     if (!contact) {
+      console.error('❌ Contato não encontrado e não foi possível criar')
       return NextResponse.json(
         { error: 'Contato não encontrado e não foi possível criar' },
         { status: 404 }
       )
     }
+
+    console.log('✅ Contato encontrado/criado:', contact.id, 'Company:', contact.company_id)
 
     // Buscar ou criar conversa
     // IMPORTANTE: Buscar por channel_thread_id para garantir que reutilizamos a mesma conversa
@@ -188,6 +188,9 @@ export async function POST(request: NextRequest) {
       }
 
       conversation = newConversation
+      console.log('✅ Conversa criada:', conversation.id)
+    } else {
+      console.log('✅ Conversa reutilizada:', conversation.id)
     }
 
     // Determinar tipo de conteúdo
@@ -226,7 +229,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Criar mensagem
+    // Criar mensagem (usando service client para bypass RLS)
     const { data: newMessage, error: msgError } = await supabase
       .from('messages')
       .insert({
@@ -246,12 +249,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (msgError) {
-      console.error('Erro ao criar mensagem:', msgError)
+      console.error('❌ Erro ao criar mensagem:', msgError)
       return NextResponse.json(
-        { error: 'Erro ao criar mensagem' },
+        { error: 'Erro ao criar mensagem', details: msgError.message },
         { status: 500 }
       )
     }
+
+    console.log('✅ Mensagem criada:', newMessage.id)
 
     // Buscar automações ativas para processar mensagens
     const { data: automations } = await supabase
@@ -262,11 +267,14 @@ export async function POST(request: NextRequest) {
       .eq('is_active', true)
       .eq('is_paused', false)
 
+    console.log('🔍 Automações encontradas:', automations?.length || 0)
+
     // Se houver automações configuradas, enviar para n8n
     if (automations && automations.length > 0) {
       const automation = automations[0] // Usar a primeira automação ativa
       
       if (automation.n8n_webhook_url) {
+        console.log('📤 Enviando para n8n:', automation.n8n_webhook_url)
         try {
           // Enviar para o n8n no formato que seu workflow espera
           const n8nResponse = await fetch(automation.n8n_webhook_url, {
@@ -297,8 +305,10 @@ export async function POST(request: NextRequest) {
           })
 
           if (!n8nResponse.ok) {
-            console.error('Erro ao enviar para n8n:', await n8nResponse.text())
+            const errorText = await n8nResponse.text()
+            console.error('❌ Erro ao enviar para n8n:', errorText)
           } else {
+            console.log('✅ Mensagem enviada para n8n com sucesso')
             // Registrar log de execução
             await supabase.from('automation_logs').insert({
               company_id: contact.company_id,
@@ -342,15 +352,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('✅ Webhook Telegram processado com sucesso')
     return NextResponse.json({
       success: true,
       message_id: newMessage.id,
       conversation_id: conversation.id,
     })
   } catch (error) {
-    console.error('Erro no webhook do Telegram:', error)
+    console.error('❌ Erro no webhook do Telegram:', error)
     return NextResponse.json(
-      { error: 'Erro ao processar webhook' },
+      { error: 'Erro ao processar webhook', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
