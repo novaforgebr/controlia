@@ -215,6 +215,13 @@ export async function POST(request: NextRequest) {
       content = '[Mensagem de voz]'
     }
 
+    if (!conversation) {
+      return NextResponse.json(
+        { error: 'Erro ao obter ou criar conversa' },
+        { status: 500 }
+      )
+    }
+
     // Criar mensagem
     const { data: newMessage, error: msgError } = await supabase
       .from('messages')
@@ -277,8 +284,8 @@ export async function POST(request: NextRequest) {
               controlia: {
                 company_id: contact.company_id,
                 contact_id: contact.id,
-                conversation_id: conversation.id,
-                message_id: newMessage.id,
+                conversation_id: conversation?.id,
+                message_id: newMessage?.id,
                 channel: 'telegram',
                 callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/webhooks/n8n/channel-response`,
               },
@@ -294,8 +301,8 @@ export async function POST(request: NextRequest) {
               automation_id: automation.id,
               trigger_event: 'new_message',
               trigger_data: {
-                message_id: newMessage.id,
-                conversation_id: conversation.id,
+                message_id: newMessage?.id,
+                conversation_id: conversation?.id,
                 channel: 'telegram',
               },
               status: 'success',
@@ -311,8 +318,8 @@ export async function POST(request: NextRequest) {
               automation_id: automation.id,
               trigger_event: 'new_message',
               trigger_data: {
-                message_id: newMessage.id,
-                conversation_id: conversation.id,
+                message_id: newMessage?.id,
+                conversation_id: conversation?.id,
               },
               status: 'error',
               error_message: String(n8nError),
@@ -322,6 +329,13 @@ export async function POST(request: NextRequest) {
           // Não falhar a requisição se o n8n falhar
         }
       }
+    }
+
+    if (!newMessage || !conversation) {
+      return NextResponse.json(
+        { error: 'Erro ao criar mensagem ou conversa' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({

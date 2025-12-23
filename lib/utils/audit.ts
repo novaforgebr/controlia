@@ -4,7 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import type { ActorType } from '@/lib/types/database'
+import { ActorType } from '@/lib/types/database'
 
 interface AuditLogParams {
   companyId: string
@@ -61,7 +61,7 @@ export async function logHumanAction(
   return createAuditLog({
     companyId,
     userId,
-    actorType: 'human',
+    actorType: ActorType.HUMAN,
     action,
     entityType,
     entityId: entityId || null,
@@ -82,7 +82,7 @@ export async function logAIAction(
   return createAuditLog({
     companyId,
     userId: null,
-    actorType: 'ai',
+    actorType: ActorType.AI,
     actorName: 'AI Assistant',
     action,
     entityType,

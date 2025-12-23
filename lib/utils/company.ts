@@ -33,7 +33,12 @@ export async function getCurrentCompany(): Promise<Company | null> {
     return null
   }
 
-  return companyUser.companies as Company
+  // companies pode ser um objeto único ou array, mas com .single() é sempre um objeto
+  const companies = companyUser.companies
+  if (Array.isArray(companies)) {
+    return companies[0] as Company
+  }
+  return companies as Company
 }
 
 /**
@@ -60,7 +65,13 @@ export async function getUserCompanies(): Promise<Company[]> {
     return []
   }
 
-  return data.map((item) => item.companies as Company)
+  return data.map((item) => {
+    const companies = item.companies
+    if (Array.isArray(companies)) {
+      return companies[0] as Company
+    }
+    return companies as Company
+  })
 }
 
 /**
