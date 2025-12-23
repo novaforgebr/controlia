@@ -196,9 +196,6 @@ export async function POST(request: NextRequest) {
       }
 
       conversation = newConversation
-      console.log('✅ Conversa criada:', conversation.id)
-    } else {
-      console.log('✅ Conversa reutilizada:', conversation.id)
     }
 
     // Verificar se conversation existe antes de continuar
@@ -208,6 +205,11 @@ export async function POST(request: NextRequest) {
         { error: 'Erro ao obter ou criar conversa' },
         { status: 500 }
       )
+    }
+
+    // Log após garantir que conversation não é null
+    if (conversation.id) {
+      console.log('✅ Conversa encontrada/criada:', conversation.id)
     }
 
     // Determinar tipo de conteúdo
