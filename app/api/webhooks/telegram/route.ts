@@ -363,32 +363,35 @@ export async function POST(request: NextRequest) {
           let webhookUrl = automation.n8n_webhook_url
           
           // O n8n pode esperar o secret de três formas:
-          // 1. Como query parameter na URL (?secret=xxx) - método mais comum
-          // 2. Como header HTTP (X-Webhook-Secret ou X-n8n-Webhook-Secret) - para Header Auth
+          // 1. Como query parameter na URL (?secret=xxx) - quando Authentication é "None"
+          // 2. Como header HTTP (X-Webhook-Secret) - quando Authentication é "Header Auth"
           // 3. Sem autenticação (None) - não recomendado
           if (n8nWebhookSecret) {
-            // Adicionar secret como header (para Header Auth no n8n)
-            // Tentar múltiplos nomes de header comuns
-            headers['X-Webhook-Secret'] = n8nWebhookSecret
-            headers['X-n8n-Webhook-Secret'] = n8nWebhookSecret
-            headers['webhook-secret'] = n8nWebhookSecret
-            headers['secret'] = n8nWebhookSecret
-            
-            // Também adicionar como query parameter (para compatibilidade)
             try {
               const urlObj = new URL(webhookUrl)
-              // Verificar se já não tem secret na URL
-              if (!urlObj.searchParams.has('secret')) {
-                urlObj.searchParams.set('secret', n8nWebhookSecret)
-                webhookUrl = urlObj.toString()
-                console.log('🔐 Secret adicionado à URL do webhook como query parameter')
+              const hasSecretInUrl = urlObj.searchParams.has('secret')
+              
+              // Se o secret já está na URL, provavelmente o n8n está usando query parameter
+              // Se não está na URL, provavelmente está usando Header Auth
+              if (hasSecretInUrl) {
+                // Secret na URL = usar query parameter (Authentication: None)
+                console.log('🔐 Secret encontrado na URL - usando query parameter (Authentication: None)')
+                // Não adicionar headers, apenas usar o query parameter
               } else {
-                console.log('🔐 Secret já presente na URL do webhook')
+                // Secret não na URL = usar Header Auth
+                console.log('🔐 Secret não na URL - usando Header Auth')
+                // Adicionar secret como header (para Header Auth no n8n)
+                // O n8n espera exatamente o header configurado na credencial
+                headers['X-Webhook-Secret'] = n8nWebhookSecret
+                headers['X-n8n-Webhook-Secret'] = n8nWebhookSecret
+                console.log('🔐 Secret enviado como headers HTTP: X-Webhook-Secret, X-n8n-Webhook-Secret')
               }
-              console.log('🔐 Secret enviado como headers HTTP:', ['X-Webhook-Secret', 'X-n8n-Webhook-Secret', 'webhook-secret', 'secret'].join(', '))
             } catch (urlError) {
               console.warn('⚠️ Erro ao processar URL do webhook, usando URL original:', urlError)
-              console.log('🔐 Secret enviado apenas como headers HTTP')
+              // Fallback: enviar como header
+              headers['X-Webhook-Secret'] = n8nWebhookSecret
+              headers['X-n8n-Webhook-Secret'] = n8nWebhookSecret
+              console.log('🔐 Secret enviado como headers HTTP (fallback)')
             }
           } else {
             // Tentar extrair secret da própria URL do webhook (pode estar já incluído)
