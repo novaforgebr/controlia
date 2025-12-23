@@ -303,6 +303,7 @@ export async function POST(request: NextRequest) {
 
     if (automationsError) {
       console.error('❌ Erro ao buscar automações:', automationsError)
+      console.error('❌ Detalhes do erro:', JSON.stringify(automationsError, null, 2))
     }
 
     console.log('🔍 Automações encontradas:', automations?.length || 0)
@@ -310,12 +311,17 @@ export async function POST(request: NextRequest) {
       console.log('📋 Detalhes das automações:', JSON.stringify(automations.map(a => ({
         id: a.id,
         name: a.name,
-        n8n_webhook_url: a.n8n_webhook_url ? '✅ Configurado' : '❌ Não configurado',
+        n8n_webhook_url: a.n8n_webhook_url ? `✅ ${a.n8n_webhook_url.substring(0, 50)}...` : '❌ Não configurado',
         is_active: a.is_active,
         is_paused: a.is_paused
       })), null, 2))
     } else {
       console.warn('⚠️ Nenhuma automação ativa encontrada para company_id:', contact.company_id)
+      console.warn('💡 Verifique se existe uma automação com:')
+      console.warn('   - company_id:', contact.company_id)
+      console.warn('   - trigger_event: "new_message"')
+      console.warn('   - is_active: true')
+      console.warn('   - is_paused: false')
     }
 
     // Se houver automações configuradas, enviar para n8n
@@ -385,69 +391,104 @@ export async function POST(request: NextRequest) {
             }
           }
 
+          // Preparar payload para o n8n
+          const n8nPayload = {
+            // Formato compatível com seu Telegram Trigger
+            update_id: body.update_id || Date.now(),
+            message: {
+              message_id: message_id,
+              from: from,
+              chat: chat,
+              date: date,
+              text: text || content,
+            },
+            // Dados adicionais do Controlia
+            controlia: {
+              company_id: contact.company_id,
+              contact_id: contact.id,
+              conversation_id: conversation?.id,
+              message_id: newMessage?.id,
+              channel: 'telegram',
+              callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/webhooks/n8n/channel-response`,
+            },
+          }
+
+          console.log('📤 Enviando para n8n:')
+          console.log('   URL:', webhookUrl)
+          console.log('   Headers:', JSON.stringify(headers, null, 2))
+          console.log('   Payload:', JSON.stringify(n8nPayload, null, 2))
+
           // Enviar para o n8n no formato que seu workflow espera
           const n8nResponse = await fetch(webhookUrl, {
             method: 'POST',
             headers,
-            body: JSON.stringify({
-              // Formato compatível com seu Telegram Trigger
-              update_id: body.update_id || Date.now(),
-              message: {
-                message_id: message_id,
-                from: from,
-                chat: chat,
-                date: date,
-                text: text || content,
-              },
-              // Dados adicionais do Controlia
-              controlia: {
-                company_id: contact.company_id,
-                contact_id: contact.id,
-                conversation_id: conversation?.id,
-                message_id: newMessage?.id,
-                channel: 'telegram',
-                callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/webhooks/n8n/channel-response`,
-              },
-            }),
+            body: JSON.stringify(n8nPayload),
           })
+
+          console.log('📡 Resposta do n8n:')
+          console.log('   Status:', n8nResponse.status, n8nResponse.statusText)
+          console.log('   Headers:', JSON.stringify(Object.fromEntries(n8nResponse.headers.entries()), null, 2))
 
           if (!n8nResponse.ok) {
             const errorText = await n8nResponse.text()
-            console.error('❌ Erro ao enviar para n8n:', errorText)
-            console.error('❌ Status HTTP:', n8nResponse.status)
+            console.error('❌ Erro ao enviar para n8n:')
+            console.error('   Status HTTP:', n8nResponse.status)
+            console.error('   Resposta:', errorText)
+            console.error('   URL tentada:', webhookUrl)
+            console.error('   Headers enviados:', JSON.stringify(headers, null, 2))
             
             // Registrar log de erro
-            await supabase.from('automation_logs').insert({
-              company_id: contact.company_id,
-              automation_id: automation.id,
-              trigger_event: 'new_message',
-              trigger_data: {
-                message_id: newMessage?.id,
-                conversation_id: conversation?.id,
-                channel: 'telegram',
-              },
-              status: 'error',
-              error_message: `HTTP ${n8nResponse.status}: ${errorText}`,
-              started_at: new Date().toISOString(),
-            })
+            try {
+              await supabase.from('automation_logs').insert({
+                company_id: contact.company_id,
+                automation_id: automation.id,
+                trigger_event: 'new_message',
+                trigger_data: {
+                  message_id: newMessage?.id,
+                  conversation_id: conversation?.id,
+                  channel: 'telegram',
+                  webhook_url: webhookUrl,
+                },
+                status: 'error',
+                error_message: `HTTP ${n8nResponse.status}: ${errorText.substring(0, 500)}`,
+                started_at: new Date().toISOString(),
+              })
+            } catch (logError) {
+              console.error('❌ Erro ao registrar log de automação:', logError)
+            }
           } else {
-            const responseData = await n8nResponse.json().catch(() => null)
+            let responseData: unknown = null
+            try {
+              responseData = await n8nResponse.json()
+            } catch {
+              try {
+                const text = await n8nResponse.text()
+                responseData = { raw: text }
+              } catch {
+                responseData = { raw: 'Não foi possível ler a resposta' }
+              }
+            }
             console.log('✅ Mensagem enviada para n8n com sucesso')
             console.log('📥 Resposta do n8n:', responseData ? JSON.stringify(responseData, null, 2) : 'Sem resposta JSON')
             
             // Registrar log de execução
-            await supabase.from('automation_logs').insert({
-              company_id: contact.company_id,
-              automation_id: automation.id,
-              trigger_event: 'new_message',
-              trigger_data: {
-                message_id: newMessage?.id,
-                conversation_id: conversation?.id,
-                channel: 'telegram',
-              },
-              status: 'success',
-              started_at: new Date().toISOString(),
-            })
+            try {
+              await supabase.from('automation_logs').insert({
+                company_id: contact.company_id,
+                automation_id: automation.id,
+                trigger_event: 'new_message',
+                trigger_data: {
+                  message_id: newMessage?.id,
+                  conversation_id: conversation?.id,
+                  channel: 'telegram',
+                },
+                status: 'success',
+                started_at: new Date().toISOString(),
+                completed_at: new Date().toISOString(),
+              })
+            } catch (logError) {
+              console.error('❌ Erro ao registrar log de automação:', logError)
+            }
           }
         } catch (n8nError) {
           console.error('Erro ao enviar para n8n:', n8nError)
