@@ -187,10 +187,27 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      if (!newConversation) {
+        console.error('Erro: Conversa não foi criada')
+        return NextResponse.json(
+          { error: 'Erro ao criar conversa' },
+          { status: 500 }
+        )
+      }
+
       conversation = newConversation
       console.log('✅ Conversa criada:', conversation.id)
     } else {
       console.log('✅ Conversa reutilizada:', conversation.id)
+    }
+
+    // Verificar se conversation existe antes de continuar
+    if (!conversation) {
+      console.error('❌ Erro: Conversa não encontrada e não foi possível criar')
+      return NextResponse.json(
+        { error: 'Erro ao obter ou criar conversa' },
+        { status: 500 }
+      )
     }
 
     // Determinar tipo de conteúdo
