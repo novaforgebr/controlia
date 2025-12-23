@@ -17,15 +17,23 @@ import { revalidatePath } from 'next/cache'
  */
 export async function createMessage(formData: FormData) {
   try {
-    const company = await getCurrentCompany()
-    if (!company) {
-      return { error: 'Empresa não encontrada' }
+    // company_id é opcional - pode vir do formData ou ser obtido da empresa atual
+    const company_id_from_form = formData.get('company_id') as string | null
+    let company_id: string | null = null
+    
+    if (company_id_from_form) {
+      company_id = company_id_from_form
+    } else {
+      // Tentar obter da empresa atual (se houver usuário autenticado)
+      const company = await getCurrentCompany()
+      if (company) {
+        company_id = company.id
+      }
+      // Se não houver empresa, company_id será NULL (permitido agora)
     }
 
     const user = await getUser()
-    if (!user) {
-      return { error: 'Usuário não autenticado' }
-    }
+    // user não é obrigatório para mensagens do n8n
 
     const rawData = {
       conversation_id: formData.get('conversation_id') as string,
@@ -34,7 +42,7 @@ export async function createMessage(formData: FormData) {
       content_type: formData.get('content_type') as string || 'text',
       media_url: formData.get('media_url') as string || '',
       sender_type: formData.get('sender_type') as string || 'human',
-      sender_id: formData.get('sender_id') as string || user.id,
+      sender_id: formData.get('sender_id') as string || (user?.id || ''),
       ai_agent_id: formData.get('ai_agent_id') as string || '',
       channel_message_id: formData.get('channel_message_id') as string || '',
       channel_timestamp: formData.get('channel_timestamp') as string || '',
@@ -46,7 +54,7 @@ export async function createMessage(formData: FormData) {
 
     const validatedData = createMessageSchema.parse({
       ...rawData,
-      sender_id: rawData.sender_type === 'human' ? rawData.sender_id : null,
+      sender_id: rawData.sender_type === 'human' ? (rawData.sender_id || null) : null,
       ai_agent_id: rawData.sender_type === 'ai' ? rawData.ai_agent_id : null,
       channel_message_id: rawData.channel_message_id || null,
       channel_timestamp: rawData.channel_timestamp || null,
@@ -56,12 +64,19 @@ export async function createMessage(formData: FormData) {
 
     const supabase = await createClient()
 
+    // Inserir mensagem (company_id pode ser NULL)
+    const messageData: Record<string, unknown> = {
+      ...validatedData,
+    }
+    
+    // Adicionar company_id apenas se existir
+    if (company_id) {
+      messageData.company_id = company_id
+    }
+
     const { data: message, error } = await supabase
       .from('messages')
-      .insert({
-        company_id: company.id,
-        ...validatedData,
-      })
+      .insert(messageData)
       .select()
       .single()
 
@@ -70,24 +85,26 @@ export async function createMessage(formData: FormData) {
       return { error: 'Erro ao criar mensagem' }
     }
 
-    // Registrar auditoria
-    if (validatedData.sender_type === 'ai') {
-      await logAIAction(
-        company.id,
-        'create_message',
-        'message',
-        message.id,
-        { message: message }
-      )
-    } else {
-      await logHumanAction(
-        company.id,
-        user.id,
-        'create_message',
-        'message',
-        message.id,
-        { created: message }
-      )
+    // Registrar auditoria (apenas se tiver company_id)
+    if (company_id) {
+      if (validatedData.sender_type === 'ai') {
+        await logAIAction(
+          company_id,
+          'create_message',
+          'message',
+          message.id,
+          { message: message }
+        )
+      } else if (user) {
+        await logHumanAction(
+          company_id,
+          user.id,
+          'create_message',
+          'message',
+          message.id,
+          { created: message }
+        )
+      }
     }
 
     revalidatePath(`/conversations/${validatedData.conversation_id}`)

@@ -34,9 +34,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
 
     // ============================================
-    // 1. Buscar empresa (NÃO cria se não existir)
+    // 1. Buscar empresa (company_id NÃO é obrigatório)
     // ============================================
     let company = null
+    let settings: Record<string, unknown> = {}
     
     // Se company_id foi enviado, buscar essa empresa específica
     if (company_id) {
@@ -53,42 +54,34 @@ export async function POST(request: NextRequest) {
           { status: 404 }
         )
       }
-    } else {
-      // Se company_id não foi enviado, tentar buscar a primeira empresa disponível
-      // (útil quando o workflow n8n não envia company_id)
-      const { data: companies } = await supabase
-        .from('companies')
-        .select('id, settings')
-        .limit(1)
-        .single()
-      
-      if (companies) {
-        company = companies
-        company_id = companies.id
-      } else {
-        // Se não encontrou empresa e company_id não foi enviado, retornar erro
-        // (não cria empresa automaticamente)
-        return NextResponse.json(
-          { error: 'company_id não foi fornecido e nenhuma empresa foi encontrada no sistema. Envie company_id no payload ou configure uma empresa no sistema.' },
-          { status: 400 }
-        )
-      }
+      settings = (company.settings as Record<string, unknown>) || {}
     }
-
-    const settings = (company.settings as Record<string, unknown>) || {}
+    // Se company_id não foi enviado, continuar sem empresa (company_id será NULL)
 
     // ============================================
-    // 2. Buscar ou criar contato
+    // 2. Buscar ou criar contato (company_id é opcional)
     // ============================================
     let contact = null
+    let contact_id_final = contact_id
+    
     if (contact_id) {
-      const { data } = await supabase
+      // Buscar contato (com ou sem company_id)
+      const query = supabase
         .from('contacts')
         .select('id, company_id')
         .eq('id', contact_id)
-        .eq('company_id', company_id)
-        .single()
+      
+      if (company_id) {
+        query.eq('company_id', company_id)
+      } else {
+        query.is('company_id', null)
+      }
+      
+      const { data } = await query.single()
       contact = data
+      if (contact) {
+        contact_id_final = contact.id
+      }
     }
 
     // Se não encontrou contato, criar um novo baseado nos dados do Telegram
@@ -100,11 +93,17 @@ export async function POST(request: NextRequest) {
       const fullName = `${firstName} ${lastName}`.trim() || fromData.username || 'Usuário Telegram'
 
       // Verificar se já existe contato com este telegram_id
-      // Buscar todos os contatos da empresa e filtrar por telegram_id no código
-      const { data: allContacts } = await supabase
+      const query = supabase
         .from('contacts')
         .select('id, company_id, custom_fields')
-        .eq('company_id', company_id)
+      
+      if (company_id) {
+        query.eq('company_id', company_id)
+      } else {
+        query.is('company_id', null)
+      }
+      
+      const { data: allContacts } = await query
       
       const existingContact = allContacts?.find((c) => {
         const customFields = (c.custom_fields as Record<string, unknown>) || {}
@@ -113,21 +112,27 @@ export async function POST(request: NextRequest) {
 
       if (existingContact) {
         contact = existingContact
-        contact_id = existingContact.id
+        contact_id_final = existingContact.id
       } else {
-        // Criar novo contato
+        // Criar novo contato (company_id é opcional)
+        const contactData: Record<string, unknown> = {
+          name: fullName,
+          custom_fields: {
+            telegram_id: telegramUserId,
+            telegram_username: telegramUsername,
+          },
+          status: 'lead',
+          source: 'telegram',
+        }
+        
+        // Adicionar company_id apenas se existir
+        if (company_id) {
+          contactData.company_id = company_id
+        }
+        
         const { data: newContact, error: contactError } = await supabase
           .from('contacts')
-          .insert({
-            company_id: company_id,
-            name: fullName,
-            custom_fields: {
-              telegram_id: telegramUserId,
-              telegram_username: telegramUsername,
-            },
-            status: 'lead',
-            source: 'telegram',
-          })
+          .insert(contactData)
           .select('id, company_id')
           .single()
 
@@ -140,7 +145,7 @@ export async function POST(request: NextRequest) {
         }
 
         contact = newContact
-        contact_id = newContact.id
+        contact_id_final = newContact.id
       }
     }
 
@@ -152,7 +157,6 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      // Se tem fromData.id mas ainda não criou, houve erro na criação (já tratado acima)
       return NextResponse.json(
         { error: 'Erro ao criar contato. Verifique os logs do servidor.' },
         { status: 500 }
@@ -160,22 +164,35 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================
-    // 3. Buscar ou criar conversa
+    // 3. Buscar ou criar conversa (company_id é opcional)
     // ============================================
     let conversation = null
+    let conversation_id_final = conversation_id
+    let finalChannel = channel || 'telegram'
+    
     if (conversation_id) {
-      const { data } = await supabase
+      // Buscar conversa (com ou sem company_id)
+      const query = supabase
         .from('conversations')
         .select('id, channel_thread_id, contact_id, channel')
         .eq('id', conversation_id)
-        .eq('company_id', company_id)
-        .single()
+      
+      if (company_id) {
+        query.eq('company_id', company_id)
+      } else {
+        query.is('company_id', null)
+      }
+      
+      const { data } = await query.single()
       conversation = data
+      if (conversation) {
+        conversation_id_final = conversation.id
+        finalChannel = conversation.channel || finalChannel
+      }
     }
 
     // Se não encontrou conversa, criar uma nova
-    if (!conversation) {
-      const finalChannel = channel || 'telegram'
+    if (!conversation && contact_id_final) {
       // Tentar obter channel_id de várias fontes
       const finalChannelId = channel_id || chatData.id?.toString() || fromData.id?.toString()
 
@@ -186,17 +203,24 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // Criar nova conversa (company_id é opcional)
+      const conversationData: Record<string, unknown> = {
+        contact_id: contact_id_final,
+        channel: finalChannel,
+        channel_thread_id: finalChannelId,
+        status: 'open',
+        priority: 'normal',
+        ai_assistant_enabled: true,
+      }
+      
+      // Adicionar company_id apenas se existir
+      if (company_id) {
+        conversationData.company_id = company_id
+      }
+      
       const { data: newConversation, error: convError } = await supabase
         .from('conversations')
-        .insert({
-          company_id: company_id,
-          contact_id: contact_id,
-          channel: finalChannel,
-          channel_thread_id: finalChannelId,
-          status: 'open',
-          priority: 'normal',
-          ai_assistant_enabled: true,
-        })
+        .insert(conversationData)
         .select('id, channel_thread_id, contact_id, channel')
         .single()
 
@@ -209,26 +233,33 @@ export async function POST(request: NextRequest) {
       }
 
       conversation = newConversation
-      conversation_id = newConversation.id
+      conversation_id_final = newConversation.id
+      finalChannel = newConversation.channel || finalChannel
     }
 
-    const finalChannel = channel || conversation.channel
+    if (!conversation) {
+      return NextResponse.json(
+        { error: 'Não foi possível criar ou encontrar a conversa. Verifique se contact_id ou dados do Telegram (message.from) estão presentes.' },
+        { status: 400 }
+      )
+    }
 
     // Enviar resposta ao canal apropriado
     let channelMessageId: string | null = null
 
     if (finalChannel === 'telegram') {
-      const telegramBotToken = settings.telegram_bot_token as string
+      // Tentar obter bot token das settings ou de variável de ambiente
+      const telegramBotToken = (settings.telegram_bot_token as string) || process.env.TELEGRAM_BOT_TOKEN
 
       if (!telegramBotToken) {
         return NextResponse.json(
-          { error: 'Bot Token do Telegram não configurado' },
+          { error: 'Bot Token do Telegram não configurado. Configure em Configurações > Integrações > Telegram ou na variável de ambiente TELEGRAM_BOT_TOKEN' },
           { status: 400 }
         )
       }
 
       // Obter chat_id de várias fontes possíveis
-      const telegramChatId = channel_id || conversation.channel_thread_id || chatData.id?.toString() || fromData.id?.toString()
+      const telegramChatId = channel_id || conversation?.channel_thread_id || chatData.id?.toString() || fromData.id?.toString()
 
       if (!telegramChatId) {
         return NextResponse.json(
@@ -316,10 +347,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Criar mensagem da IA no Controlia
+    // Criar mensagem da IA no Controlia (sempre, pois agora temos conversation_id)
     const messageFormData = new FormData()
-    messageFormData.append('conversation_id', conversation_id)
-    messageFormData.append('contact_id', conversation.contact_id || contact_id || contact.id)
+    messageFormData.append('conversation_id', conversation_id_final)
+    messageFormData.append('contact_id', conversation.contact_id || contact_id_final || '')
     messageFormData.append('content', output)
     messageFormData.append('sender_type', 'ai')
     messageFormData.append('ai_agent_id', 'n8n-agent')
