@@ -89,7 +89,7 @@ const tutorials = {
               </p>
             </div>
             <p className="text-sm text-gray-600 mt-2">
-              <strong>Onde encontrar:</strong> No painel do provedor, geralmente em "Configurações", "API" ou "Credenciais".
+              <strong>Onde encontrar:</strong> No painel do provedor, geralmente em &quot;Configurações&quot;, &quot;API&quot; ou &quot;Credenciais&quot;.
             </p>
           </div>
         ),
@@ -284,7 +284,7 @@ const tutorials = {
               <div className="text-gray-900">SendGrid: smtp.sendgrid.net</div>
             </div>
             <p className="text-sm text-gray-600 mt-2">
-              <strong>Onde encontrar:</strong> Na documentação do seu provedor de email, geralmente em "Configurações SMTP" ou "Configurações de envio".
+              <strong>Onde encontrar:</strong> Na documentação do seu provedor de email, geralmente em &quot;Configurações SMTP&quot; ou &quot;Configurações de envio&quot;.
             </p>
           </div>
         ),
@@ -340,7 +340,7 @@ const tutorials = {
             </ul>
             <div className="mt-3 p-3 bg-yellow-50 rounded-md">
               <p className="text-xs text-yellow-800">
-                <strong>Gmail:</strong> Se usar autenticação de dois fatores, você precisará criar uma "Senha de App" nas configurações da sua conta Google.
+                <strong>Gmail:</strong> Se usar autenticação de dois fatores, você precisará criar uma &quot;Senha de App&quot; nas configurações da sua conta Google.
               </p>
             </div>
             <div className="mt-2 p-3 bg-blue-50 rounded-md">

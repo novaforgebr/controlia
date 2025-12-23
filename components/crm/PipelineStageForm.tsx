@@ -113,7 +113,7 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
             className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
           />
           <label htmlFor="is_closed" className="ml-2 text-sm text-gray-700">
-            Representa "Fechado/Ganho"
+            Representa &quot;Fechado/Ganho&quot;
           </label>
         </div>
 
@@ -127,7 +127,7 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
             className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
           />
           <label htmlFor="is_lost" className="ml-2 text-sm text-gray-700">
-            Representa "Perdido"
+            Representa &quot;Perdido&quot;
           </label>
         </div>
       </div>
