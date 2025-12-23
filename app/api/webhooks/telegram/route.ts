@@ -292,7 +292,8 @@ export async function POST(request: NextRequest) {
     console.log('✅ Mensagem criada com sucesso:', newMessage.id, 'Content:', content.substring(0, 50))
 
     // Buscar automações ativas para processar mensagens
-    const { data: automations } = await supabase
+    console.log('🔍 Buscando automações para company_id:', contact.company_id)
+    const { data: automations, error: automationsError } = await supabase
       .from('automations')
       .select('*')
       .eq('company_id', contact.company_id)
@@ -300,7 +301,22 @@ export async function POST(request: NextRequest) {
       .eq('is_active', true)
       .eq('is_paused', false)
 
+    if (automationsError) {
+      console.error('❌ Erro ao buscar automações:', automationsError)
+    }
+
     console.log('🔍 Automações encontradas:', automations?.length || 0)
+    if (automations && automations.length > 0) {
+      console.log('📋 Detalhes das automações:', JSON.stringify(automations.map(a => ({
+        id: a.id,
+        name: a.name,
+        n8n_webhook_url: a.n8n_webhook_url ? '✅ Configurado' : '❌ Não configurado',
+        is_active: a.is_active,
+        is_paused: a.is_paused
+      })), null, 2))
+    } else {
+      console.warn('⚠️ Nenhuma automação ativa encontrada para company_id:', contact.company_id)
+    }
 
     // Se houver automações configuradas, enviar para n8n
     if (automations && automations.length > 0) {
@@ -340,8 +356,27 @@ export async function POST(request: NextRequest) {
           if (!n8nResponse.ok) {
             const errorText = await n8nResponse.text()
             console.error('❌ Erro ao enviar para n8n:', errorText)
+            console.error('❌ Status HTTP:', n8nResponse.status)
+            
+            // Registrar log de erro
+            await supabase.from('automation_logs').insert({
+              company_id: contact.company_id,
+              automation_id: automation.id,
+              trigger_event: 'new_message',
+              trigger_data: {
+                message_id: newMessage?.id,
+                conversation_id: conversation?.id,
+                channel: 'telegram',
+              },
+              status: 'error',
+              error_message: `HTTP ${n8nResponse.status}: ${errorText}`,
+              started_at: new Date().toISOString(),
+            })
           } else {
+            const responseData = await n8nResponse.json().catch(() => null)
             console.log('✅ Mensagem enviada para n8n com sucesso')
+            console.log('📥 Resposta do n8n:', responseData ? JSON.stringify(responseData, null, 2) : 'Sem resposta JSON')
+            
             // Registrar log de execução
             await supabase.from('automation_logs').insert({
               company_id: contact.company_id,
