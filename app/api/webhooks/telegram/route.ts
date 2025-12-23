@@ -491,16 +491,13 @@ export async function POST(request: NextRequest) {
               } else {
                 // Secret não na URL = usar Header Auth
                 console.log('🔐 Secret não na URL - usando Header Auth')
-                // Adicionar secret como header (para Header Auth no n8n)
-                // O n8n pode esperar diferentes nomes de header dependendo da configuração
-                // Tentar múltiplos nomes comuns para garantir compatibilidade
+                // O n8n está configurado para aceitar "X-Webhook-Secret" como nome do header
+                // Enviar APENAS o header correto para evitar confusão
                 headers['X-Webhook-Secret'] = n8nWebhookSecret
-                headers['X-n8n-Webhook-Secret'] = n8nWebhookSecret
-                headers['webhook-secret'] = n8nWebhookSecret
-                headers['secret'] = n8nWebhookSecret
-                headers['Authorization'] = `Bearer ${n8nWebhookSecret}` // Algumas configs usam Bearer
-                console.log('🔐 Secret enviado como headers HTTP: X-Webhook-Secret, X-n8n-Webhook-Secret, webhook-secret, secret, Authorization')
-                console.log('🔐 Valor do secret (primeiros 5 caracteres):', n8nWebhookSecret.substring(0, 5) + '...')
+                console.log('🔐 Secret enviado como header HTTP: X-Webhook-Secret')
+                console.log('🔐 Valor do secret completo:', n8nWebhookSecret)
+                console.log('🔐 Tamanho do secret:', n8nWebhookSecret.length, 'caracteres')
+                console.log('🔐 Secret em bytes (para verificar encoding):', Buffer.from(n8nWebhookSecret).toString('hex'))
               }
             } catch (urlError) {
               console.warn('⚠️ Erro ao processar URL do webhook, usando URL original:', urlError)
@@ -542,7 +539,7 @@ export async function POST(request: NextRequest) {
               conversation_id: conversation?.id,
               message_id: newMessage?.id,
               channel: 'telegram',
-              callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/webhooks/n8n/channel-response`,
+              callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://controliaa.vercel.app'}/api/webhooks/n8n/channel-response`,
             },
           }
 
