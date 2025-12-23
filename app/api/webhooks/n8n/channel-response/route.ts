@@ -32,16 +32,17 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    const serviceClient = createServiceRoleClient()
 
     // ============================================
-    // 1. Buscar empresa (company_id NÃO é obrigatório)
+    // 1. Buscar empresa (company_id NÃO é obrigatório, mas definimos um fallback)
     // ============================================
     let company = null
     let settings: Record<string, unknown> = {}
     
     // Se company_id foi enviado, buscar essa empresa específica
     if (company_id) {
-      const { data } = await supabase
+      const { data } = await serviceClient
         .from('companies')
         .select('id, settings')
         .eq('id', company_id)
@@ -55,27 +56,41 @@ export async function POST(request: NextRequest) {
         )
       }
       settings = (company.settings as Record<string, unknown>) || {}
+    } else {
+      // Sem company_id: usar a primeira empresa disponível como fallback
+      const { data: firstCompany } = await serviceClient
+        .from('companies')
+        .select('id, settings')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single()
+      
+      if (firstCompany) {
+        company = firstCompany
+        company_id = firstCompany.id
+        settings = (firstCompany.settings as Record<string, unknown>) || {}
+      } else {
+        return NextResponse.json(
+          { error: 'Nenhuma empresa encontrada. Crie uma empresa ou forneça company_id.' },
+          { status: 400 }
+        )
+      }
     }
-    // Se company_id não foi enviado, continuar sem empresa (company_id será NULL)
 
     // ============================================
-    // 2. Buscar ou criar contato (company_id é opcional)
+    // 2. Buscar ou criar contato (company_id agora é obrigatório após fallback)
     // ============================================
     let contact = null
     let contact_id_final = contact_id
     
     if (contact_id) {
       // Buscar contato (com ou sem company_id)
-      const query = supabase
+      const query = serviceClient
         .from('contacts')
         .select('id, company_id')
         .eq('id', contact_id)
       
-      if (company_id) {
-        query.eq('company_id', company_id)
-      } else {
-        query.is('company_id', null)
-      }
+      query.eq('company_id', company_id)
       
       const { data } = await query.single()
       contact = data
@@ -93,17 +108,10 @@ export async function POST(request: NextRequest) {
       const fullName = `${firstName} ${lastName}`.trim() || fromData.username || 'Usuário Telegram'
 
       // Verificar se já existe contato com este telegram_id
-      const query = supabase
+      const { data: allContacts } = await serviceClient
         .from('contacts')
         .select('id, company_id, custom_fields')
-      
-      if (company_id) {
-        query.eq('company_id', company_id)
-      } else {
-        query.is('company_id', null)
-      }
-      
-      const { data: allContacts } = await query
+        .eq('company_id', company_id)
       
       const existingContact = allContacts?.find((c) => {
         const customFields = (c.custom_fields as Record<string, unknown>) || {}
@@ -124,13 +132,9 @@ export async function POST(request: NextRequest) {
           status: 'lead',
           source: 'telegram',
         }
+        contactData.company_id = company_id
         
-        // Adicionar company_id apenas se existir
-        if (company_id) {
-          contactData.company_id = company_id
-        }
-        
-        const { data: newContact, error: contactError } = await supabase
+        const { data: newContact, error: contactError } = await serviceClient
           .from('contacts')
           .insert(contactData)
           .select('id, company_id')
@@ -164,7 +168,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================
-    // 3. Buscar ou criar conversa (company_id é opcional)
+    // 3. Buscar ou criar conversa (company_id definido)
     // ============================================
     let conversation = null
     let conversation_id_final = conversation_id
@@ -172,16 +176,12 @@ export async function POST(request: NextRequest) {
     
     if (conversation_id) {
       // Buscar conversa (com ou sem company_id)
-      const query = supabase
+      const query = serviceClient
         .from('conversations')
         .select('id, channel_thread_id, contact_id, channel')
         .eq('id', conversation_id)
       
-      if (company_id) {
-        query.eq('company_id', company_id)
-      } else {
-        query.is('company_id', null)
-      }
+      query.eq('company_id', company_id)
       
       const { data } = await query.single()
       conversation = data
@@ -212,13 +212,9 @@ export async function POST(request: NextRequest) {
         priority: 'normal',
         ai_assistant_enabled: true,
       }
+      conversationData.company_id = company_id
       
-      // Adicionar company_id apenas se existir
-      if (company_id) {
-        conversationData.company_id = company_id
-      }
-      
-      const { data: newConversation, error: convError } = await supabase
+      const { data: newConversation, error: convError } = await serviceClient
         .from('conversations')
         .insert(conversationData)
         .select('id, channel_thread_id, contact_id, channel')
@@ -302,7 +298,7 @@ export async function POST(request: NextRequest) {
           // Se service role não estiver configurada, tentar com cliente normal
           if (searchError instanceof Error && searchError.message.includes('SERVICE_ROLE')) {
             console.log('Service role não configurada, tentando com cliente normal...')
-            const { data: companies } = await supabase
+            const { data: companies } = await serviceClient
               .from('companies')
               .select('id, name, settings')
               .limit(100)
@@ -417,29 +413,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Criar mensagem da IA no Controlia (sempre, pois agora temos conversation_id)
-    const messageFormData = new FormData()
-    messageFormData.append('conversation_id', conversation_id_final)
-    messageFormData.append('contact_id', conversation.contact_id || contact_id_final || '')
-    messageFormData.append('content', output)
-    messageFormData.append('sender_type', 'ai')
-    messageFormData.append('ai_agent_id', 'n8n-agent')
-    messageFormData.append('direction', 'outbound')
-    messageFormData.append('status', 'sent')
-    if (channelMessageId) {
-      messageFormData.append('channel_message_id', channelMessageId)
-    }
+    // Criar mensagem da IA no Controlia (sempre, usando service role para evitar RLS)
+    const { data: messageResult, error: messageError } = await serviceClient
+      .from('messages')
+      .insert({
+        company_id,
+        conversation_id: conversation_id_final,
+        contact_id: conversation.contact_id || contact_id_final || '',
+        content: output,
+        sender_type: 'ai',
+        ai_agent_id: 'n8n-agent',
+        direction: 'outbound',
+        status: 'sent',
+        channel_message_id: channelMessageId || null,
+      })
+      .select()
+      .single()
 
-    const messageResult = await createMessage(messageFormData)
-
-    if (messageResult.error) {
-      console.error('Erro ao criar mensagem no Controlia:', messageResult.error)
+    if (messageError) {
+      console.error('Erro ao criar mensagem no Controlia:', messageError)
       // Não falhar, a mensagem já foi enviada ao canal
     }
 
     return NextResponse.json({
       success: true,
-      message_id: messageResult.data?.id,
+      message_id: messageResult?.id || null,
       channel_message_id: channelMessageId,
     })
   } catch (error) {
