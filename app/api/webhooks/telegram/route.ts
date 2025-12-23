@@ -325,12 +325,62 @@ export async function POST(request: NextRequest) {
       if (automation.n8n_webhook_url) {
         console.log('📤 Enviando para n8n:', automation.n8n_webhook_url)
         try {
+          // Preparar headers
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+          }
+
+          // Verificar se há secret configurado nas settings da empresa
+          // O secret pode estar na URL (query param) ou pode ser enviado como header
+          // Primeiro, tentar obter das settings da empresa
+          const { data: companySettings } = await supabase
+            .from('companies')
+            .select('settings')
+            .eq('id', contact.company_id)
+            .single()
+
+          const settings = (companySettings?.settings as Record<string, unknown>) || {}
+          const n8nWebhookSecret = settings.n8n_webhook_secret as string | undefined
+
+          // Preparar URL do webhook
+          let webhookUrl = automation.n8n_webhook_url
+          
+          // O n8n pode esperar o secret de duas formas:
+          // 1. Como query parameter na URL (?secret=xxx) - método mais comum
+          // 2. Como header HTTP (X-n8n-webhook-secret) - método alternativo
+          if (n8nWebhookSecret) {
+            try {
+              const urlObj = new URL(webhookUrl)
+              // Verificar se já não tem secret na URL
+              if (!urlObj.searchParams.has('secret')) {
+                urlObj.searchParams.set('secret', n8nWebhookSecret)
+                webhookUrl = urlObj.toString()
+                console.log('🔐 Secret adicionado à URL do webhook como query parameter')
+              } else {
+                console.log('🔐 Secret já presente na URL do webhook')
+              }
+            } catch (urlError) {
+              console.warn('⚠️ Erro ao processar URL do webhook, usando URL original:', urlError)
+            }
+          } else {
+            // Tentar extrair secret da própria URL do webhook (pode estar já incluído)
+            try {
+              const urlObj = new URL(webhookUrl)
+              if (urlObj.searchParams.has('secret')) {
+                console.log('🔐 Secret encontrado na URL do webhook')
+              } else {
+                console.warn('⚠️ Nenhum secret configurado. O n8n pode rejeitar a requisição se exigir autenticação.')
+                console.warn('💡 Configure n8n_webhook_secret nas settings da empresa ou adicione ?secret=xxx na URL do webhook')
+              }
+            } catch (urlError) {
+              console.warn('⚠️ Não foi possível processar URL do webhook:', urlError)
+            }
+          }
+
           // Enviar para o n8n no formato que seu workflow espera
-          const n8nResponse = await fetch(automation.n8n_webhook_url, {
+          const n8nResponse = await fetch(webhookUrl, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers,
             body: JSON.stringify({
               // Formato compatível com seu Telegram Trigger
               update_id: body.update_id || Date.now(),
