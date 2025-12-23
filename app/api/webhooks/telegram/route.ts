@@ -251,8 +251,17 @@ export async function POST(request: NextRequest) {
     console.log('📦 Conteúdo final:', { content, contentType, mediaUrl })
 
     if (!conversation) {
+      console.error('❌ Conversa não encontrada após tentativas de busca/criação')
       return NextResponse.json(
         { error: 'Erro ao obter ou criar conversa' },
+        { status: 500 }
+      )
+    }
+
+    if (!contact || !contact.id) {
+      console.error('❌ Contato não encontrado ou inválido')
+      return NextResponse.json(
+        { error: 'Erro ao obter ou criar contato' },
         { status: 500 }
       )
     }
@@ -272,9 +281,18 @@ export async function POST(request: NextRequest) {
       created_at: new Date(date * 1000).toISOString(), // Telegram usa timestamp Unix
     }
 
+    console.log('📋 Dados para inserção de mensagem:')
+    console.log('   company_id:', messageData.company_id)
+    console.log('   conversation_id:', messageData.conversation_id)
+    console.log('   contact_id:', messageData.contact_id)
+    console.log('   content:', messageData.content.substring(0, 100))
+    console.log('   direction:', messageData.direction)
+    console.log('   sender_type:', messageData.sender_type)
+
     console.log('💾 Tentando inserir mensagem:', JSON.stringify(messageData, null, 2))
 
-    const { data: newMessage, error: msgError } = await supabase
+    // IMPORTANTE: Usar serviceClient para bypass RLS (webhooks não têm usuário autenticado)
+    const { data: newMessage, error: msgError } = await serviceClient
       .from('messages')
       .insert(messageData)
       .select()
@@ -282,10 +300,29 @@ export async function POST(request: NextRequest) {
 
     if (msgError) {
       console.error('❌ Erro ao criar mensagem:', msgError)
-      console.error('❌ Detalhes do erro:', JSON.stringify(msgError, null, 2))
+      console.error('❌ Código do erro:', msgError.code)
+      console.error('❌ Mensagem do erro:', msgError.message)
+      console.error('❌ Detalhes completos:', JSON.stringify(msgError, null, 2))
+      console.error('❌ Dados que tentaram ser inseridos:', JSON.stringify(messageData, null, 2))
+      
+      // Não retornar erro 500, apenas logar - a mensagem pode ter sido processada parcialmente
+      // Retornar sucesso para o Telegram não reenviar
       return NextResponse.json(
-        { error: 'Erro ao criar mensagem', details: msgError.message },
-        { status: 500 }
+        { 
+          success: false, 
+          error: 'Erro ao criar mensagem no banco', 
+          details: msgError.message,
+          code: msgError.code 
+        },
+        { status: 200 } // Retornar 200 para Telegram não reenviar
+      )
+    }
+
+    if (!newMessage) {
+      console.error('❌ Mensagem não foi criada (newMessage é null)')
+      return NextResponse.json(
+        { success: false, error: 'Mensagem não foi criada' },
+        { status: 200 }
       )
     }
 
