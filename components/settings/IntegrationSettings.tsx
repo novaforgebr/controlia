@@ -206,7 +206,7 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Secret configurado no webhook do n8n para autenticação. Encontre nas configurações do nó "Webhook" no seu workflow n8n.
+                Secret configurado no webhook do n8n para autenticação. Encontre nas configurações do nó &quot;Webhook&quot; no seu workflow n8n.
               </p>
             </div>
           </div>
