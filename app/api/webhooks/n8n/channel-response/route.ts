@@ -34,9 +34,11 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
 
     // ============================================
-    // 1. Buscar ou criar empresa
+    // 1. Buscar empresa (NÃO cria se não existir)
     // ============================================
     let company = null
+    
+    // Se company_id foi enviado, buscar essa empresa específica
     if (company_id) {
       const { data } = await supabase
         .from('companies')
@@ -44,11 +46,16 @@ export async function POST(request: NextRequest) {
         .eq('id', company_id)
         .single()
       company = data
-    }
-
-    // Se não encontrou empresa, buscar a primeira empresa disponível
-    // (ou você pode configurar uma empresa padrão)
-    if (!company) {
+      
+      if (!company) {
+        return NextResponse.json(
+          { error: `Empresa com ID ${company_id} não encontrada` },
+          { status: 404 }
+        )
+      }
+    } else {
+      // Se company_id não foi enviado, tentar buscar a primeira empresa disponível
+      // (útil quando o workflow n8n não envia company_id)
       const { data: companies } = await supabase
         .from('companies')
         .select('id, settings')
@@ -59,9 +66,11 @@ export async function POST(request: NextRequest) {
         company = companies
         company_id = companies.id
       } else {
+        // Se não encontrou empresa e company_id não foi enviado, retornar erro
+        // (não cria empresa automaticamente)
         return NextResponse.json(
-          { error: 'Nenhuma empresa encontrada no sistema' },
-          { status: 404 }
+          { error: 'company_id não foi fornecido e nenhuma empresa foi encontrada no sistema. Envie company_id no payload ou configure uma empresa no sistema.' },
+          { status: 400 }
         )
       }
     }
@@ -135,10 +144,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Se não encontrou contato e não conseguiu criar, retornar erro
     if (!contact) {
+      if (!fromData.id) {
+        return NextResponse.json(
+          { error: 'contact_id não foi fornecido e não foi possível criar um novo contato. É necessário enviar contact_id ou dados do Telegram (message.from) no payload.' },
+          { status: 400 }
+        )
+      }
+      // Se tem fromData.id mas ainda não criou, houve erro na criação (já tratado acima)
       return NextResponse.json(
-        { error: 'Não foi possível identificar ou criar o contato. É necessário company_id e dados do Telegram (message.from)' },
-        { status: 400 }
+        { error: 'Erro ao criar contato. Verifique os logs do servidor.' },
+        { status: 500 }
       )
     }
 
