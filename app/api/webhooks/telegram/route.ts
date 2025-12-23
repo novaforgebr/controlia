@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     // IMPORTANTE: Usar service role client para bypass RLS (webhooks não têm usuário autenticado)
     const serviceClient = createServiceRoleClient()
-    const supabase = serviceClient // Usar service client para todas as operações
+    const supabase = serviceClient // Usar service role para todas as operações (bypass RLS) // Usar service client para todas as operações
 
     // Buscar empresa pela configuração do bot token (se necessário)
     // Por enquanto, vamos buscar contato pelo username ou ID do Telegram
@@ -367,6 +367,12 @@ export async function POST(request: NextRequest) {
 
     // Buscar automações ativas para processar mensagens
     console.log('🔍 Buscando automações para company_id:', contact.company_id)
+    console.log('🔍 Critérios de busca:')
+    console.log('   - company_id:', contact.company_id)
+    console.log('   - trigger_event: "new_message"')
+    console.log('   - is_active: true')
+    console.log('   - is_paused: false')
+    
     const { data: automations, error: automationsError } = await supabase
       .from('automations')
       .select('*')
@@ -377,10 +383,41 @@ export async function POST(request: NextRequest) {
 
     if (automationsError) {
       console.error('❌ Erro ao buscar automações:', automationsError)
-      console.error('❌ Detalhes do erro:', JSON.stringify(automationsError, null, 2))
+      console.error('❌ Código do erro:', automationsError.code)
+      console.error('❌ Mensagem do erro:', automationsError.message)
+      console.error('❌ Detalhes completos:', JSON.stringify(automationsError, null, 2))
+    } else {
+      console.log('✅ Busca de automações executada sem erros')
     }
 
     console.log('🔍 Automações encontradas:', automations?.length || 0)
+    
+    // Log detalhado se não encontrar automações
+    if (!automations || automations.length === 0) {
+      console.warn('⚠️ NENHUMA automação encontrada!')
+      console.warn('⚠️ Isso significa que a mensagem NÃO será enviada para o n8n')
+      console.warn('⚠️ Verifique no banco de dados se existe uma automação com:')
+      console.warn('   - company_id:', contact.company_id)
+      console.warn('   - trigger_event: "new_message"')
+      console.warn('   - is_active: true')
+      console.warn('   - is_paused: false')
+      console.warn('   - n8n_webhook_url: não nulo')
+      
+      // Tentar buscar TODAS as automações da empresa para debug
+      const { data: allAutomations } = await supabase
+        .from('automations')
+        .select('*')
+        .eq('company_id', contact.company_id)
+      
+      if (allAutomations && allAutomations.length > 0) {
+        console.warn('📋 Automações encontradas na empresa (mas não atendem aos critérios):')
+        allAutomations.forEach(a => {
+          console.warn(`   - ${a.name}: trigger_event="${a.trigger_event}", is_active=${a.is_active}, is_paused=${a.is_paused}, url=${a.n8n_webhook_url ? '✅' : '❌'}`)
+        })
+      } else {
+        console.warn('📋 Nenhuma automação encontrada para esta empresa')
+      }
+    }
     if (automations && automations.length > 0) {
       console.log('📋 Detalhes das automações:', JSON.stringify(automations.map(a => ({
         id: a.id,
@@ -455,10 +492,15 @@ export async function POST(request: NextRequest) {
                 // Secret não na URL = usar Header Auth
                 console.log('🔐 Secret não na URL - usando Header Auth')
                 // Adicionar secret como header (para Header Auth no n8n)
-                // O n8n espera exatamente o header configurado na credencial
+                // O n8n pode esperar diferentes nomes de header dependendo da configuração
+                // Tentar múltiplos nomes comuns para garantir compatibilidade
                 headers['X-Webhook-Secret'] = n8nWebhookSecret
                 headers['X-n8n-Webhook-Secret'] = n8nWebhookSecret
-                console.log('🔐 Secret enviado como headers HTTP: X-Webhook-Secret, X-n8n-Webhook-Secret')
+                headers['webhook-secret'] = n8nWebhookSecret
+                headers['secret'] = n8nWebhookSecret
+                headers['Authorization'] = `Bearer ${n8nWebhookSecret}` // Algumas configs usam Bearer
+                console.log('🔐 Secret enviado como headers HTTP: X-Webhook-Secret, X-n8n-Webhook-Secret, webhook-secret, secret, Authorization')
+                console.log('🔐 Valor do secret (primeiros 5 caracteres):', n8nWebhookSecret.substring(0, 5) + '...')
               }
             } catch (urlError) {
               console.warn('⚠️ Erro ao processar URL do webhook, usando URL original:', urlError)
