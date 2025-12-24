@@ -372,6 +372,45 @@ export async function POST(request: NextRequest) {
     console.log('✅ Mensagem criada com sucesso:', newMessage.id, 'Content:', content.substring(0, 50))
     console.log('✅ Mensagem inbound salva no banco - ID:', newMessage.id, 'Direction:', newMessage.direction, 'Sender:', newMessage.sender_type)
 
+    // ✅ VALIDAÇÃO CRÍTICA: Garantir que mensagem recebida seja SEMPRE 'inbound' e 'human'
+    if (newMessage.direction !== 'inbound') {
+      console.error('❌ ERRO CRÍTICO: Mensagem recebida salva como outbound!')
+      console.error('   - message_id:', newMessage.id)
+      console.error('   - direction atual:', newMessage.direction)
+      console.error('   - direction esperado: inbound')
+      
+      // Tentar corrigir no banco
+      try {
+        await serviceClient
+          .from('messages')
+          .update({ direction: 'inbound' })
+          .eq('id', newMessage.id)
+        console.log('✅ Direção corrigida no banco de dados')
+        newMessage.direction = 'inbound'
+      } catch (fixError) {
+        console.error('❌ Erro ao corrigir direção:', fixError)
+      }
+    }
+    
+    if (newMessage.sender_type !== 'human') {
+      console.error('❌ ERRO CRÍTICO: Mensagem humana salva com sender_type incorreto!')
+      console.error('   - message_id:', newMessage.id)
+      console.error('   - sender_type atual:', newMessage.sender_type)
+      console.error('   - sender_type esperado: human')
+      
+      // Tentar corrigir no banco
+      try {
+        await serviceClient
+          .from('messages')
+          .update({ sender_type: 'human' })
+          .eq('id', newMessage.id)
+        console.log('✅ Sender type corrigido no banco de dados')
+        newMessage.sender_type = 'human'
+      } catch (fixError) {
+        console.error('❌ Erro ao corrigir sender_type:', fixError)
+      }
+    }
+
     // Buscar automações ativas para processar mensagens
     console.log('🔍 Buscando automações para company_id:', contact.company_id)
     console.log('🔍 Critérios de busca:')
@@ -399,16 +438,14 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 Automações encontradas:', automations?.length || 0)
     
-    // Log detalhado se não encontrar automações
+    // ✅ VALIDAÇÃO CRÍTICA: Logar ERRO CRÍTICO se não encontrar automações
     if (!automations || automations.length === 0) {
-      console.warn('⚠️ NENHUMA automação encontrada!')
-      console.warn('⚠️ Isso significa que a mensagem NÃO será enviada para o n8n')
-      console.warn('⚠️ Verifique no banco de dados se existe uma automação com:')
-      console.warn('   - company_id:', contact.company_id)
-      console.warn('   - trigger_event: "new_message"')
-      console.warn('   - is_active: true')
-      console.warn('   - is_paused: false')
-      console.warn('   - n8n_webhook_url: não nulo')
+      console.error('❌ CRÍTICO: Nenhuma automação encontrada!')
+      console.error('   - company_id:', contact.company_id)
+      console.error('   - trigger_event: new_message')
+      console.error('   - is_active: true')
+      console.error('   - is_paused: false')
+      console.error('❌ Isso significa que a mensagem NÃO será enviada para o n8n')
       
       // Tentar buscar TODAS as automações da empresa para debug
       const { data: allAutomations } = await supabase
@@ -417,29 +454,15 @@ export async function POST(request: NextRequest) {
         .eq('company_id', contact.company_id)
       
       if (allAutomations && allAutomations.length > 0) {
-        console.warn('📋 Automações encontradas na empresa (mas não atendem aos critérios):')
+        console.error('📋 Automações encontradas na empresa (mas não atendem aos critérios):')
         allAutomations.forEach(a => {
-          console.warn(`   - ${a.name}: trigger_event="${a.trigger_event}", is_active=${a.is_active}, is_paused=${a.is_paused}, url=${a.n8n_webhook_url ? '✅' : '❌'}`)
+          console.error(`   - ${a.name}: trigger_event="${a.trigger_event}", is_active=${a.is_active}, is_paused=${a.is_paused}, url=${a.n8n_webhook_url ? '✅' : '❌'}`)
         })
       } else {
-        console.warn('📋 Nenhuma automação encontrada para esta empresa')
+        console.error('📋 Nenhuma automação encontrada para esta empresa')
       }
-    }
-    if (automations && automations.length > 0) {
-      console.log('📋 Detalhes das automações:', JSON.stringify(automations.map(a => ({
-        id: a.id,
-        name: a.name,
-        n8n_webhook_url: a.n8n_webhook_url ? `✅ ${a.n8n_webhook_url.substring(0, 50)}...` : '❌ Não configurado',
-        is_active: a.is_active,
-        is_paused: a.is_paused
-      })), null, 2))
-    } else {
-      console.warn('⚠️ Nenhuma automação ativa encontrada para company_id:', contact.company_id)
-      console.warn('💡 Verifique se existe uma automação com:')
-      console.warn('   - company_id:', contact.company_id)
-      console.warn('   - trigger_event: "new_message"')
-      console.warn('   - is_active: true')
-      console.warn('   - is_paused: false')
+      
+      // NÃO falhar o webhook, mas logar o erro crítico
     }
 
     // Se houver automações configuradas, enviar para n8n
@@ -458,7 +481,32 @@ export async function POST(request: NextRequest) {
         has_url: !!automation.n8n_webhook_url
       })
       
-      if (automation.n8n_webhook_url) {
+      if (!automation.n8n_webhook_url) {
+        console.error('❌ CRÍTICO: Automação sem n8n_webhook_url!')
+        console.error('   - automation_id:', automation.id)
+        console.error('   - automation_name:', automation.name)
+        console.error('❌ A automação não será executada sem URL configurada')
+        
+        // Registrar erro mas não falhar
+        try {
+          await supabase.from('automation_logs').insert({
+            company_id: contact.company_id,
+            automation_id: automation.id,
+            trigger_event: 'new_message',
+            trigger_data: {
+              message_id: newMessage?.id,
+              conversation_id: conversation?.id,
+              channel: 'telegram',
+            },
+            status: 'error',
+            error_message: 'Automação sem n8n_webhook_url configurado',
+            started_at: new Date().toISOString(),
+          })
+        } catch (logError) {
+          console.error('❌ Erro ao registrar log de automação:', logError)
+        }
+      } else {
+        // ✅ SEMPRE tentar enviar para n8n se houver URL
         console.log('📤 PREPARANDO envio para n8n')
         console.log('📤 URL completa:', automation.n8n_webhook_url)
         try {
@@ -666,23 +714,29 @@ export async function POST(request: NextRequest) {
             }
           }
         } catch (n8nError) {
-          console.error('Erro ao enviar para n8n:', n8nError)
-          // Registrar erro
+          console.error('❌ Erro ao enviar para n8n:', n8nError)
+          // ✅ Registrar erro
           if (automation.id) {
-            await supabase.from('automation_logs').insert({
-              company_id: contact.company_id,
-              automation_id: automation.id,
-              trigger_event: 'new_message',
-              trigger_data: {
-                message_id: newMessage?.id,
-                conversation_id: conversation?.id,
-              },
-              status: 'error',
-              error_message: String(n8nError),
-              started_at: new Date().toISOString(),
-            })
+            try {
+              await supabase.from('automation_logs').insert({
+                company_id: contact.company_id,
+                automation_id: automation.id,
+                trigger_event: 'new_message',
+                trigger_data: {
+                  message_id: newMessage?.id,
+                  conversation_id: conversation?.id,
+                  channel: 'telegram',
+                  webhook_url: automation.n8n_webhook_url,
+                },
+                status: 'error',
+                error_message: String(n8nError),
+                started_at: new Date().toISOString(),
+              })
+            } catch (logError) {
+              console.error('❌ Erro ao registrar log de automação:', logError)
+            }
           }
-          // Não falhar a requisição se o n8n falhar
+          // ✅ Não falhar webhook, mas logar o erro
         }
       }
     }

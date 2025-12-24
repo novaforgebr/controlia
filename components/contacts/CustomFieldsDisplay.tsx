@@ -21,8 +21,8 @@ export async function CustomFieldsDisplay({ customFields }: CustomFieldsDisplayP
   }
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow">
-      <h2 className="mb-4 text-xl font-bold text-gray-900">Campos Customizados</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+      <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Campos Customizados</h2>
       <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {activeFieldsWithValues.map((field: any) => {
           const value = customFields[field.field_key]
@@ -42,8 +42,8 @@ export async function CustomFieldsDisplay({ customFields }: CustomFieldsDisplayP
 
           return (
             <div key={field.id}>
-              <dt className="text-sm font-medium text-gray-500">{field.field_label}</dt>
-              <dd className="mt-1 text-sm text-gray-900">{displayValue}</dd>
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">{field.field_label}</dt>
+              <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{displayValue}</dd>
             </div>
           )
         })}

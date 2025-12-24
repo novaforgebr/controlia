@@ -139,11 +139,11 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg bg-white p-6 shadow">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
       <div className="grid grid-cols-1 gap-6">
         {/* Nome */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Nome <span className="text-red-500">*</span>
           </label>
           <input
@@ -152,13 +152,13 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
           />
         </div>
 
         {/* Descrição */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Descrição
           </label>
           <textarea
@@ -166,7 +166,7 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={3}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             placeholder="Descreva o propósito deste prompt..."
           />
         </div>
@@ -174,14 +174,14 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
         {/* Contexto e Canal */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="context_type" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="context_type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Tipo de Contexto
             </label>
             <select
               id="context_type"
               value={formData.context_type}
               onChange={(e) => setFormData({ ...formData, context_type: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             >
               <option value="">Selecione...</option>
               <option value="conversation">Conversa</option>
@@ -191,14 +191,14 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
           </div>
 
           <div>
-            <label htmlFor="channel" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="channel" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Canal
             </label>
             <select
               id="channel"
               value={formData.channel}
               onChange={(e) => setFormData({ ...formData, channel: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             >
               <option value="">Todos</option>
               <option value="whatsapp">WhatsApp</option>
@@ -211,7 +211,7 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
 
         {/* Texto do Prompt */}
         <div>
-          <label htmlFor="prompt_text" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="prompt_text" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Texto do Prompt <span className="text-red-500">*</span>
           </label>
           <div className="mt-1">
@@ -221,10 +221,10 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
               onChange={(e) => setFormData({ ...formData, prompt_text: e.target.value })}
               rows={12}
               required
-              className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono leading-relaxed"
+              className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono leading-relaxed"
               placeholder="Ex: Você é um assistente virtual especializado em atendimento ao cliente..."
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Use formatação de texto simples. Variáveis podem ser inseridas como {'{variável}'}.
             </p>
           </div>
@@ -232,7 +232,7 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
 
         {/* System Prompt */}
         <div>
-          <label htmlFor="system_prompt" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="system_prompt" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             System Prompt (Opcional)
           </label>
           <textarea
@@ -240,7 +240,7 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
             value={formData.system_prompt}
             onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
             rows={6}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono"
             placeholder="Instruções do sistema que serão enviadas antes do prompt principal..."
           />
         </div>
@@ -248,7 +248,7 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
         {/* Configurações do Modelo */}
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label htmlFor="model" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="model" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Modelo
             </label>
             <input
@@ -256,12 +256,12 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
               id="model"
               value={formData.model}
               onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             />
           </div>
 
           <div>
-            <label htmlFor="temperature" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="temperature" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Temperature (0-2)
             </label>
             <input
@@ -272,12 +272,12 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
               step="0.1"
               value={formData.temperature}
               onChange={(e) => setFormData({ ...formData, temperature: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             />
           </div>
 
           <div>
-            <label htmlFor="max_tokens" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="max_tokens" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Max Tokens
             </label>
             <input
@@ -286,14 +286,14 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
               min="1"
               value={formData.max_tokens}
               onChange={(e) => setFormData({ ...formData, max_tokens: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             />
           </div>
         </div>
 
         {/* Constraints */}
         <div>
-          <label htmlFor="constraints" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="constraints" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Restrições e Regras
           </label>
           <textarea
@@ -301,14 +301,14 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
             value={formData.constraints}
             onChange={(e) => setFormData({ ...formData, constraints: e.target.value })}
             rows={4}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             placeholder="Regras adicionais que a IA deve seguir..."
           />
         </div>
 
         {/* Ações Permitidas */}
         <div>
-          <label htmlFor="allowed_actions" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="allowed_actions" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Ações Permitidas (uma por linha)
           </label>
           <textarea
@@ -316,14 +316,14 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
             value={allowedActionsText}
             onChange={(e) => setAllowedActionsText(e.target.value)}
             rows={4}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono"
             placeholder="responder_mensagem&#10;buscar_informacao&#10;agendar_consulta"
           />
         </div>
 
         {/* Ações Proibidas */}
         <div>
-          <label htmlFor="forbidden_actions" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="forbidden_actions" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Ações Proibidas (uma por linha)
           </label>
           <textarea
@@ -331,7 +331,7 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
             value={forbiddenActionsText}
             onChange={(e) => setForbiddenActionsText(e.target.value)}
             rows={4}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono"
             placeholder="deletar_conversa&#10;alterar_preco&#10;cancelar_pedido"
           />
         </div>
@@ -343,26 +343,26 @@ export function PromptEditor({ prompt, onSubmit }: PromptEditorProps) {
               type="checkbox"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+              className="rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155] dark:bg-gray-800"
             />
-            <span className="ml-2 text-sm text-gray-700">Ativo</span>
+            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Ativo</span>
           </label>
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={formData.is_default}
               onChange={(e) => setFormData({ ...formData, is_default: e.target.checked })}
-              className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+              className="rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155] dark:bg-gray-800"
             />
-            <span className="ml-2 text-sm text-gray-700">Padrão</span>
+            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Padrão</span>
           </label>
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 border-t border-gray-200 pt-6">
+      <div className="flex justify-end gap-4 border-t border-gray-200 dark:border-gray-800 pt-6">
         <a
           href={prompt ? `/ai/prompts/${prompt.id}` : '/ai/prompts'}
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+          className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
           Cancelar
         </a>

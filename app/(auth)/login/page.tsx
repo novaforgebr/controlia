@@ -70,7 +70,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 px-4 py-12">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -82,32 +82,32 @@ export default function LoginPage() {
                 </svg>
               </div>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900">Controlia CRM</h1>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">Controlia CRM</h1>
           </Link>
-          <p className="mt-3 text-lg font-medium text-gray-600">Bem-vindo de volta</p>
-          <p className="mt-1 text-sm text-gray-500">Faça login para acessar sua conta</p>
+          <p className="mt-3 text-lg font-medium text-gray-600 dark:text-gray-400">Bem-vindo de volta</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-500">Faça login para acessar sua conta</p>
         </div>
 
         {/* Login Form Card */}
-        <div className="rounded-2xl bg-white p-8 shadow-xl">
+        <div className="rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="h-5 w-5 text-red-400 dark:text-red-500" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-red-800">{error}</p>
+                    <p className="text-sm font-medium text-red-800 dark:text-red-300">{error}</p>
                   </div>
                 </div>
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email
               </label>
               <div className="mt-1">
@@ -122,7 +122,7 @@ export default function LoginPage() {
                     setEmail(e.target.value)
                     setError(null)
                   }}
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 disabled:text-gray-500"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400"
                   placeholder="seu@email.com"
                   disabled={loading}
                 />
@@ -130,7 +130,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Senha
               </label>
               <div className="relative mt-1">
@@ -145,14 +145,14 @@ export default function LoginPage() {
                     setPassword(e.target.value)
                     setError(null)
                   }}
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 pr-12 text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 disabled:text-gray-500"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-12 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400"
                   placeholder="••••••••"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -177,15 +177,15 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155] dark:bg-gray-800"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                   Lembrar-me
                 </label>
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-[#039155] hover:text-[#18B0BB] transition-colors">
+                <a href="#" className="font-medium text-[#039155] dark:text-[#18B0BB] hover:text-[#18B0BB] dark:hover:text-[#039155] transition-colors">
                   Esqueceu a senha?
                 </a>
               </div>
@@ -228,32 +228,32 @@ export default function LoginPage() {
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-700" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">Ou</span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">Ou</span>
-              </div>
-            </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Não tem uma conta?{' '}
-                <Link href="/register" className="font-medium text-[#039155] hover:text-[#18B0BB] transition-colors">
-                  Registre-se gratuitamente
-                </Link>
-              </p>
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Não tem uma conta?{' '}
+                  <Link href="/register" className="font-medium text-[#039155] dark:text-[#18B0BB] hover:text-[#18B0BB] dark:hover:text-[#039155] transition-colors">
+                    Registre-se gratuitamente
+                  </Link>
+                </p>
+              </div>
             </div>
-          </div>
         </div>
 
         {/* Footer Navigation */}
         <div className="mt-8 text-center">
           <Link
             href="/"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

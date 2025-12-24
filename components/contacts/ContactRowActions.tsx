@@ -42,22 +42,22 @@ export function ContactRowActions({ contactId, contactName }: ContactRowActionsP
       <div className="flex items-center gap-2">
         <Link
           href={`/contacts/${contactId}`}
-          className="text-[#039155] hover:text-[#18B0BB] font-medium transition-colors"
+          className="text-[#039155] dark:text-[#18B0BB] hover:text-[#18B0BB] dark:hover:text-[#039155] font-medium transition-colors"
         >
           Ver
         </Link>
-        <span className="text-gray-300">|</span>
+        <span className="text-gray-300 dark:text-gray-600">|</span>
         <Link
           href={`/contacts/${contactId}/edit`}
-          className="text-gray-600 hover:text-[#039155] font-medium transition-colors"
+          className="text-gray-600 dark:text-gray-400 hover:text-[#039155] dark:hover:text-[#18B0BB] font-medium transition-colors"
         >
           Editar
         </Link>
-        <span className="text-gray-300">|</span>
+        <span className="text-gray-300 dark:text-gray-600">|</span>
         <button
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
-          className="text-red-600 hover:text-red-700 font-medium transition-colors"
+          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium transition-colors"
         >
           Excluir
         </button>

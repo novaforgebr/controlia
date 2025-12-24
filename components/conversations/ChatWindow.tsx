@@ -220,26 +220,26 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   }, [messages])
 
   return (
-    <div className="flex h-full flex-col bg-white overflow-hidden">
+    <div className="flex h-full flex-col bg-white dark:bg-gray-900 overflow-hidden">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white px-6 py-4">
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-gray-900 truncate">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
                 {conversation.contacts?.name || 'Contato sem nome'}
               </h2>
               {conversation.status === 'open' && (
                 <span className="relative flex h-2 w-2 flex-shrink-0">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
                 </span>
               )}
             </div>
             {conversation.subject && (
-              <p className="mt-1 text-sm text-gray-600 truncate">{conversation.subject}</p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 truncate">{conversation.subject}</p>
             )}
-            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
               <span className="capitalize">{conversation.channel}</span>
               <span>•</span>
               <span className="capitalize">{conversation.status}</span>
@@ -258,7 +258,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
             {/* Botão Ver Detalhes do Contato */}
             <button
               onClick={() => setShowContactModal(true)}
-              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               title="Ver detalhes do contato"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,7 +272,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
             {onClose && (
               <button
                 onClick={onClose}
-                className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Fechar
               </button>
@@ -282,14 +282,14 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       </div>
 
       {/* Mensagens */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 min-h-0">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 min-h-0 bg-gray-50 dark:bg-gray-950">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-[#039155] border-r-transparent"></div>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex h-full items-center justify-center">
-            <div className="text-center text-gray-500">
+            <div className="text-center text-gray-500 dark:text-gray-400">
               <p className="text-sm">Nenhuma mensagem ainda</p>
               <p className="mt-1 text-xs">Envie a primeira mensagem abaixo</p>
             </div>
@@ -300,9 +300,9 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               <div key={group.date}>
                 {/* Separador de data */}
                 <div className="flex items-center gap-4 my-4">
-                  <div className="flex-1 border-t border-gray-200"></div>
-                  <span className="text-xs font-medium text-gray-500">{group.date}</span>
-                  <div className="flex-1 border-t border-gray-200"></div>
+                  <div className="flex-1 border-t border-gray-200 dark:border-gray-800"></div>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{group.date}</span>
+                  <div className="flex-1 border-t border-gray-200 dark:border-gray-800"></div>
                 </div>
 
                 {/* Mensagens do dia */}
@@ -317,8 +317,8 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
                           message.direction === 'outbound'
                             ? 'bg-gradient-to-r from-[#039155] to-[#18B0BB] text-white'
                             : message.sender_type === 'ai'
-                            ? 'bg-purple-50 border border-purple-200 text-purple-900'
-                            : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            ? 'bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-100'
+                            : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100'
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-1">
@@ -341,7 +341,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
                               href={message.media_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={`text-xs underline ${message.direction === 'outbound' ? 'text-white/90' : 'text-gray-600'}`}
+                              className={`text-xs underline ${message.direction === 'outbound' ? 'text-white/90' : 'text-gray-600 dark:text-gray-400'}`}
                             >
                               Ver mídia
                             </a>
@@ -360,7 +360,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
 
       {/* Formulário de mensagem */}
       {conversation.status !== 'closed' && (
-        <div className="border-t border-gray-200 bg-white p-4">
+        <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
           <MessageForm
             conversationId={conversation.id}
             contactId={conversation.contact_id}

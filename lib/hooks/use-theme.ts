@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 type Theme = 'light' | 'dark'
 
@@ -8,38 +8,50 @@ export function useTheme() {
   const [theme, setTheme] = useState<Theme>('light')
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-    // Verificar preferência salva ou do sistema
-    const savedTheme = localStorage.getItem('theme') as Theme | null
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    const initialTheme = savedTheme || systemTheme
-    
-    setTheme(initialTheme)
-    applyTheme(initialTheme)
+  const getSystemTheme = useCallback((): Theme => {
+    if (typeof window === 'undefined') return 'light'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   }, [])
 
-  const applyTheme = (newTheme: Theme) => {
+  const applyTheme = useCallback((newTheme: Theme) => {
+    if (typeof document === 'undefined') return
     const root = document.documentElement
     if (newTheme === 'dark') {
       root.classList.add('dark')
     } else {
       root.classList.remove('dark')
     }
-  }
+  }, [])
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
+  useEffect(() => {
+    setMounted(true)
+    
+    // Verificar preferência salva
+    const savedTheme = localStorage.getItem('theme') as Theme | null
+    
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      setTheme(savedTheme)
+      applyTheme(savedTheme)
+    } else {
+      // Usar tema do sistema
+      const systemTheme = getSystemTheme()
+      setTheme(systemTheme)
+      applyTheme(systemTheme)
+    }
+  }, [applyTheme, getSystemTheme])
+
+  const toggleTheme = useCallback(() => {
+    const newTheme: Theme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
     localStorage.setItem('theme', newTheme)
     applyTheme(newTheme)
-  }
+  }, [theme, applyTheme])
 
-  const setThemeMode = (newTheme: Theme) => {
+  const setThemeMode = useCallback((newTheme: Theme) => {
     setTheme(newTheme)
     localStorage.setItem('theme', newTheme)
     applyTheme(newTheme)
-  }
+  }, [applyTheme])
 
   return {
     theme,

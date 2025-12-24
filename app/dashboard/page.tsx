@@ -79,7 +79,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-8">
-          <div className="rounded-xl bg-gradient-to-r from-[#039155]/5 to-[#18B0BB]/5 border border-[#039155]/20 p-8 shadow-sm">
+          <div className="rounded-xl bg-gradient-to-r from-[#039155]/5 to-[#18B0BB]/5 dark:from-[#039155]/10 dark:to-[#18B0BB]/10 border border-[#039155]/20 dark:border-[#039155]/30 p-8 shadow-sm">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-[#039155] to-[#18B0BB]">
@@ -89,8 +89,8 @@ export default async function DashboardPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-gray-900">Bem-vindo ao Controlia CRM</h2>
-                <p className="mt-2 text-gray-600">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Bem-vindo ao Controlia CRM</h2>
+                <p className="mt-2 text-gray-600 dark:text-gray-400">
                   Sua plataforma está configurada e pronta para uso. Comece criando contatos e
                   configurando suas automações para potencializar seus resultados.
                 </p>
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
                   </a>
                   <a
                     href="/automations"
-                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     Ver Automações
                   </a>

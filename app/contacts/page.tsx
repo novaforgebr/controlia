@@ -36,8 +36,8 @@ export default async function ContactsPage({
         <Breadcrumb items={[{ label: 'Contatos' }]} />
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Contatos</h1>
-            <p className="mt-2 text-gray-600">Gerencie seus contatos, leads e clientes</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Contatos</h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Gerencie seus contatos, leads e clientes</p>
           </div>
           <Link
             href="/contacts/new"
@@ -48,7 +48,7 @@ export default async function ContactsPage({
         </div>
 
         {/* Filtros */}
-        <div className="mb-6 rounded-lg bg-white p-4 shadow">
+        <div className="mb-6 rounded-lg bg-white dark:bg-gray-900 p-4 shadow dark:shadow-gray-900/50">
           <form method="get" className="flex gap-4">
             <div className="flex-1">
               <input
@@ -56,13 +56,13 @@ export default async function ContactsPage({
                 name="search"
                 placeholder="Digite o nome, email ou telefone do contato..."
                 defaultValue={params.search}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
               />
             </div>
             <select
               name="status"
               defaultValue={params.status || ''}
-              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
             >
               <option value="">Todos os status</option>
               <option value={ContactStatus.LEAD}>Lead</option>
@@ -72,7 +72,7 @@ export default async function ContactsPage({
             </select>
             <button
               type="submit"
-              className="rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+              className="rounded-md bg-gray-700 dark:bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
             >
               Filtrar
             </button>
@@ -80,51 +80,51 @@ export default async function ContactsPage({
         </div>
 
         {/* Lista de contatos */}
-        <div className="rounded-lg bg-white shadow">
+        <div className="rounded-lg bg-white dark:bg-gray-900 shadow dark:shadow-gray-900/50">
           {contacts.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
               <p>Nenhum contato encontrado.</p>
-              <Link href="/contacts/new" className="mt-4 inline-block text-[#039155] hover:text-[#18B0BB] font-medium transition-colors">
+              <Link href="/contacts/new" className="mt-4 inline-block text-[#039155] dark:text-[#18B0BB] hover:text-[#18B0BB] dark:hover:text-[#039155] font-medium transition-colors">
                 Criar primeiro contato →
               </Link>
             </div>
           ) : (
             <>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       Nome
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       Contato
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       Tags
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       IA
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       Ações
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900">
                   {contacts.map((contact) => (
-                    <tr key={contact.id} className="hover:bg-gray-50">
+                    <tr key={contact.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                       <td className="whitespace-nowrap px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{contact.name}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{contact.name}</div>
                         {contact.document && (
-                          <div className="text-xs text-gray-500">{contact.document}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{contact.document}</div>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <div className="text-sm text-gray-900">{contact.email || '-'}</div>
-                        <div className="text-xs text-gray-500">{contact.phone || contact.whatsapp || '-'}</div>
+                        <div className="text-sm text-gray-900 dark:text-gray-100">{contact.email || '-'}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{contact.phone || contact.whatsapp || '-'}</div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         <span
@@ -147,26 +147,26 @@ export default async function ContactsPage({
                             contact.tags.slice(0, 3).map((tag, idx) => (
                               <span
                                 key={idx}
-                                className="inline-flex rounded bg-gray-100 px-2 py-1 text-xs text-gray-700"
+                                className="inline-flex rounded bg-gray-100 dark:bg-gray-800 px-2 py-1 text-xs text-gray-700 dark:text-gray-300"
                               >
                                 {tag}
                               </span>
                             ))
                           ) : (
-                            <span className="text-xs text-gray-400">-</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
                           )}
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         {contact.ai_enabled ? (
-                          <span className="inline-flex items-center text-xs font-medium text-[#039155]">
+                          <span className="inline-flex items-center text-xs font-medium text-[#039155] dark:text-[#18B0BB]">
                             <svg className="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                             Ativa
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-400">Desativada</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">Desativada</span>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -179,16 +179,16 @@ export default async function ContactsPage({
 
               {/* Paginação */}
               {totalPages > 1 && (
-                <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 sm:px-6">
+                <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 px-4 py-3 sm:px-6">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-700">
+                    <div className="text-sm text-gray-700 dark:text-gray-300">
                       Página {page} de {totalPages}
                     </div>
                     <div className="flex gap-2">
                       {page > 1 && (
                         <Link
                           href={`/contacts?page=${page - 1}${params.status ? `&status=${params.status}` : ''}${params.search ? `&search=${params.search}` : ''}`}
-                          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
                           Anterior
                         </Link>
@@ -196,7 +196,7 @@ export default async function ContactsPage({
                       {page < totalPages && (
                         <Link
                           href={`/contacts?page=${page + 1}${params.status ? `&status=${params.status}` : ''}${params.search ? `&search=${params.search}` : ''}`}
-                          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
                           Próxima
                         </Link>

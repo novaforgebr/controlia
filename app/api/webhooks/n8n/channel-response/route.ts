@@ -433,6 +433,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar mensagem da IA no Controlia (sempre, usando service role para evitar RLS)
+    // ✅ GARANTIR: direction = 'outbound' e sender_type = 'ai'
     const { data: messageResult, error: messageError } = await serviceClient
       .from('messages')
       .insert({
@@ -440,10 +441,10 @@ export async function POST(request: NextRequest) {
         conversation_id: conversation_id_final,
         contact_id: conversation.contact_id || contact_id_final || '',
         content: output,
-        sender_type: 'ai',
+        sender_type: 'ai', // ✅ SEMPRE 'ai' para respostas da IA
         // ai_agent_id deve ser um UUID; enquanto não houver agente configurado, deixamos null
         ai_agent_id: null,
-        direction: 'outbound',
+        direction: 'outbound', // ✅ SEMPRE 'outbound' para respostas da IA
         status: 'sent',
         channel_message_id: channelMessageId || null,
       })
@@ -451,8 +452,49 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (messageError) {
-      console.error('Erro ao criar mensagem no Controlia:', messageError)
+      console.error('❌ Erro ao criar mensagem no Controlia:', messageError)
       // Não falhar, a mensagem já foi enviada ao canal
+    } else if (messageResult) {
+      // ✅ VALIDAÇÃO CRÍTICA: Garantir que resposta IA seja SEMPRE 'outbound' e 'ai'
+      if (messageResult.direction !== 'outbound') {
+        console.error('❌ ERRO CRÍTICO: Resposta IA salva como inbound!')
+        console.error('   - message_id:', messageResult.id)
+        console.error('   - direction atual:', messageResult.direction)
+        console.error('   - direction esperado: outbound')
+        
+        // Tentar corrigir no banco
+        try {
+          await serviceClient
+            .from('messages')
+            .update({ direction: 'outbound' })
+            .eq('id', messageResult.id)
+          console.log('✅ Direção corrigida no banco de dados')
+          messageResult.direction = 'outbound'
+        } catch (fixError) {
+          console.error('❌ Erro ao corrigir direção:', fixError)
+        }
+      }
+      
+      if (messageResult.sender_type !== 'ai') {
+        console.error('❌ ERRO CRÍTICO: Resposta IA salva com sender_type incorreto!')
+        console.error('   - message_id:', messageResult.id)
+        console.error('   - sender_type atual:', messageResult.sender_type)
+        console.error('   - sender_type esperado: ai')
+        
+        // Tentar corrigir no banco
+        try {
+          await serviceClient
+            .from('messages')
+            .update({ sender_type: 'ai' })
+            .eq('id', messageResult.id)
+          console.log('✅ Sender type corrigido no banco de dados')
+          messageResult.sender_type = 'ai'
+        } catch (fixError) {
+          console.error('❌ Erro ao corrigir sender_type:', fixError)
+        }
+      } else {
+        console.log('✅ Mensagem IA salva corretamente: direction=outbound, sender_type=ai')
+      }
     }
 
     return NextResponse.json({

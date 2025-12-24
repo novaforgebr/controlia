@@ -11,31 +11,31 @@ export function IntegrationStatusBadge({ status, className = '' }: IntegrationSt
       case 'connected':
         return {
           label: 'Conectado',
-          bgColor: 'bg-green-100',
-          textColor: 'text-green-800',
+          bgColor: 'bg-green-100 dark:bg-green-900/30',
+          textColor: 'text-green-800 dark:text-green-400',
           dotColor: 'bg-green-500',
           icon: (
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
             </span>
           ),
         }
       case 'connecting':
         return {
           label: 'Conectando...',
-          bgColor: 'bg-yellow-100',
-          textColor: 'text-yellow-800',
+          bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+          textColor: 'text-yellow-800 dark:text-yellow-400',
           dotColor: 'bg-yellow-500',
           icon: (
-            <div className="h-2 w-2 animate-spin rounded-full border-2 border-yellow-600 border-t-transparent"></div>
+            <div className="h-2 w-2 animate-spin rounded-full border-2 border-yellow-600 dark:border-yellow-400 border-t-transparent"></div>
           ),
         }
       case 'error':
         return {
           label: 'Erro',
-          bgColor: 'bg-red-100',
-          textColor: 'text-red-800',
+          bgColor: 'bg-red-100 dark:bg-red-900/30',
+          textColor: 'text-red-800 dark:text-red-400',
           dotColor: 'bg-red-500',
           icon: (
             <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
@@ -51,11 +51,11 @@ export function IntegrationStatusBadge({ status, className = '' }: IntegrationSt
       default:
         return {
           label: 'Desconectado',
-          bgColor: 'bg-gray-100',
-          textColor: 'text-gray-800',
+          bgColor: 'bg-gray-100 dark:bg-gray-800',
+          textColor: 'text-gray-800 dark:text-gray-300',
           dotColor: 'bg-gray-500',
           icon: (
-            <span className="h-2 w-2 rounded-full bg-gray-400"></span>
+            <span className="h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500"></span>
           ),
         }
     }

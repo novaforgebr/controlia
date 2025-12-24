@@ -71,16 +71,16 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
 
   if (fields.length === 0) {
     return (
-      <div className="rounded-lg bg-white p-6 shadow">
-        <h2 className="mb-4 text-xl font-bold text-gray-900">Campos Customizados</h2>
-        <p className="text-sm text-gray-500">Nenhum campo customizado configurado.</p>
+      <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+        <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Campos Customizados</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum campo customizado configurado.</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow">
-      <h2 className="mb-4 text-xl font-bold text-gray-900">Editar Campos Customizados</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+      <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Editar Campos Customizados</h2>
       <div className="space-y-4">
         {fields.map((field) => {
           const value = formData[field.field_key] ?? (customFields[field.field_key] || '')
@@ -89,7 +89,7 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
             case 'text':
               return (
                 <div key={field.id}>
-                  <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                  <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {field.field_label}
                     {field.is_required && <span className="text-red-500 ml-1">*</span>}
                   </label>
@@ -99,7 +99,7 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
                     value={String(value)}
                     onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
                     required={field.is_required}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                    className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
                   />
                 </div>
               )
@@ -107,7 +107,7 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
             case 'textarea':
               return (
                 <div key={field.id}>
-                  <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                  <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {field.field_label}
                     {field.is_required && <span className="text-red-500 ml-1">*</span>}
                   </label>
@@ -117,7 +117,7 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
                     onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
                     required={field.is_required}
                     rows={3}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                    className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
                   />
                 </div>
               )
@@ -125,7 +125,7 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
             case 'number':
               return (
                 <div key={field.id}>
-                  <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                  <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {field.field_label}
                     {field.is_required && <span className="text-red-500 ml-1">*</span>}
                   </label>
@@ -135,7 +135,7 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
                     value={String(value)}
                     onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
                     required={field.is_required}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                    className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
                   />
                 </div>
               )
@@ -143,7 +143,7 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
             case 'date':
               return (
                 <div key={field.id}>
-                  <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                  <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {field.field_label}
                     {field.is_required && <span className="text-red-500 ml-1">*</span>}
                   </label>
@@ -153,7 +153,7 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
                     value={value ? new Date(value as string).toISOString().split('T')[0] : ''}
                     onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
                     required={field.is_required}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                    className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
                   />
                 </div>
               )
@@ -166,9 +166,9 @@ export function CustomFieldsEditor({ contactId, customFields, fields }: CustomFi
                     id={`custom_${field.field_key}`}
                     checked={value === true || value === 'true'}
                     onChange={(e) => handleFieldChange(field.field_key, e.target.checked)}
-                    className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+                    className="rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155]"
                   />
-                  <label htmlFor={`custom_${field.field_key}`} className="ml-2 text-sm font-medium text-gray-700">
+                  <label htmlFor={`custom_${field.field_key}`} className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     {field.field_label}
                     {field.is_required && <span className="text-red-500 ml-1">*</span>}
                   </label>

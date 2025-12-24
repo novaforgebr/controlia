@@ -354,12 +354,12 @@ export function ConversationsSplitView({
   return (
     <div className="flex h-full gap-4 overflow-hidden">
       {/* Lista de conversas - lado esquerdo */}
-      <div className="flex w-96 flex-col border-r border-gray-200 bg-white">
+      <div className="flex w-96 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         {/* Filtros */}
-        <div className="border-b border-gray-200 p-4">
+        <div className="border-b border-gray-200 dark:border-gray-800 p-4">
           <div className="space-y-3">
             <div>
-              <label htmlFor="status" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="status" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Status
               </label>
               <select
@@ -372,7 +372,7 @@ export function ConversationsSplitView({
                   if (channelFilter !== 'all') params.set('channel', channelFilter)
                   router.push(`/conversations?${params.toString()}`)
                 }}
-                className="block w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
               >
                 <option value="all">Todos</option>
                 <option value={ConversationStatus.OPEN}>Abertas</option>
@@ -382,7 +382,7 @@ export function ConversationsSplitView({
               </select>
             </div>
             <div>
-              <label htmlFor="channel" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="channel" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Canal
               </label>
               <select
@@ -395,7 +395,7 @@ export function ConversationsSplitView({
                   params.set('channel', e.target.value)
                   router.push(`/conversations?${params.toString()}`)
                 }}
-                className="block w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
               >
                 <option value="all">Todos</option>
                 <option value="whatsapp">WhatsApp</option>
@@ -411,34 +411,34 @@ export function ConversationsSplitView({
         {/* Lista */}
         <div className="flex-1 overflow-y-auto">
           {conversations.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
               <p className="text-sm">Nenhuma conversa encontrada</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-100 dark:divide-gray-800">
               {conversations.map((conversation) => (
                 <button
                   key={conversation.id}
                   onClick={() => handleSelectConversation(conversation.id)}
-                  className={`w-full text-left p-4 transition-colors hover:bg-gray-50 ${
-                    selectedId === conversation.id ? 'bg-gradient-to-r from-[#039155]/10 to-[#18B0BB]/10 border-r-2 border-[#039155]' : ''
+                  className={`w-full text-left p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                    selectedId === conversation.id ? 'bg-gradient-to-r from-[#039155]/10 to-[#18B0BB]/10 dark:from-[#039155]/20 dark:to-[#18B0BB]/20 border-r-2 border-[#039155] dark:border-[#18B0BB]' : ''
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-sm font-semibold text-gray-900 truncate">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                           {conversation.contacts?.name || 'Sem nome'}
                         </h3>
                         {conversation.status === ConversationStatus.OPEN && (
                           <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400"></span>
                           </span>
                         )}
                       </div>
                       {conversation.subject && (
-                        <p className="text-xs text-gray-600 truncate mb-2">{conversation.subject}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate mb-2">{conversation.subject}</p>
                       )}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span
@@ -446,12 +446,12 @@ export function ConversationsSplitView({
                         >
                           {getStatusLabel(conversation.status)}
                         </span>
-                        <span className="text-xs text-gray-500 capitalize">{conversation.channel}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">{conversation.channel}</span>
                         {conversation.ai_assistant_enabled && (
                           <span className="text-xs">🤖</span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                         {format(new Date(conversation.last_message_at), 'dd/MM HH:mm')}
                       </p>
                     </div>
@@ -464,7 +464,7 @@ export function ConversationsSplitView({
       </div>
 
       {/* Visualização da conversa - lado direito */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-950">
         {selectedConversation ? (
           <ConversationDetailView
             conversation={selectedConversation}
@@ -476,10 +476,10 @@ export function ConversationsSplitView({
             }}
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gray-50">
+          <div className="flex h-full items-center justify-center bg-gray-50 dark:bg-gray-950">
             <div className="text-center">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -491,8 +491,8 @@ export function ConversationsSplitView({
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <h3 className="mt-4 text-lg font-semibold text-gray-900">Selecione uma conversa</h3>
-              <p className="mt-2 text-sm text-gray-600">Clique em uma conversa na lista para visualizá-la</p>
+              <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Selecione uma conversa</h3>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Clique em uma conversa na lista para visualizá-la</p>
             </div>
           </div>
         )}

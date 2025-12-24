@@ -20,8 +20,8 @@ export default async function AutomationsPage() {
         <Breadcrumb items={[{ label: 'Automações' }]} />
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Automações</h1>
-            <p className="mt-2 text-gray-600">Gerencie workflows e integrações com n8n</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Automações</h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Gerencie workflows e integrações com n8n</p>
           </div>
           <Link
             href="/automations/new"
@@ -34,9 +34,9 @@ export default async function AutomationsPage() {
         {/* Lista de automações */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {automations.length === 0 ? (
-            <div className="col-span-full rounded-lg bg-white p-12 text-center shadow">
+            <div className="col-span-full rounded-lg bg-white dark:bg-gray-900 p-12 text-center shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -49,53 +49,53 @@ export default async function AutomationsPage() {
                 />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <h3 className="mt-4 text-lg font-semibold text-gray-900">Nenhuma automação encontrada</h3>
-              <p className="mt-2 text-gray-600">Comece criando sua primeira automação</p>
+              <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Nenhuma automação encontrada</h3>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">Comece criando sua primeira automação</p>
             </div>
           ) : (
             automations.map((automation: any) => (
               <div
                 key={automation.id}
-                className="rounded-xl bg-white p-6 shadow-lg transition-all hover:shadow-xl"
+                className="rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl border border-gray-200 dark:border-gray-800"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{automation.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{automation.name}</h3>
                       {automation.is_active ? (
-                        <span className="inline-flex h-2 w-2 rounded-full bg-green-400" />
+                        <span className="inline-flex h-2 w-2 rounded-full bg-green-400 dark:bg-green-500" />
                       ) : (
-                        <span className="inline-flex h-2 w-2 rounded-full bg-gray-300" />
+                        <span className="inline-flex h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600" />
                       )}
                       {automation.is_paused && (
-                        <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+                        <span className="rounded bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:text-yellow-400">
                           Pausada
                         </span>
                       )}
                     </div>
                     {automation.description && (
-                      <p className="mt-2 text-sm text-gray-600">{automation.description}</p>
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{automation.description}</p>
                     )}
                     <div className="mt-4 space-y-2">
                       <div className="text-sm">
-                        <span className="font-medium text-gray-700">Evento:</span>{' '}
-                        <span className="text-gray-600">{automation.trigger_event}</span>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">Evento:</span>{' '}
+                        <span className="text-gray-600 dark:text-gray-400">{automation.trigger_event}</span>
                       </div>
                       {automation.last_executed_at && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           Última execução: {format(new Date(automation.last_executed_at), 'dd/MM/yyyy HH:mm')}
                         </div>
                       )}
-                      <div className="flex gap-4 text-xs text-gray-500">
+                      <div className="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
                         <span>Execuções: {automation.execution_count || 0}</span>
                         {automation.error_count > 0 && (
-                          <span className="text-red-600">Erros: {automation.error_count}</span>
+                          <span className="text-red-600 dark:text-red-400">Erros: {automation.error_count}</span>
                         )}
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
+                <div className="mt-6 flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-4">
                   <div className="flex gap-2">
                     <ToggleAutomationButton
                       automationId={automation.id}

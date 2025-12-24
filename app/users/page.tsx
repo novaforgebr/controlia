@@ -30,11 +30,11 @@ export default async function UsersPage() {
         </div>
 
         {/* Lista de usuários */}
-        <div className="rounded-lg bg-white dark:bg-gray-900 shadow dark:shadow-gray-900/50">
+        <div className="rounded-lg bg-white dark:bg-gray-900 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
           {users.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
+            <div className="p-12 text-center text-gray-500 dark:text-gray-400">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -50,11 +50,11 @@ export default async function UsersPage() {
               <p className="mt-2 text-gray-600 dark:text-gray-400">Comece adicionando usuários à sua empresa</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-gray-200 dark:divide-gray-800">
               {users.map((companyUser: any) => (
                 <div
                   key={companyUser.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-200 dark:border-gray-800 last:border-0"
+                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -72,10 +72,10 @@ export default async function UsersPage() {
                           <span
                             className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                               companyUser.role === 'admin'
-                                ? 'bg-purple-100 text-purple-800'
+                                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400'
                                 : companyUser.role === 'operator'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-gray-100 text-gray-800'
+                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                             }`}
                           >
                             {companyUser.role === 'admin'
@@ -85,13 +85,13 @@ export default async function UsersPage() {
                               : 'Observador'}
                           </span>
                           {companyUser.is_active ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                              <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400"></span>
                               Ativo
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
-                              <span className="h-1.5 w-1.5 rounded-full bg-gray-500"></span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-800 dark:text-gray-200">
+                              <span className="h-1.5 w-1.5 rounded-full bg-gray-500 dark:bg-gray-400"></span>
                               Inativo
                             </span>
                           )}

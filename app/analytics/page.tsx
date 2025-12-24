@@ -124,8 +124,8 @@ export default async function AnalyticsPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Breadcrumb items={[{ label: 'Analytics' }]} />
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Análises e Relatórios</h1>
-          <p className="mt-2 text-gray-600">Visualize métricas e insights do seu CRM</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Análises e Relatórios</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Visualize métricas e insights do seu CRM</p>
         </div>
 
         <AnalyticsDashboard

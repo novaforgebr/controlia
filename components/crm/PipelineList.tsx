@@ -25,9 +25,9 @@ interface PipelineListProps {
 export function PipelineList({ pipelines }: PipelineListProps) {
   if (pipelines.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-12 text-center shadow dark:shadow-gray-900/50">
         <svg
-          className="mx-auto h-12 w-12 text-gray-400"
+          className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -39,8 +39,8 @@ export function PipelineList({ pipelines }: PipelineListProps) {
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
           />
         </svg>
-        <h3 className="mt-4 text-lg font-semibold text-gray-900">Nenhum pipeline encontrado</h3>
-        <p className="mt-2 text-gray-600">Crie seu primeiro pipeline para organizar seus contatos</p>
+        <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Nenhum pipeline encontrado</h3>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">Crie seu primeiro pipeline para organizar seus contatos</p>
         <Link
           href="/crm/pipelines/new"
           className="mt-6 inline-block rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"
@@ -54,11 +54,11 @@ export function PipelineList({ pipelines }: PipelineListProps) {
   return (
     <div className="space-y-4">
       {pipelines.map((pipeline) => (
-        <div key={pipeline.id} className="rounded-lg border border-gray-200 bg-white p-6 shadow">
+        <div key={pipeline.id} className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <h3 className="text-lg font-semibold text-gray-900">{pipeline.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{pipeline.name}</h3>
                 {pipeline.is_default && (
                   <span className="inline-flex rounded-full bg-[#039155] px-2 py-1 text-xs font-medium text-white">
                     Padrão
@@ -66,10 +66,10 @@ export function PipelineList({ pipelines }: PipelineListProps) {
                 )}
               </div>
               {pipeline.description && (
-                <p className="mt-1 text-sm text-gray-600">{pipeline.description}</p>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{pipeline.description}</p>
               )}
               <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700">Estágios ({pipeline.pipeline_stages.length}):</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Estágios ({pipeline.pipeline_stages.length}):</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {pipeline.pipeline_stages
                     .sort((a, b) => a.display_order - b.display_order)
@@ -84,14 +84,14 @@ export function PipelineList({ pipelines }: PipelineListProps) {
                     ))}
                 </div>
               </div>
-              <p className="mt-4 text-xs text-gray-500">
+              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
                 Criado em {format(new Date(pipeline.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </p>
             </div>
             <div className="ml-4 flex gap-2">
               <Link
                 href={`/crm/pipelines/${pipeline.id}/edit`}
-                className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Editar
               </Link>

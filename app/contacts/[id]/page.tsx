@@ -38,8 +38,8 @@ export default async function ContactDetailPage({
         />
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{contact.name}</h1>
-            <p className="mt-2 text-gray-600">Detalhes do contato</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{contact.name}</h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Detalhes do contato</p>
           </div>
           <div className="flex gap-2">
             <Link
@@ -50,7 +50,7 @@ export default async function ContactDetailPage({
             </Link>
             <Link
               href="/contacts"
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Voltar
             </Link>
@@ -60,32 +60,32 @@ export default async function ContactDetailPage({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Informações principais */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-lg bg-white p-6 shadow">
-              <h2 className="mb-4 text-xl font-bold text-gray-900">Informações de Contato</h2>
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+              <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Informações de Contato</h2>
               <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Email</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{contact.email || '-'}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{contact.email || '-'}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Telefone</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{contact.phone || '-'}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Telefone</dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{contact.phone || '-'}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">WhatsApp</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{contact.whatsapp || '-'}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">WhatsApp</dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{contact.whatsapp || '-'}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">CPF/CNPJ</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{contact.document || '-'}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">CPF/CNPJ</dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{contact.document || '-'}</dd>
                 </div>
               </dl>
             </div>
 
             {contact.notes && (
-              <div className="rounded-lg bg-white p-6 shadow">
-                <h2 className="mb-4 text-xl font-bold text-gray-900">Observações</h2>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{contact.notes}</p>
+              <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+                <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Observações</h2>
+                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{contact.notes}</p>
               </div>
             )}
 
@@ -110,29 +110,29 @@ export default async function ContactDetailPage({
             <ContactConversations contactId={contact.id} />
 
             {/* Informações Adicionais */}
-            <div className="rounded-lg bg-white p-6 shadow">
-              <h2 className="mb-4 text-xl font-bold text-gray-900">Informações Adicionais</h2>
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+              <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Informações Adicionais</h2>
               <dl className="space-y-4">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Score</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{contact.score}/100</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Score</dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{contact.score}/100</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Origem</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{contact.source || '-'}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Origem</dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{contact.source || '-'}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">IA Habilitada</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">IA Habilitada</dt>
                   <dd className="mt-1">
                     {contact.ai_enabled ? (
-                      <span className="inline-flex items-center text-sm font-medium text-[#039155]">
+                      <span className="inline-flex items-center text-sm font-medium text-[#039155] dark:text-[#18B0BB]">
                         <svg className="mr-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                         Habilitada
                       </span>
                     ) : (
-                      <span className="text-sm text-gray-400">Desabilitada</span>
+                      <span className="text-sm text-gray-400 dark:text-gray-500">Desabilitada</span>
                     )}
                   </dd>
                 </div>
@@ -140,13 +140,13 @@ export default async function ContactDetailPage({
             </div>
 
             {contact.tags && contact.tags.length > 0 && (
-              <div className="rounded-lg bg-white p-6 shadow">
-                <h2 className="mb-4 text-xl font-bold text-gray-900">Tags</h2>
+              <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+                <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Tags</h2>
                 <div className="flex flex-wrap gap-2">
                   {contact.tags.map((tag, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex rounded bg-gray-100 px-2 py-1 text-xs text-gray-700"
+                      className="inline-flex rounded bg-gray-100 dark:bg-gray-800 px-2 py-1 text-xs text-gray-700 dark:text-gray-300"
                     >
                       {tag}
                     </span>
@@ -155,19 +155,19 @@ export default async function ContactDetailPage({
               </div>
             )}
 
-            <div className="rounded-lg bg-white p-6 shadow">
-              <h2 className="mb-4 text-xl font-bold text-gray-900">Informações do Sistema</h2>
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+              <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Informações do Sistema</h2>
               <dl className="space-y-2 text-sm">
                 <div>
-                  <dt className="font-medium text-gray-500">Criado em</dt>
-                  <dd className="text-gray-900">
+                  <dt className="font-medium text-gray-500 dark:text-gray-400">Criado em</dt>
+                  <dd className="text-gray-900 dark:text-gray-100">
                     {format(new Date(contact.created_at), "dd/MM/yyyy 'às' HH:mm")}
                   </dd>
                 </div>
                 {contact.last_interaction_at && (
                   <div>
-                    <dt className="font-medium text-gray-500">Última interação</dt>
-                    <dd className="text-gray-900">
+                    <dt className="font-medium text-gray-500 dark:text-gray-400">Última interação</dt>
+                    <dd className="text-gray-900 dark:text-gray-100">
                       {format(new Date(contact.last_interaction_at), "dd/MM/yyyy 'às' HH:mm")}
                     </dd>
                   </div>

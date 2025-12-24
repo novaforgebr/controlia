@@ -9,9 +9,9 @@ export async function CustomFieldsDisplayAll({ customFields }: CustomFieldsDispl
 
   if (!fields || fields.length === 0) {
     return (
-      <div className="rounded-lg bg-white p-6 shadow">
-        <h2 className="mb-4 text-xl font-bold text-gray-900">Campos Customizados</h2>
-        <p className="text-sm text-gray-500">Nenhum campo customizado configurado.</p>
+      <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+        <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Campos Customizados</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum campo customizado configurado.</p>
       </div>
     )
   }
@@ -23,16 +23,16 @@ export async function CustomFieldsDisplayAll({ customFields }: CustomFieldsDispl
 
   if (activeFields.length === 0) {
     return (
-      <div className="rounded-lg bg-white p-6 shadow">
-        <h2 className="mb-4 text-xl font-bold text-gray-900">Campos Customizados</h2>
-        <p className="text-sm text-gray-500">Nenhum campo customizado ativo.</p>
+      <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+        <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Campos Customizados</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum campo customizado ativo.</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow">
-      <h2 className="mb-4 text-xl font-bold text-gray-900">Campos Customizados</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+      <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Campos Customizados</h2>
       <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {activeFields.map((field: any) => {
           const value = customFields[field.field_key]
@@ -58,8 +58,8 @@ export async function CustomFieldsDisplayAll({ customFields }: CustomFieldsDispl
 
           return (
             <div key={field.id}>
-              <dt className="text-sm font-medium text-gray-500">{field.field_label}</dt>
-              <dd className={`mt-1 text-sm ${value ? 'text-gray-900' : 'text-gray-400'}`}>
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">{field.field_label}</dt>
+              <dd className={`mt-1 text-sm ${value ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}`}>
                 {displayValue}
               </dd>
             </div>

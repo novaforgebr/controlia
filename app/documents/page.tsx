@@ -21,8 +21,8 @@ export default async function DocumentsPage({
         <Breadcrumb items={[{ label: 'Base de Conhecimento' }]} />
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Base de Conhecimento</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Base de Conhecimento</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               Gerencie documentos que servirão como base de conhecimento para a IA
             </p>
           </div>

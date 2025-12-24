@@ -92,15 +92,15 @@ export function EditPipelineForm({ pipeline }: EditPipelineFormProps) {
   return (
     <div className="space-y-6">
       {/* Formulário do Pipeline */}
-      <form onSubmit={handleUpdatePipeline} className="space-y-6 rounded-lg bg-white p-6 shadow">
+      <form onSubmit={handleUpdatePipeline} className="space-y-6 rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
+            <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
           </div>
         )}
 
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Nome do Pipeline <span className="text-red-500">*</span>
           </label>
           <input
@@ -109,12 +109,12 @@ export function EditPipelineForm({ pipeline }: EditPipelineFormProps) {
             name="name"
             required
             defaultValue={pipeline.name}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Descrição
           </label>
           <textarea
@@ -122,7 +122,7 @@ export function EditPipelineForm({ pipeline }: EditPipelineFormProps) {
             name="description"
             rows={3}
             defaultValue={pipeline.description || ''}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
           />
         </div>
 
@@ -133,9 +133,9 @@ export function EditPipelineForm({ pipeline }: EditPipelineFormProps) {
             name="is_default"
             value="true"
             defaultChecked={pipeline.is_default}
-            className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+            className="rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155]"
           />
-          <label htmlFor="is_default" className="ml-2 text-sm text-gray-700">
+          <label htmlFor="is_default" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
             Definir como pipeline padrão
           </label>
         </div>
@@ -152,9 +152,9 @@ export function EditPipelineForm({ pipeline }: EditPipelineFormProps) {
       </form>
 
       {/* Gerenciamento de Estágios */}
-      <div className="rounded-lg bg-white p-6 shadow">
+      <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">Estágios do Pipeline</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Estágios do Pipeline</h2>
           {!showNewStage && (
             <button
               onClick={() => setShowNewStage(true)}
@@ -166,7 +166,7 @@ export function EditPipelineForm({ pipeline }: EditPipelineFormProps) {
         </div>
 
         {showNewStage && (
-          <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <div className="mb-6 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
             <PipelineStageForm
               pipelineId={pipeline.id}
               onSubmit={handleCreateStage}
@@ -176,14 +176,14 @@ export function EditPipelineForm({ pipeline }: EditPipelineFormProps) {
         )}
 
         {sortedStages.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">
+          <div className="py-8 text-center text-gray-500 dark:text-gray-400">
             <p className="text-sm">Nenhum estágio configurado</p>
             <p className="mt-2 text-xs">Crie estágios para organizar seus contatos</p>
           </div>
         ) : (
           <div className="space-y-3">
             {sortedStages.map((stage) => (
-              <div key={stage.id} className="rounded-lg border border-gray-200 p-4">
+              <div key={stage.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800">
                 {editingStageId === stage.id ? (
                   <PipelineStageForm
                     pipelineId={pipeline.id}
@@ -199,29 +199,29 @@ export function EditPipelineForm({ pipeline }: EditPipelineFormProps) {
                         style={{ backgroundColor: stage.color }}
                       />
                       <div>
-                        <h3 className="font-semibold text-gray-900">{stage.name}</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">{stage.name}</h3>
                         {stage.description && (
-                          <p className="text-sm text-gray-600">{stage.description}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{stage.description}</p>
                         )}
                         <div className="mt-1 flex gap-2">
                           {stage.is_closed && (
-                            <span className="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                            <span className="inline-flex rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-800 dark:text-green-400">
                               Fechado/Ganho
                             </span>
                           )}
                           {stage.is_lost && (
-                            <span className="inline-flex rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                            <span className="inline-flex rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-800 dark:text-red-400">
                               Perdido
                             </span>
                           )}
-                          <span className="text-xs text-gray-500">Ordem: {stage.display_order}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">Ordem: {stage.display_order}</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setEditingStageId(stage.id)}
-                        className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       >
                         Editar
                       </button>

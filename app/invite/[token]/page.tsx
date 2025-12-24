@@ -43,7 +43,7 @@ export default async function InviteAcceptPage({
     if (user.email?.toLowerCase() === invitation.email.toLowerCase()) {
       // Mesmo email, mostrar modal de conclusão
       return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
           <div className="w-full max-w-md">
             <CompleteRegistrationModal
               invitation={invitation}
@@ -60,7 +60,7 @@ export default async function InviteAcceptPage({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
       <div className="w-full max-w-md">
         <CompleteRegistrationModal
           invitation={invitation}

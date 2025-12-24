@@ -20,19 +20,19 @@ export default async function AIPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Breadcrumb items={[{ label: 'IA' }]} />
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Inteligência Artificial</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Inteligência Artificial</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
             Gerencie prompts, monitore decisões da IA e configure automações inteligentes
           </p>
         </div>
 
         {/* Cards de Estatísticas */}
         <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-lg bg-white p-6 shadow">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
             <div className="flex items-center">
-              <div className="flex-shrink-0 rounded-md bg-purple-100 p-3">
+              <div className="flex-shrink-0 rounded-md bg-purple-100 dark:bg-purple-900/30 p-3">
                 <svg
-                  className="h-6 w-6 text-purple-600"
+                  className="h-6 w-6 text-purple-600 dark:text-purple-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -46,17 +46,17 @@ export default async function AIPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total de Prompts</p>
-                <p className="text-2xl font-semibold text-gray-900">{prompts?.length || 0}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total de Prompts</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{prompts?.length || 0}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
             <div className="flex items-center">
-              <div className="flex-shrink-0 rounded-md bg-green-100 p-3">
+              <div className="flex-shrink-0 rounded-md bg-green-100 dark:bg-green-900/30 p-3">
                 <svg
-                  className="h-6 w-6 text-green-600"
+                  className="h-6 w-6 text-green-600 dark:text-green-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -70,17 +70,17 @@ export default async function AIPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Prompts Ativos</p>
-                <p className="text-2xl font-semibold text-gray-900">{activePrompts.length}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Prompts Ativos</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{activePrompts.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
             <div className="flex items-center">
-              <div className="flex-shrink-0 rounded-md bg-blue-100 p-3">
+              <div className="flex-shrink-0 rounded-md bg-blue-100 dark:bg-blue-900/30 p-3">
                 <svg
-                  className="h-6 w-6 text-blue-600"
+                  className="h-6 w-6 text-blue-600 dark:text-blue-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -94,8 +94,8 @@ export default async function AIPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Prompts Padrão</p>
-                <p className="text-2xl font-semibold text-gray-900">{defaultPrompts.length}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Prompts Padrão</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{defaultPrompts.length}</p>
               </div>
             </div>
           </div>
@@ -106,14 +106,14 @@ export default async function AIPage() {
           {/* Prompts */}
           <Link
             href="/ai/prompts"
-            className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
+            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-purple-100 p-3">
+                  <div className="rounded-lg bg-purple-100 dark:bg-purple-900/30 p-3">
                     <svg
-                      className="h-6 w-6 text-purple-600"
+                      className="h-6 w-6 text-purple-600 dark:text-purple-400"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -127,13 +127,13 @@ export default async function AIPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Prompts de IA</h3>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Prompts de IA</h3>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                       Crie e gerencie prompts versionados para inteligência artificial
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center text-sm font-medium text-purple-600 group-hover:text-purple-700">
+                <div className="mt-4 flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 group-hover:text-purple-700 dark:group-hover:text-purple-300">
                   Gerenciar prompts
                   <svg
                     className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
@@ -156,14 +156,14 @@ export default async function AIPage() {
           {/* Logs */}
           <Link
             href="/ai/logs"
-            className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
+            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-indigo-100 p-3">
+                  <div className="rounded-lg bg-indigo-100 dark:bg-indigo-900/30 p-3">
                     <svg
-                      className="h-6 w-6 text-indigo-600"
+                      className="h-6 w-6 text-indigo-600 dark:text-indigo-400"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -177,13 +177,13 @@ export default async function AIPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Logs de IA</h3>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Logs de IA</h3>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                       Visualize todas as decisões e ações tomadas pela inteligência artificial
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center text-sm font-medium text-indigo-600 group-hover:text-indigo-700">
+                <div className="mt-4 flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300">
                   Ver logs
                   <svg
                     className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
@@ -205,8 +205,8 @@ export default async function AIPage() {
         </div>
 
         {/* Ações Rápidas */}
-        <div className="mt-8 rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Ações Rápidas</h2>
+        <div className="mt-8 rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Ações Rápidas</h2>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/ai/prompts/new"
@@ -216,13 +216,13 @@ export default async function AIPage() {
             </Link>
             <Link
               href="/ai/prompts"
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Ver Todos os Prompts
             </Link>
             <Link
               href="/ai/logs"
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Ver Logs de IA
             </Link>

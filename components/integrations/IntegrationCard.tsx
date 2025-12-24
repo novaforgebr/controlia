@@ -133,15 +133,15 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
 
   return (
     <>
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm dark:shadow-gray-900/50 hover:shadow-md transition-shadow">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className={`text-3xl ${channel.color === 'green' ? 'text-green-500' : 'text-blue-500'}`}>
+            <div className={`text-3xl ${channel.color === 'green' ? 'text-green-500 dark:text-green-400' : 'text-blue-500 dark:text-blue-400'}`}>
               {channel.icon}
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">{channel.name}</h3>
-              <p className="text-sm text-gray-500">{channel.description}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{channel.name}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{channel.description}</p>
             </div>
           </div>
         </div>
@@ -150,17 +150,17 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
           <div className="mb-4 space-y-2">
             <IntegrationStatusBadge status={integration.status} />
             {integration.channel_name && (
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 <span className="font-medium">Nome:</span> {integration.channel_name}
               </p>
             )}
             {isConnected && integration.connected_at && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Conectado em {new Date(integration.connected_at).toLocaleDateString('pt-BR')}
               </p>
             )}
             {isConnected && (
-              <div className="flex gap-4 text-xs text-gray-600 pt-2">
+              <div className="flex gap-4 text-xs text-gray-600 dark:text-gray-400 pt-2">
                 <span>
                   <span className="font-medium">{integration.total_messages}</span> mensagens
                 </span>
@@ -177,7 +177,7 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
             <button
               onClick={handleConnect}
               disabled={loading || isConnecting}
-              className="flex-1 rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-medium text-white hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-[#039155] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-medium text-white hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-[#039155] focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading || isConnecting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -192,7 +192,7 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
             <button
               onClick={() => setShowDisconnectConfirm(true)}
               disabled={loading}
-              className="flex-1 rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+              className="flex-1 rounded-md border border-red-300 dark:border-red-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50"
             >
               Desconectar
             </button>

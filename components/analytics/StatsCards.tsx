@@ -66,7 +66,7 @@ export function StatsCards({
       {cards.map((card, index) => (
         <div
           key={index}
-          className="relative overflow-hidden rounded-lg bg-white p-6 shadow-lg transition-transform hover:scale-105"
+          className="relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-transform hover:scale-105 border border-gray-200 dark:border-gray-800"
         >
           <div className={`absolute top-0 right-0 h-20 w-20 rounded-bl-full bg-gradient-to-br ${card.gradient} opacity-10`} />
           <div className="relative">
@@ -74,9 +74,9 @@ export function StatsCards({
               {card.icon}
             </div>
             <div className="mt-4">
-              <p className="text-sm font-medium text-gray-600">{card.title}</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">{card.value}</p>
-              {card.subtitle && <p className="mt-1 text-xs text-gray-500">{card.subtitle}</p>}
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{card.title}</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{card.value}</p>
+              {card.subtitle && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{card.subtitle}</p>}
             </div>
           </div>
         </div>

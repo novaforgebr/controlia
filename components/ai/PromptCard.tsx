@@ -75,53 +75,53 @@ export function PromptCard({ prompt }: PromptCardProps) {
 
   return (
     <>
-      <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
+      <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1 border border-gray-200 dark:border-gray-800">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-gray-900">{prompt.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{prompt.name}</h3>
               {prompt.is_default && (
-                <span className="rounded-full bg-[#039155] px-2 py-0.5 text-xs font-medium text-white">
+                <span className="rounded-full bg-[#039155] dark:bg-[#18B0BB] px-2 py-0.5 text-xs font-medium text-white">
                   Padrão
                 </span>
               )}
             </div>
             {prompt.description && (
-              <p className="mt-2 text-sm text-gray-600 line-clamp-2">{prompt.description}</p>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{prompt.description}</p>
             )}
             <div className="mt-4 flex flex-wrap gap-2">
               {prompt.context_type && (
-                <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                <span className="rounded bg-gray-100 dark:bg-gray-800 px-2 py-1 text-xs text-gray-700 dark:text-gray-300">
                   {prompt.context_type}
                 </span>
               )}
               {prompt.channel && (
-                <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                <span className="rounded bg-blue-100 dark:bg-blue-900/30 px-2 py-1 text-xs text-blue-700 dark:text-blue-400">
                   {prompt.channel}
                 </span>
               )}
-              <span className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-700">
+              <span className="rounded bg-purple-100 dark:bg-purple-900/30 px-2 py-1 text-xs text-purple-700 dark:text-purple-400">
                 v{prompt.version}
               </span>
             </div>
           </div>
           <div className="ml-4 flex items-center gap-2">
             {prompt.is_active ? (
-              <span className="inline-flex h-2 w-2 rounded-full bg-green-400" title="Ativo" />
+              <span className="inline-flex h-2 w-2 rounded-full bg-green-400 dark:bg-green-500" title="Ativo" />
             ) : (
-              <span className="inline-flex h-2 w-2 rounded-full bg-gray-300" title="Inativo" />
+              <span className="inline-flex h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600" title="Inativo" />
             )}
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
-          <div className="text-xs text-gray-500">
+        <div className="mt-6 flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-4">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             Modelo: {prompt.model}
           </div>
           <div className="flex items-center gap-2">
             <Link
               href={`/ai/prompts/${prompt.id}`}
-              className="text-sm font-semibold text-[#039155] hover:text-[#18B0BB] transition-colors"
+              className="text-sm font-semibold text-[#039155] dark:text-[#18B0BB] hover:text-[#18B0BB] dark:hover:text-[#039155] transition-colors"
             >
               Ver detalhes
             </Link>
@@ -134,7 +134,7 @@ export function PromptCard({ prompt }: PromptCardProps) {
             <button
               type="button"
               onClick={() => setShowMenu(!showMenu)}
-              className="rounded-md bg-white p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#039155] focus:ring-offset-2"
+              className="rounded-md bg-white dark:bg-gray-800 p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#039155] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors"
               aria-label="Menu de ações"
             >
               <svg
@@ -152,12 +152,12 @@ export function PromptCard({ prompt }: PromptCardProps) {
               </svg>
             </button>
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+              <div className="absolute right-0 mt-2 w-48 rounded-md bg-white dark:bg-gray-800 shadow-lg dark:shadow-gray-900/50 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-10 border border-gray-200 dark:border-gray-700">
                 <div className="py-1">
                   <Link
                     href={`/ai/prompts/${prompt.id}/edit`}
                     onClick={() => setShowMenu(false)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -173,7 +173,7 @@ export function PromptCard({ prompt }: PromptCardProps) {
                       handleToggleStatus()
                     }}
                     disabled={loading}
-                    className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                    className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,7 +193,7 @@ export function PromptCard({ prompt }: PromptCardProps) {
                       setShowDeleteConfirm(true)
                     }}
                     disabled={loading}
-                    className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                    className="w-full text-left block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

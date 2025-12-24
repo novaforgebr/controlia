@@ -34,7 +34,7 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Nome do Estágio <span className="text-red-500">*</span>
           </label>
           <input
@@ -43,13 +43,13 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
             name="name"
             required
             defaultValue={stage?.name || ''}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             placeholder="Ex: Qualificação"
           />
         </div>
 
         <div>
-          <label htmlFor="color" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="color" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Cor
           </label>
           <div className="mt-1 flex gap-2">
@@ -58,7 +58,7 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
               id="color"
               name="color"
               defaultValue={stage?.color || '#039155'}
-              className="h-10 w-20 rounded-md border border-gray-300"
+              className="h-10 w-20 rounded-md border border-gray-300 dark:border-gray-700"
             />
             <input
               type="text"
@@ -67,7 +67,7 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
                 const colorInput = document.getElementById('color') as HTMLInputElement
                 if (colorInput) colorInput.value = e.target.value
               }}
-              className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="flex-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
               placeholder="#039155"
             />
           </div>
@@ -75,7 +75,7 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Descrição
         </label>
         <textarea
@@ -83,14 +83,14 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
           name="description"
           rows={2}
           defaultValue={stage?.description || ''}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
           placeholder="Descreva este estágio..."
         />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="display_order" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Ordem de Exibição
           </label>
           <input
@@ -99,7 +99,7 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
             name="display_order"
             min="0"
             defaultValue={stage?.display_order || 0}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
           />
         </div>
 
@@ -110,9 +110,9 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
             name="is_closed"
             value="true"
             defaultChecked={stage?.is_closed || false}
-            className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+            className="rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155]"
           />
-          <label htmlFor="is_closed" className="ml-2 text-sm text-gray-700">
+          <label htmlFor="is_closed" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
             Representa &quot;Fechado/Ganho&quot;
           </label>
         </div>
@@ -124,9 +124,9 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
             name="is_lost"
             value="true"
             defaultChecked={stage?.is_lost || false}
-            className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+            className="rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155]"
           />
-          <label htmlFor="is_lost" className="ml-2 text-sm text-gray-700">
+          <label htmlFor="is_lost" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
             Representa &quot;Perdido&quot;
           </label>
         </div>
@@ -136,7 +136,7 @@ export function PipelineStageForm({ pipelineId, stage, onSubmit, onCancel }: Pip
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
           Cancelar
         </button>

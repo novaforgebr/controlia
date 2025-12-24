@@ -21,12 +21,12 @@ export default async function EditDocumentPage({
         <div className="mb-6">
           <Link
             href="/documents"
-            className="text-sm font-medium text-gray-600 hover:text-[#039155] transition-colors"
+            className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#039155] dark:hover:text-[#18B0BB] transition-colors"
           >
             ← Voltar para documentos
           </Link>
-          <h1 className="mt-2 text-3xl font-bold text-gray-900">Editar Documento</h1>
-          <p className="mt-2 text-sm text-gray-600">Atualize as informações do documento</p>
+          <h1 className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">Editar Documento</h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Atualize as informações do documento</p>
         </div>
 
         <EditDocumentForm file={file} />

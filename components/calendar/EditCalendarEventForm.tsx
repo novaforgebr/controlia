@@ -94,15 +94,15 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg bg-white p-6 shadow">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
       {error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <p className="text-sm text-red-800">{error}</p>
+        <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
+          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
 
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Título <span className="text-red-500">*</span>
         </label>
         <input
@@ -111,12 +111,12 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
           name="title"
           required
           defaultValue={event.title}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
         />
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Descrição
         </label>
         <textarea
@@ -124,13 +124,13 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
           name="description"
           rows={3}
           defaultValue={event.description || ''}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
         />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="start_at" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="start_at" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Data de Início <span className="text-red-500">*</span>
           </label>
           <input
@@ -139,12 +139,12 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
             name="start_at"
             required
             defaultValue={format(startDate, 'yyyy-MM-dd')}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
           />
         </div>
         {!isAllDay && (
           <div>
-            <label htmlFor="start_time" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="start_time" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Hora de Início
             </label>
             <input
@@ -152,7 +152,7 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
               id="start_time"
               name="start_time"
               defaultValue={format(startDate, 'HH:mm')}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             />
           </div>
         )}
@@ -160,7 +160,7 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="end_at" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="end_at" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Data de Término <span className="text-red-500">*</span>
           </label>
           <input
@@ -169,12 +169,12 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
             name="end_at"
             required
             defaultValue={format(endDate, 'yyyy-MM-dd')}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
           />
         </div>
         {!isAllDay && (
           <div>
-            <label htmlFor="end_time" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Hora de Término
             </label>
             <input
@@ -182,7 +182,7 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
               id="end_time"
               name="end_time"
               defaultValue={format(endDate, 'HH:mm')}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             />
           </div>
         )}
@@ -194,15 +194,15 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
           id="is_all_day"
           checked={isAllDay}
           onChange={(e) => setIsAllDay(e.target.checked)}
-          className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+          className="rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155]"
         />
-        <label htmlFor="is_all_day" className="ml-2 text-sm text-gray-700">
+        <label htmlFor="is_all_day" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
           Dia inteiro
         </label>
       </div>
 
       <div>
-        <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Localização
         </label>
         <input
@@ -210,20 +210,20 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
           id="location"
           name="location"
           defaultValue={event.location || ''}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
           placeholder="Ex: Sala de reuniões, Online, etc."
         />
       </div>
 
       <div>
-        <label htmlFor="contact_id" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="contact_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Relacionado a Contato
         </label>
         <select
           id="contact_id"
           name="contact_id"
           defaultValue={event.contact_id || ''}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
         >
           <option value="">Nenhum</option>
           {contacts.map((contact) => (
@@ -235,14 +235,14 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
       </div>
 
       <div>
-        <label htmlFor="visibility" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="visibility" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Visibilidade
         </label>
         <select
           id="visibility"
           name="visibility"
           defaultValue={event.visibility}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
         >
           <option value="private">Privado (apenas eu)</option>
           <option value="company">Empresa (todos da empresa)</option>
@@ -251,14 +251,14 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
       </div>
 
       <div>
-        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Status
         </label>
         <select
           id="status"
           name="status"
           defaultValue={event.status}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
         >
           <option value="scheduled">Agendado</option>
           <option value="confirmed">Confirmado</option>
@@ -274,7 +274,7 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 disabled={loading}
               >
                 Cancelar
@@ -301,7 +301,7 @@ export function EditCalendarEventForm({ event, contacts }: EditCalendarEventForm
         <div className="flex gap-3">
           <Link
             href="/calendar"
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Cancelar
           </Link>

@@ -112,7 +112,7 @@ export function IntegrationsDashboard() {
     <div className="space-y-6">
       {/* Canais disponíveis */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Canais Disponíveis</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Canais Disponíveis</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {availableChannels.map((channel) => {
             const existingIntegration = integrations.find((i) => i.channel === channel.id)
@@ -131,7 +131,7 @@ export function IntegrationsDashboard() {
       {/* Integrações existentes */}
       {integrations.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Suas Integrações</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Suas Integrações</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {integrations.map((integration) => {
               const channelInfo = availableChannels.find((c) => c.id === integration.channel)

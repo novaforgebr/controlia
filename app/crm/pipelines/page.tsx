@@ -13,12 +13,12 @@ export default async function PipelinesPage() {
           <div>
             <Link
               href="/crm"
-              className="text-sm font-medium text-gray-600 hover:text-[#039155] transition-colors"
+              className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#039155] dark:hover:text-[#18B0BB] transition-colors"
             >
               ← Voltar para CRM
             </Link>
-            <h1 className="mt-2 text-3xl font-bold text-gray-900">Pipelines</h1>
-            <p className="mt-2 text-sm text-gray-600">Configure e gerencie seus pipelines de vendas</p>
+            <h1 className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">Pipelines</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Configure e gerencie seus pipelines de vendas</p>
           </div>
           <Link
             href="/crm/pipelines/new"

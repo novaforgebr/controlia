@@ -23,8 +23,8 @@ export default async function CalendarPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Calendário</h1>
-            <p className="mt-2 text-sm text-gray-600">Visualize e gerencie suas agendas e eventos</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Calendário</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Visualize e gerencie suas agendas e eventos</p>
           </div>
         </div>
 

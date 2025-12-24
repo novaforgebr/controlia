@@ -118,15 +118,15 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose}></div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity" onClick={onClose}></div>
         
-        <div className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl">
-          <div className="border-b border-gray-200 px-6 py-4">
+        <div className="relative w-full max-w-2xl rounded-lg bg-white dark:bg-gray-900 shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+          <div className="border-b border-gray-200 dark:border-gray-800 px-6 py-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Detalhes do Contato</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Detalhes do Contato</h2>
               <button
                 onClick={onClose}
-                className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#039155]"
+                className="rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#039155] transition-colors"
               >
                 <span className="sr-only">Fechar</span>
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,7 +136,7 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
             </div>
           </div>
 
-          <div className="max-h-[70vh] overflow-y-auto px-6 py-4">
+          <div className="max-h-[70vh] overflow-y-auto px-6 py-4 bg-gray-50 dark:bg-gray-950">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-[#039155] border-r-transparent"></div>
@@ -145,7 +145,7 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Nome <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -154,12 +154,12 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Email
                     </label>
                     <input
@@ -167,12 +167,12 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       id="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Telefone
                     </label>
                     <input
@@ -180,12 +180,12 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       id="phone"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       WhatsApp
                     </label>
                     <input
@@ -193,12 +193,12 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       id="whatsapp"
                       value={formData.whatsapp}
                       onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="document" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="document" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       CPF/CNPJ
                     </label>
                     <input
@@ -206,19 +206,19 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       id="document"
                       value={formData.document}
                       onChange={(e) => setFormData({ ...formData, document: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Status
                     </label>
                     <select
                       id="status"
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     >
                       <option value="lead">Lead</option>
                       <option value="customer">Cliente</option>
@@ -228,7 +228,7 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                   </div>
 
                   <div>
-                    <label htmlFor="source" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="source" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Origem
                     </label>
                     <input
@@ -236,12 +236,12 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       id="source"
                       value={formData.source}
                       onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="score" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="score" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Score
                     </label>
                     <input
@@ -251,12 +251,12 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       max="100"
                       value={formData.score}
                       onChange={(e) => setFormData({ ...formData, score: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Tags (separadas por vírgula)
                     </label>
                     <input
@@ -265,12 +265,12 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                       placeholder="ex: importante, vip, retorno"
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Observações
                     </label>
                     <textarea
@@ -278,20 +278,20 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                       rows={4}
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155] dark:focus:ring-[#039155]/20"
                     />
                   </div>
                 </div>
 
                 {/* Campos customizados */}
                 {contact.custom_fields && Object.keys(contact.custom_fields).length > 0 && (
-                  <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-sm font-medium text-gray-700 mb-4">Campos Customizados</h3>
+                  <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Campos Customizados</h3>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       {Object.entries(contact.custom_fields).map(([key, value]) => (
                         <div key={key}>
-                          <label className="block text-sm font-medium text-gray-700">{key}</label>
-                          <div className="mt-1 text-sm text-gray-900">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{key}</label>
+                          <div className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                             {typeof value === 'string' ? value : JSON.stringify(value)}
                           </div>
                         </div>
@@ -301,43 +301,44 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                 )}
 
                 {/* Informações do sistema */}
-                <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-sm font-medium text-gray-700 mb-4">Informações do Sistema</h3>
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Informações do Sistema</h3>
                   <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
                     <div>
-                      <dt className="font-medium text-gray-500">Criado em</dt>
-                      <dd className="mt-1 text-gray-900">
+                      <dt className="font-medium text-gray-500 dark:text-gray-400">Criado em</dt>
+                      <dd className="mt-1 text-gray-900 dark:text-gray-100">
                         {format(new Date(contact.created_at), 'dd/MM/yyyy HH:mm')}
                       </dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-gray-500">Atualizado em</dt>
-                      <dd className="mt-1 text-gray-900">
+                      <dt className="font-medium text-gray-500 dark:text-gray-400">Atualizado em</dt>
+                      <dd className="mt-1 text-gray-900 dark:text-gray-100">
                         {format(new Date(contact.updated_at), 'dd/MM/yyyy HH:mm')}
                       </dd>
                     </div>
                   </dl>
                 </div>
 
-                <div className="flex justify-end gap-3 border-t border-gray-200 pt-6">
+                <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-800 pt-6">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    disabled={saving}
+                    className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                    className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? 'Salvando...' : 'Salvar Alterações'}
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 <p>Contato não encontrado</p>
               </div>
             )}

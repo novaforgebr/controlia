@@ -13,10 +13,10 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4" aria-label="Breadcrumb">
+    <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-4" aria-label="Breadcrumb">
       <Link
         href="/dashboard"
-        className="flex items-center hover:text-[#039155] transition-colors"
+        className="flex items-center hover:text-[#039155] dark:hover:text-[#18B0BB] transition-colors"
         title="Dashboard"
       >
         <svg
@@ -40,7 +40,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         return (
           <div key={index} className="flex items-center space-x-2">
             <svg
-              className="h-4 w-4 text-gray-400"
+              className="h-4 w-4 text-gray-400 dark:text-gray-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -53,16 +53,16 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
               />
             </svg>
             {isLast ? (
-              <span className="font-medium text-gray-900">{item.label}</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">{item.label}</span>
             ) : item.href ? (
               <Link
                 href={item.href}
-                className="hover:text-[#039155] transition-colors"
+                className="hover:text-[#039155] dark:hover:text-[#18B0BB] transition-colors"
               >
                 {item.label}
               </Link>
             ) : (
-              <span className="text-gray-600">{item.label}</span>
+              <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
             )}
           </div>
         )

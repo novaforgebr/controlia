@@ -155,20 +155,20 @@ export function CompleteRegistrationModal({
 
   if (step === 'register') {
     return (
-      <div className="rounded-lg bg-white p-8 shadow-xl">
+      <div className="rounded-lg bg-white dark:bg-gray-900 p-8 shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Bem-vindo!</h1>
-          <p className="mt-2 text-gray-600">
-            Você foi convidado para se juntar à <strong>{invitation.companies?.name}</strong>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Bem-vindo!</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Você foi convidado para se juntar à <strong className="text-gray-900 dark:text-gray-100">{invitation.companies?.name}</strong>
           </p>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Crie sua conta para continuar
           </p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Nome Completo <span className="text-red-500">*</span>
             </label>
             <input
@@ -178,13 +178,13 @@ export function CompleteRegistrationModal({
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               required
               disabled={loading}
-              className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-50"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 disabled:bg-gray-50 dark:disabled:bg-gray-900"
               placeholder="Seu nome completo"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               E-mail
             </label>
             <input
@@ -192,12 +192,12 @@ export function CompleteRegistrationModal({
               id="email"
               value={userEmail}
               disabled
-              className="block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-500"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400"
             />
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Telefone
             </label>
             <input
@@ -206,13 +206,13 @@ export function CompleteRegistrationModal({
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               disabled={loading}
-              className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-50"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 disabled:bg-gray-50 dark:disabled:bg-gray-900"
               placeholder="(00) 00000-0000"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Senha <span className="text-red-500">*</span>
             </label>
             <input
@@ -223,7 +223,7 @@ export function CompleteRegistrationModal({
               required
               disabled={loading}
               minLength={6}
-              className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-50"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 disabled:bg-gray-50 dark:disabled:bg-gray-900"
               placeholder="Mínimo 6 caracteres"
             />
           </div>
