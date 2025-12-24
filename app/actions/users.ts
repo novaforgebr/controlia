@@ -179,9 +179,39 @@ export async function inviteUser(email: string, role: string = 'operator') {
         return { error: 'Erro ao criar convite' }
       }
 
-      // TODO: Enviar email com link de convite
-      // Por enquanto, apenas criar o convite
-      // O link será: {NEXT_PUBLIC_APP_URL}/invite/{token}
+      // Enviar email com link de convite
+      try {
+        // Buscar informações do convidador
+        const { data: inviterProfile } = await supabase
+          .from('user_profiles')
+          .select('full_name, email')
+          .eq('id', user.id)
+          .single()
+
+        // Chamar API para enviar e-mail
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+        const emailResponse = await fetch(`${appUrl}/api/invitations/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            invitationId: invitation.id,
+            email: email.toLowerCase(),
+            token: inviteToken,
+            companyName: company.name,
+            inviterName: inviterProfile?.full_name || inviterProfile?.email || 'Administrador',
+          }),
+        })
+
+        if (!emailResponse.ok) {
+          console.error('Erro ao enviar e-mail, mas convite foi criado')
+          // Não falhar o convite se o e-mail falhar
+        }
+      } catch (emailError) {
+        console.error('Erro ao enviar e-mail de convite:', emailError)
+        // Não falhar o convite se o e-mail falhar
+      }
 
       await logHumanAction(
         company.id,

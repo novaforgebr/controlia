@@ -23,14 +23,14 @@ export default async function UsersPage() {
         <Breadcrumb items={[{ label: 'Usuários' }]} />
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Usuários</h1>
-            <p className="mt-2 text-gray-600">Gerencie usuários e permissões da sua empresa</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Usuários</h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Gerencie usuários e permissões da sua empresa</p>
           </div>
           {canInvite && <InviteUserButton />}
         </div>
 
         {/* Lista de usuários */}
-        <div className="rounded-lg bg-white shadow">
+        <div className="rounded-lg bg-white dark:bg-gray-900 shadow dark:shadow-gray-900/50">
           {users.length === 0 ? (
             <div className="p-12 text-center text-gray-500">
               <svg
@@ -46,15 +46,15 @@ export default async function UsersPage() {
                   d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                 />
               </svg>
-              <h3 className="mt-4 text-lg font-semibold text-gray-900">Nenhum usuário encontrado</h3>
-              <p className="mt-2 text-gray-600">Comece adicionando usuários à sua empresa</p>
+              <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Nenhum usuário encontrado</h3>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">Comece adicionando usuários à sua empresa</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
               {users.map((companyUser: any) => (
                 <div
                   key={companyUser.id}
-                  className="p-6 hover:bg-gray-50 transition-colors"
+                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-200 dark:border-gray-800 last:border-0"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -64,10 +64,10 @@ export default async function UsersPage() {
                           : companyUser.user_profiles?.email?.charAt(0).toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                           {companyUser.user_profiles?.full_name || 'Sem nome'}
                         </h3>
-                        <p className="text-sm text-gray-500">{companyUser.user_profiles?.email}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{companyUser.user_profiles?.email}</p>
                         <div className="mt-2 flex items-center gap-2">
                           <span
                             className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
@@ -99,9 +99,9 @@ export default async function UsersPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="text-right text-sm text-gray-500">
+                      <div className="text-right text-sm text-gray-500 dark:text-gray-400">
                         <p>Adicionado em</p>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-gray-900 dark:text-gray-100">
                           {format(new Date(companyUser.created_at), 'dd/MM/yyyy')}
                         </p>
                       </div>

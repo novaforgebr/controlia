@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Sidebar } from './Sidebar'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 interface SidebarLayoutProps {
   companyName: string
@@ -34,7 +35,7 @@ export function SidebarLayout({ companyName, children }: SidebarLayoutProps) {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
       <Sidebar companyName={companyName} />
       <div
         className="flex-1 flex flex-col transition-all duration-300"
@@ -42,23 +43,24 @@ export function SidebarLayout({ companyName, children }: SidebarLayoutProps) {
         id="main-content"
       >
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6">
+        <header className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 h-16 flex items-center justify-between px-6">
           <div className="flex-1">
             {/* Breadcrumb ou título da página pode ir aqui */}
           </div>
           <div className="flex items-center space-x-4">
-            <span className="hidden sm:block text-sm font-medium text-gray-700">{companyName}</span>
+            <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">{companyName}</span>
+            <ThemeToggle />
             <form action="/api/auth/logout" method="post">
               <button
                 type="submit"
-                className="text-sm font-medium text-gray-600 hover:text-[#039155] transition-colors"
+                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#039155] dark:hover:text-[#18B0BB] transition-colors"
               >
                 Sair
               </button>
             </form>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto py-8 px-6">{children}</main>
+        <main className="flex-1 overflow-y-auto py-8 px-6 bg-gray-50 dark:bg-gray-950">{children}</main>
       </div>
     </div>
   )

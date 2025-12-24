@@ -125,13 +125,13 @@ export function Sidebar({ companyName }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-40 h-screen bg-white border-r border-gray-200 transition-all duration-300 ${
+      className={`fixed left-0 top-0 z-40 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ${
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
       <div className="flex h-full flex-col">
         {/* Header */}
-        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
+        <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4">
           {!isCollapsed && (
             <Link href="/dashboard" className="flex items-center space-x-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#039155] to-[#18B0BB]">
@@ -153,7 +153,7 @@ export function Sidebar({ companyName }: SidebarProps) {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="rounded-md p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
             aria-label={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             <svg
@@ -181,12 +181,12 @@ export function Sidebar({ companyName }: SidebarProps) {
                 href={item.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   active
-                    ? 'bg-gradient-to-r from-[#039155]/10 to-[#18B0BB]/10 text-[#039155]'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-gradient-to-r from-[#039155]/10 to-[#18B0BB]/10 text-[#039155] dark:text-[#18B0BB]'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
                 } ${isCollapsed ? 'justify-center' : ''}`}
                 title={isCollapsed ? item.title : undefined}
               >
-                <span className={active ? 'text-[#039155]' : 'text-gray-500'}>{item.icon}</span>
+                <span className={active ? 'text-[#039155] dark:text-[#18B0BB]' : 'text-gray-500 dark:text-gray-400'}>{item.icon}</span>
                 {!isCollapsed && <span>{item.title}</span>}
               </Link>
             )
@@ -195,10 +195,10 @@ export function Sidebar({ companyName }: SidebarProps) {
 
         {/* Footer - Company Info */}
         {!isCollapsed && (
-          <div className="border-t border-gray-200 p-4">
-            <div className="rounded-lg bg-gradient-to-r from-[#039155]/5 to-[#18B0BB]/5 p-3">
-              <p className="text-xs font-medium text-gray-500">Empresa</p>
-              <p className="mt-1 truncate text-sm font-semibold text-gray-900">{companyName}</p>
+          <div className="border-t border-gray-200 dark:border-gray-800 p-4">
+            <div className="rounded-lg bg-gradient-to-r from-[#039155]/5 to-[#18B0BB]/5 dark:from-[#039155]/10 dark:to-[#18B0BB]/10 p-3">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Empresa</p>
+              <p className="mt-1 truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{companyName}</p>
             </div>
           </div>
         )}

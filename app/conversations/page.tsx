@@ -22,16 +22,16 @@ export default async function ConversationsPage({
         <div className="mb-4 flex items-center justify-between flex-shrink-0">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-gray-900">Conversas</h1>
-              <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Conversas</h1>
+              <span className="inline-flex items-center gap-2 rounded-full bg-green-100 dark:bg-green-900/30 px-3 py-1 text-sm font-medium text-green-800 dark:text-green-400">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
                 </span>
                 Tempo Real
               </span>
             </div>
-            <p className="mt-2 text-sm text-gray-600">Todas as conversas em tempo real</p>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Todas as conversas em tempo real</p>
           </div>
         </div>
 
