@@ -15,9 +15,9 @@ export default async function ConversationsPage({
 
   return (
     <ProtectedLayout>
-      <div className="h-[calc(100vh-8rem)] flex flex-col">
+      <div className="flex h-[calc(100vh-4rem)] flex-col">
         <Breadcrumb items={[{ label: 'Conversas' }]} />
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between flex-shrink-0">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold text-gray-900">Conversas</h1>
@@ -33,11 +33,13 @@ export default async function ConversationsPage({
           </div>
         </div>
 
-        <ConversationsSplitView
-          selectedConversationId={searchParams.id}
-          initialStatus={searchParams.status}
-          initialChannel={searchParams.channel}
-        />
+        <div className="flex-1 min-h-0">
+          <ConversationsSplitView
+            selectedConversationId={searchParams.id}
+            initialStatus={searchParams.status}
+            initialChannel={searchParams.channel}
+          />
+        </div>
       </div>
     </ProtectedLayout>
   )

@@ -312,6 +312,32 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['contact_custom_fields']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['contact_custom_fields']['Insert']>
       }
+      channel_integrations: {
+        Row: {
+          id: string
+          company_id: string
+          channel: string
+          channel_name: string | null
+          status: string
+          connection_data: Json
+          n8n_instance_id: string | null
+          n8n_webhook_url: string | null
+          n8n_qr_code_url: string | null
+          qr_code_base64: string | null
+          connected_at: string | null
+          disconnected_at: string | null
+          last_sync_at: string | null
+          total_messages: number
+          total_conversations: number
+          auto_reply_enabled: boolean
+          business_hours_only: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['channel_integrations']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['channel_integrations']['Insert']>
+      }
     }
   }
 }
@@ -332,6 +358,7 @@ export type File = Database['public']['Tables']['files']['Row']
 export type Payment = Database['public']['Tables']['payments']['Row']
 export type AuditLog = Database['public']['Tables']['audit_logs']['Row']
 export type ContactCustomField = Database['public']['Tables']['contact_custom_fields']['Row']
+export type ChannelIntegration = Database['public']['Tables']['channel_integrations']['Row']
 
 // Tipos para inserção
 export type ContactInsert = Database['public']['Tables']['contacts']['Insert']

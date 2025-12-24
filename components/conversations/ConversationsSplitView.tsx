@@ -352,7 +352,7 @@ export function ConversationsSplitView({
   }
 
   return (
-    <div className="flex flex-1 gap-4 overflow-hidden">
+    <div className="flex h-full gap-4 overflow-hidden">
       {/* Lista de conversas - lado esquerdo */}
       <div className="flex w-96 flex-col border-r border-gray-200 bg-white">
         {/* Filtros */}
