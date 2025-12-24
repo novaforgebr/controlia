@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { deleteCustomField } from '@/app/actions/custom-fields'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useToast } from '@/lib/hooks/use-toast'
 
 interface CustomFieldActionsProps {
   fieldId: string
@@ -13,16 +14,28 @@ export function CustomFieldActions({ fieldId }: CustomFieldActionsProps) {
   const [loading, setLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const router = useRouter()
+  const toast = useToast()
 
   const handleDelete = async () => {
     setLoading(true)
-    const result = await deleteCustomField(fieldId)
-    setLoading(false)
-    setShowDeleteConfirm(false)
-    if (result.success) {
-      router.refresh()
-    } else {
-      alert(result.error || 'Erro ao remover campo')
+    const loadingToast = toast.loading('Removendo campo...')
+    
+    try {
+      const result = await deleteCustomField(fieldId)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        toast.success('Campo customizado removido com sucesso')
+        router.refresh()
+      } else {
+        toast.error(result.error || 'Erro ao remover campo')
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao remover campo. Tente novamente.')
+    } finally {
+      setLoading(false)
+      setShowDeleteConfirm(false)
     }
   }
 

@@ -14,7 +14,7 @@ O Controlia CRM é um centro de comando operacional que centraliza:
 
 ## 🛠️ Stack Tecnológica
 
-- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
+- **Frontend**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS
 - **Backend**: API Routes / Server Actions (Next.js)
 - **Banco de Dados**: Supabase (PostgreSQL)
 - **Autenticação**: Supabase Auth

@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { connectChannel, disconnectChannel, checkConnectionStatus } from '@/app/actions/integrations'
 import { QRCodeModal } from './QRCodeModal'
+import { IntegrationStatusBadge } from './IntegrationStatusBadge'
+import { useToast } from '@/lib/hooks/use-toast'
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal'
 
 interface Channel {
   id: string
@@ -37,25 +40,33 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
   const [showQRCode, setShowQRCode] = useState(false)
   const [qrCodeData, setQrCodeData] = useState<string | null>(null)
   const [checkingStatus, setCheckingStatus] = useState(false)
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false)
+  const toast = useToast()
 
   const isConnected = integration?.status === 'connected'
   const isConnecting = integration?.status === 'connecting'
 
   const handleConnect = async () => {
     setLoading(true)
+    const loadingToast = toast.loading(`Conectando ${channel.name}...`)
+    
     try {
       const result = await connectChannel(channel.id)
+      toast.dismiss(loadingToast)
+      
       if (result.success && result.qrCode) {
         setQrCodeData(result.qrCode)
         setShowQRCode(true)
+        toast.success(`QR Code gerado! Escaneie para conectar ${channel.name}`)
         // Iniciar polling de status
         startStatusPolling(result.integrationId)
       } else if (result.error) {
-        alert('Erro ao conectar: ' + result.error)
+        toast.error(`Erro ao conectar: ${result.error}`)
       }
     } catch (error) {
+      toast.dismiss(loadingToast)
       console.error('Erro ao conectar canal:', error)
-      alert('Erro ao conectar canal')
+      toast.error('Erro ao conectar canal. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -64,21 +75,24 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
   const handleDisconnect = async () => {
     if (!integration) return
     
-    if (!confirm('Tem certeza que deseja desconectar este canal?')) {
-      return
-    }
-
     setLoading(true)
+    const loadingToast = toast.loading(`Desconectando ${channel.name}...`)
+    
     try {
       const result = await disconnectChannel(integration.id)
+      toast.dismiss(loadingToast)
+      
       if (result.success) {
+        toast.success(`${channel.name} desconectado com sucesso`)
+        setShowDisconnectConfirm(false)
         onUpdate()
       } else {
-        alert('Erro ao desconectar: ' + result.error)
+        toast.error(`Erro ao desconectar: ${result.error}`)
       }
     } catch (error) {
+      toast.dismiss(loadingToast)
       console.error('Erro ao desconectar canal:', error)
-      alert('Erro ao desconectar canal')
+      toast.error('Erro ao desconectar canal. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -96,10 +110,11 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
             clearInterval(pollInterval)
             setShowQRCode(false)
             setQrCodeData(null)
+            toast.success(`${channel.name} conectado com sucesso!`)
             onUpdate()
           } else if (result.status === 'error') {
             clearInterval(pollInterval)
-            alert('Erro na conexão: ' + result.error)
+            toast.error(`Erro na conexão: ${result.error || 'Erro desconhecido'}`)
           }
         }
       } catch (error) {
@@ -115,39 +130,6 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
     }, 300000)
   }
 
-  const getStatusBadge = () => {
-    switch (integration?.status) {
-      case 'connected':
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
-            </span>
-            Conectado
-          </span>
-        )
-      case 'connecting':
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800">
-            <div className="h-2 w-2 animate-spin rounded-full border-2 border-yellow-600 border-t-transparent"></div>
-            Conectando...
-          </span>
-        )
-      case 'error':
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800">
-            Erro
-          </span>
-        )
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800">
-            Desconectado
-          </span>
-        )
-    }
-  }
 
   return (
     <>
@@ -166,7 +148,7 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
 
         {integration && (
           <div className="mb-4 space-y-2">
-            {getStatusBadge()}
+            <IntegrationStatusBadge status={integration.status} />
             {integration.channel_name && (
               <p className="text-sm text-gray-600">
                 <span className="font-medium">Nome:</span> {integration.channel_name}
@@ -208,15 +190,28 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
             </button>
           ) : (
             <button
-              onClick={handleDisconnect}
+              onClick={() => setShowDisconnectConfirm(true)}
               disabled={loading}
               className="flex-1 rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
             >
-              {loading ? 'Desconectando...' : 'Desconectar'}
+              Desconectar
             </button>
           )}
         </div>
       </div>
+
+      {/* Modal de confirmação de desconexão */}
+      <ConfirmationModal
+        isOpen={showDisconnectConfirm}
+        onClose={() => setShowDisconnectConfirm(false)}
+        onConfirm={handleDisconnect}
+        title="Desconectar Canal"
+        message={`Tem certeza que deseja desconectar ${channel.name}? As mensagens não serão mais recebidas até reconectar.`}
+        confirmText="Desconectar"
+        cancelText="Cancelar"
+        variant="warning"
+        loading={loading}
+      />
 
       {showQRCode && qrCodeData && (
         <QRCodeModal

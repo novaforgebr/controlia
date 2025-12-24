@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { updateCompany } from '@/app/actions/companies'
+import { useToast } from '@/lib/hooks/use-toast'
 
 interface CompanySettingsProps {
   company: {
@@ -14,16 +15,27 @@ interface CompanySettingsProps {
 
 export function CompanySettings({ company }: CompanySettingsProps) {
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true)
-    const result = await updateCompany(company.id, formData)
-    setLoading(false)
-    if (result.success) {
-      alert('Informações da empresa atualizadas com sucesso!')
-      window.location.reload()
-    } else {
-      alert(result.error || 'Erro ao atualizar empresa')
+    const loadingToast = toast.loading('Atualizando informações...')
+    
+    try {
+      const result = await updateCompany(company.id, formData)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        toast.success('Informações da empresa atualizadas com sucesso!')
+        window.location.reload()
+      } else {
+        toast.error(result.error || 'Erro ao atualizar empresa')
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao atualizar empresa. Tente novamente.')
+    } finally {
+      setLoading(false)
     }
   }
 

@@ -4,24 +4,26 @@ import Link from 'next/link'
 import { ContactStatus } from '@/lib/types/database'
 import ProtectedLayout from '@/app/layout-protected'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { ContactRowActions } from '@/components/contacts/ContactRowActions'
 
 export default async function ContactsPage({
   searchParams,
 }: {
-  searchParams: { status?: string; search?: string; page?: string }
+  searchParams: Promise<{ status?: string; search?: string; page?: string }>
 }) {
   const company = await getCurrentCompany()
   if (!company) {
     return null
   }
 
-  const page = parseInt(searchParams.page || '1')
+  const params = await searchParams
+  const page = parseInt(params.page || '1')
   const limit = 20
   const offset = (page - 1) * limit
 
   const { data: contacts, count } = await listContacts({
-    status: searchParams.status,
-    search: searchParams.search,
+    status: params.status,
+    search: params.search,
     limit,
     offset,
   })
@@ -53,13 +55,13 @@ export default async function ContactsPage({
                 type="text"
                 name="search"
                 placeholder="Digite o nome, email ou telefone do contato..."
-                defaultValue={searchParams.search}
+                defaultValue={params.search}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
               />
             </div>
             <select
               name="status"
-              defaultValue={searchParams.status || ''}
+              defaultValue={params.status || ''}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             >
               <option value="">Todos os status</option>
@@ -168,19 +170,7 @@ export default async function ContactsPage({
                         )}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                        <Link
-                          href={`/contacts/${contact.id}`}
-                          className="text-[#039155] hover:text-[#18B0BB] font-medium transition-colors"
-                        >
-                          Ver
-                        </Link>
-                        <span className="mx-2 text-gray-300">|</span>
-                        <Link
-                          href={`/contacts/${contact.id}/edit`}
-                          className="text-gray-600 hover:text-[#039155] font-medium transition-colors"
-                        >
-                          Editar
-                        </Link>
+                        <ContactRowActions contactId={contact.id} contactName={contact.name} />
                       </td>
                     </tr>
                   ))}
@@ -197,7 +187,7 @@ export default async function ContactsPage({
                     <div className="flex gap-2">
                       {page > 1 && (
                         <Link
-                          href={`/contacts?page=${page - 1}${searchParams.status ? `&status=${searchParams.status}` : ''}${searchParams.search ? `&search=${searchParams.search}` : ''}`}
+                          href={`/contacts?page=${page - 1}${params.status ? `&status=${params.status}` : ''}${params.search ? `&search=${params.search}` : ''}`}
                           className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                           Anterior
@@ -205,7 +195,7 @@ export default async function ContactsPage({
                       )}
                       {page < totalPages && (
                         <Link
-                          href={`/contacts?page=${page + 1}${searchParams.status ? `&status=${searchParams.status}` : ''}${searchParams.search ? `&search=${searchParams.search}` : ''}`}
+                          href={`/contacts?page=${page + 1}${params.status ? `&status=${params.status}` : ''}${params.search ? `&search=${params.search}` : ''}`}
                           className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                           Próxima

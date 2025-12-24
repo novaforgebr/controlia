@@ -7,11 +7,12 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 export default async function DocumentsPage({
   searchParams,
 }: {
-  searchParams: { search?: string; category?: string }
+  searchParams: Promise<{ search?: string; category?: string }>
 }) {
+  const params = await searchParams
   const { data: files } = await listKnowledgeBaseFiles({
-    search: searchParams.search,
-    category: searchParams.category,
+    search: params.search,
+    category: params.category,
   })
 
   return (

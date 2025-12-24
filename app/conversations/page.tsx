@@ -6,12 +6,14 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 export default async function ConversationsPage({
   searchParams,
 }: {
-  searchParams: { id?: string; status?: string; channel?: string }
+  searchParams: Promise<{ id?: string; status?: string; channel?: string }>
 }) {
   const company = await getCurrentCompany()
   if (!company) {
     return null
   }
+
+  const params = await searchParams
 
   return (
     <ProtectedLayout>
@@ -35,9 +37,9 @@ export default async function ConversationsPage({
 
         <div className="flex-1 min-h-0">
           <ConversationsSplitView
-            selectedConversationId={searchParams.id}
-            initialStatus={searchParams.status}
-            initialChannel={searchParams.channel}
+            selectedConversationId={params.id}
+            initialStatus={params.status}
+            initialChannel={params.channel}
           />
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createMessage } from '@/app/actions/messages'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/lib/hooks/use-toast'
 
 interface MessageFormProps {
   conversationId: string
@@ -15,6 +16,7 @@ export function MessageForm({ conversationId, contactId, onMessageSent }: Messag
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const toast = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,9 +25,14 @@ export function MessageForm({ conversationId, contactId, onMessageSent }: Messag
 
     if (!content.trim()) {
       setError('Digite uma mensagem')
+      toast.warning('Digite uma mensagem antes de enviar')
       setLoading(false)
       return
     }
+
+    setLoading(true)
+    setError(null)
+    const loadingToast = toast.loading('Enviando mensagem...')
 
     const formData = new FormData()
     formData.append('conversation_id', conversationId)
@@ -35,24 +42,33 @@ export function MessageForm({ conversationId, contactId, onMessageSent }: Messag
     formData.append('direction', 'outbound')
     formData.append('status', 'sent')
 
-    const result = await createMessage(formData)
+    try {
+      const result = await createMessage(formData)
+      toast.dismiss(loadingToast)
 
-    if (result.error) {
-      setError(result.error)
-      setLoading(false)
-      return
-    }
-
-    if (result.success) {
-      setContent('')
-      if (onMessageSent) {
-        onMessageSent()
-      } else {
-        router.refresh()
+      if (result.error) {
+        setError(result.error)
+        toast.error(result.error)
+        setLoading(false)
+        return
       }
-    }
 
-    setLoading(false)
+      if (result.success) {
+        setContent('')
+        toast.success('Mensagem enviada com sucesso')
+        if (onMessageSent) {
+          onMessageSent()
+        } else {
+          router.refresh()
+        }
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao enviar mensagem. Tente novamente.')
+      setError('Erro ao enviar mensagem')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

@@ -11,15 +11,16 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 export default async function ConversationDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const conversation = await getConversation(params.id)
+  const { id } = await params
+  const conversation = await getConversation(id)
 
   if (!conversation) {
     notFound()
   }
 
-  const { data: messages } = await listMessages(params.id)
+  const { data: messages } = await listMessages(id)
 
   return (
     <ProtectedLayout>

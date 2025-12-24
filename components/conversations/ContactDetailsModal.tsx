@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { updateContact } from '@/app/actions/contacts'
 import { format } from 'date-fns'
+import { useToast } from '@/lib/hooks/use-toast'
 
 interface Contact {
   id: string
@@ -35,6 +36,7 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState<Record<string, string>>({})
   const supabase = createClient()
+  const toast = useToast()
 
   useEffect(() => {
     if (isOpen && contactId) {
@@ -81,6 +83,7 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
+    const loadingToast = toast.loading('Salvando alterações...')
 
     try {
       const formDataObj = new FormData()
@@ -89,19 +92,22 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
       })
 
       const result = await updateContact(contactId, formDataObj)
+      toast.dismiss(loadingToast)
 
       if (result.success) {
+        toast.success('Contato atualizado com sucesso!')
         if (onUpdate) {
           onUpdate()
         }
         await loadContact()
         // Não fechar o modal, apenas atualizar os dados
       } else {
-        alert('Erro ao atualizar contato: ' + (result.error || 'Erro desconhecido'))
+        toast.error('Erro ao atualizar contato: ' + (result.error || 'Erro desconhecido'))
       }
     } catch (error) {
+      toast.dismiss(loadingToast)
       console.error('Erro ao salvar:', error)
-      alert('Erro ao salvar contato')
+      toast.error('Erro ao salvar contato. Tente novamente.')
     } finally {
       setSaving(false)
     }

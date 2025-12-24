@@ -1,8 +1,10 @@
 import { listCompanyUsers } from '@/app/actions/users'
 import { getCurrentCompany } from '@/lib/utils/company'
+import { getUserRoleInCompany } from '@/lib/utils/company'
 import { format } from 'date-fns'
 import ProtectedLayout from '@/app/layout-protected'
 import { UserManagementActions } from '@/components/users/UserManagementActions'
+import { InviteUserButton } from '@/components/users/InviteUserButton'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 export default async function UsersPage() {
@@ -12,6 +14,8 @@ export default async function UsersPage() {
   }
 
   const { data: users } = await listCompanyUsers()
+  const userRole = await getUserRoleInCompany(company.id)
+  const canInvite = userRole === 'admin'
 
   return (
     <ProtectedLayout>
@@ -22,6 +26,7 @@ export default async function UsersPage() {
             <h1 className="text-3xl font-bold text-gray-900">Usuários</h1>
             <p className="mt-2 text-gray-600">Gerencie usuários e permissões da sua empresa</p>
           </div>
+          {canInvite && <InviteUserButton />}
         </div>
 
         {/* Lista de usuários */}
@@ -104,6 +109,7 @@ export default async function UsersPage() {
                         companyUserId={companyUser.id}
                         currentRole={companyUser.role}
                         isActive={companyUser.is_active}
+                        userRole={userRole || undefined}
                       />
                     </div>
                   </div>

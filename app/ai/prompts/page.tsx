@@ -3,21 +3,23 @@ import { getCurrentCompany } from '@/lib/utils/company'
 import Link from 'next/link'
 import ProtectedLayout from '@/app/layout-protected'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { PromptCard } from '@/components/ai/PromptCard'
 
 export default async function AIPromptsPage({
   searchParams,
 }: {
-  searchParams: { context_type?: string; channel?: string; active?: string }
+  searchParams: Promise<{ context_type?: string; channel?: string; active?: string }>
 }) {
   const company = await getCurrentCompany()
   if (!company) {
     return null
   }
 
+  const params = await searchParams
   const { data: prompts } = await listAIPrompts({
-    context_type: searchParams.context_type,
-    channel: searchParams.channel,
-    is_active: searchParams.active === 'true' ? true : searchParams.active === 'false' ? false : undefined,
+    context_type: params.context_type,
+    channel: params.channel,
+    is_active: params.active === 'true' ? true : params.active === 'false' ? false : undefined,
   })
 
   return (
@@ -47,7 +49,7 @@ export default async function AIPromptsPage({
           <form method="get" className="flex gap-4">
             <select
               name="context_type"
-              defaultValue={searchParams.context_type || ''}
+              defaultValue={params.context_type || ''}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             >
               <option value="">Todos os contextos</option>
@@ -57,7 +59,7 @@ export default async function AIPromptsPage({
             </select>
             <select
               name="channel"
-              defaultValue={searchParams.channel || ''}
+              defaultValue={params.channel || ''}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             >
               <option value="">Todos os canais</option>
@@ -68,7 +70,7 @@ export default async function AIPromptsPage({
             </select>
             <select
               name="active"
-              defaultValue={searchParams.active || ''}
+              defaultValue={params.active || ''}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             >
               <option value="">Todos</option>
@@ -112,59 +114,7 @@ export default async function AIPromptsPage({
             </div>
           ) : (
             prompts.map((prompt) => (
-              <div
-                key={prompt.id}
-                className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{prompt.name}</h3>
-                      {prompt.is_default && (
-                        <span className="rounded-full bg-[#039155] px-2 py-0.5 text-xs font-medium text-white">
-                          Padrão
-                        </span>
-                      )}
-                    </div>
-                    {prompt.description && (
-                      <p className="mt-2 text-sm text-gray-600 line-clamp-2">{prompt.description}</p>
-                    )}
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {prompt.context_type && (
-                        <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                          {prompt.context_type}
-                        </span>
-                      )}
-                      {prompt.channel && (
-                        <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">
-                          {prompt.channel}
-                        </span>
-                      )}
-                      <span className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-700">
-                        v{prompt.version}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    {prompt.is_active ? (
-                      <span className="inline-flex h-2 w-2 rounded-full bg-green-400" />
-                    ) : (
-                      <span className="inline-flex h-2 w-2 rounded-full bg-gray-300" />
-                    )}
-                  </div>
-                </div>
-                <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
-                  <div className="text-xs text-gray-500">
-                    Modelo: {prompt.model}
-                  </div>
-                  <Link
-                    href={`/ai/prompts/${prompt.id}`}
-                    className="text-sm font-semibold text-[#039155] hover:text-[#18B0BB] transition-colors"
-                  >
-                    Ver detalhes →
-                  </Link>
-                </div>
-              </div>
+              <PromptCard key={prompt.id} prompt={prompt} />
             ))
           )}
         </div>

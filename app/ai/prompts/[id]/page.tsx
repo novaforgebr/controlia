@@ -3,21 +3,23 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { TogglePromptButton } from '@/components/ai/TogglePromptButton'
+import { PromptIdDisplay } from '@/components/ai/PromptIdDisplay'
 import ProtectedLayout from '@/app/layout-protected'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 export default async function AIPromptDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const prompt = await getAIPrompt(params.id)
+  const { id } = await params
+  const prompt = await getAIPrompt(id)
 
   if (!prompt) {
     notFound()
   }
 
-  const { data: versions } = await getPromptVersions(params.id)
+  const { data: versions } = await getPromptVersions(id)
 
   return (
     <ProtectedLayout>
@@ -36,10 +38,27 @@ export default async function AIPromptDetailPage({
               <p className="mt-1 text-gray-600">{prompt.description}</p>
             )}
           </div>
-          <TogglePromptButton promptId={prompt.id} isActive={prompt.is_active} />
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/ai/prompts/${prompt.id}/edit`}
+              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Editar
+            </Link>
+            <TogglePromptButton promptId={prompt.id} isActive={prompt.is_active} />
+          </div>
         </div>
 
         <div className="space-y-6">
+          {/* ID do Prompt */}
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-xl font-bold text-gray-900">Identificação</h2>
+            <PromptIdDisplay promptId={prompt.id} />
+            <p className="mt-3 text-xs text-gray-500">
+              Use este ID no n8n para referenciar este prompt nos seus workflows.
+            </p>
+          </div>
+
           {/* Informações principais */}
           <div className="rounded-lg bg-white p-6 shadow">
             <h2 className="mb-4 text-xl font-bold text-gray-900">Informações</h2>

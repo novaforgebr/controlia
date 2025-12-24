@@ -5,9 +5,10 @@ import ProtectedLayout from '@/app/layout-protected'
 export default async function DeleteContactPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const contact = await getContact(params.id)
+  const { id } = await params
+  const contact = await getContact(id)
 
   if (!contact) {
     notFound()
@@ -15,7 +16,7 @@ export default async function DeleteContactPage({
 
   async function handleDelete() {
     'use server'
-    const result = await deleteContact(params.id)
+    const result = await deleteContact(id)
     if (result.success) {
       redirect('/contacts')
     }

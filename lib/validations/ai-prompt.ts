@@ -8,7 +8,12 @@ export const createAIPromptSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório').max(255),
   description: z.string().optional().nullable(),
   version: z.number().int().positive().default(1),
-  parent_id: z.string().uuid().optional().nullable(),
+  parent_id: z
+    .string()
+    .uuid('ID do prompt pai deve ser um UUID válido')
+    .optional()
+    .nullable()
+    .or(z.literal('').transform(() => null)),
   prompt_text: z.string().min(1, 'Texto do prompt é obrigatório'),
   system_prompt: z.string().optional().nullable(),
   model: z.string().default('gpt-4'),

@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O Controlia CRM é uma plataforma SaaS multi-tenant construída com Next.js 14 (App Router), TypeScript, Supabase e integração com n8n para automações e IA.
+O Controlia CRM é uma plataforma SaaS multi-tenant construída com Next.js 15 (App Router), React 19, TypeScript, Supabase e integração com n8n para automações e IA.
 
 ## Princípios Arquiteturais
 

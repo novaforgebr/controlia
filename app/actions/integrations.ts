@@ -12,6 +12,56 @@ import { revalidatePath } from 'next/cache'
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || ''
 const N8N_SECRET = process.env.N8N_SECRET || ''
 
+// Helper para validar configuração do n8n
+function validateN8nConfig() {
+  if (!N8N_WEBHOOK_URL) {
+    return { error: 'N8N_WEBHOOK_URL não configurado. Configure a variável de ambiente.' }
+  }
+  if (!N8N_SECRET) {
+    return { error: 'N8N_SECRET não configurado. Configure a variável de ambiente.' }
+  }
+  return null
+}
+
+// Helper para fazer requisições ao n8n com retry
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3,
+  retryDelay = 1000
+): Promise<Response> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(30000), // 30 segundos de timeout
+      })
+      
+      if (response.ok) {
+        return response
+      }
+      
+      // Se não for erro de servidor, não tenta novamente
+      if (response.status < 500) {
+        return response
+      }
+      
+      lastError = new Error(`HTTP ${response.status}: ${response.statusText}`)
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Erro desconhecido')
+    }
+    
+    // Aguardar antes de tentar novamente (exceto na última tentativa)
+    if (attempt < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, retryDelay * attempt))
+    }
+  }
+  
+  throw lastError || new Error('Falha após múltiplas tentativas')
+}
+
 /**
  * Conectar canal (WhatsApp/Telegram)
  */
@@ -47,22 +97,51 @@ export async function connectChannel(channel: string) {
       }
     }
 
-    // Chamar webhook do n8n para iniciar conexão
-    const n8nResponse = await fetch(`${N8N_WEBHOOK_URL}/connect-channel`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-N8N-Secret': N8N_SECRET,
-      },
-      body: JSON.stringify({
-        company_id: company.id,
-        channel: channel,
-      }),
-    })
+    // Validar configuração do n8n
+    const configError = validateN8nConfig()
+    if (configError) {
+      return configError
+    }
+
+    // Chamar webhook do n8n para iniciar conexão com retry
+    let n8nResponse: Response
+    try {
+      n8nResponse = await fetchWithRetry(
+        `${N8N_WEBHOOK_URL}/connect-channel`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-N8N-Secret': N8N_SECRET,
+          },
+          body: JSON.stringify({
+            company_id: company.id,
+            channel: channel,
+          }),
+        }
+      )
+    } catch (error) {
+      console.error('Erro ao chamar n8n (após retries):', error)
+      return { 
+        error: 'Não foi possível conectar ao serviço de automação. Verifique se o n8n está configurado e acessível.' 
+      }
+    }
 
     if (!n8nResponse.ok) {
       const errorText = await n8nResponse.text()
       console.error('Erro ao chamar n8n:', errorText)
+      
+      // Mensagens de erro mais específicas
+      if (n8nResponse.status === 401) {
+        return { error: 'Erro de autenticação com o n8n. Verifique o N8N_SECRET.' }
+      }
+      if (n8nResponse.status === 404) {
+        return { error: 'Workflow não encontrado no n8n. Verifique se o workflow de conexão está ativo.' }
+      }
+      if (n8nResponse.status >= 500) {
+        return { error: 'Erro no servidor de automação. Tente novamente em alguns instantes.' }
+      }
+      
       return { error: 'Erro ao conectar canal. Tente novamente.' }
     }
 
@@ -133,21 +212,29 @@ export async function disconnectChannel(integrationId: string) {
 
     // Chamar webhook do n8n para desconectar
     if (integration.n8n_instance_id) {
-      try {
-        await fetch(`${N8N_WEBHOOK_URL}/disconnect-channel`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-N8N-Secret': N8N_SECRET,
-          },
-          body: JSON.stringify({
-            instance_id: integration.n8n_instance_id,
-            company_id: company.id,
-          }),
-        })
-      } catch (error) {
-        console.error('Erro ao desconectar no n8n:', error)
-        // Continuar mesmo se falhar no n8n
+      const configError = validateN8nConfig()
+      if (!configError) {
+        try {
+          await fetchWithRetry(
+            `${N8N_WEBHOOK_URL}/disconnect-channel`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-N8N-Secret': N8N_SECRET,
+              },
+              body: JSON.stringify({
+                instance_id: integration.n8n_instance_id,
+                company_id: company.id,
+              }),
+            },
+            2, // Menos retries para desconexão
+            500
+          )
+        } catch (error) {
+          console.error('Erro ao desconectar no n8n:', error)
+          // Continuar mesmo se falhar no n8n (não é crítico)
+        }
       }
     }
 
@@ -206,42 +293,51 @@ export async function checkConnectionStatus(integrationId: string) {
 
     // Chamar n8n para verificar status
     if (integration.n8n_instance_id) {
-      try {
-        const n8nResponse = await fetch(`${N8N_WEBHOOK_URL}/check-status`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-N8N-Secret': N8N_SECRET,
-          },
-          body: JSON.stringify({
-            instance_id: integration.n8n_instance_id,
-            company_id: company.id,
-          }),
-        })
+      const configError = validateN8nConfig()
+      if (!configError) {
+        try {
+          const n8nResponse = await fetchWithRetry(
+            `${N8N_WEBHOOK_URL}/check-status`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-N8N-Secret': N8N_SECRET,
+              },
+              body: JSON.stringify({
+                instance_id: integration.n8n_instance_id,
+                company_id: company.id,
+              }),
+            },
+            2, // Menos retries para verificação de status
+            1000
+          )
 
-        if (n8nResponse.ok) {
-          const n8nData = await n8nResponse.json()
-          
-          // Atualizar status no banco
-          if (n8nData.status && n8nData.status !== integration.status) {
-            await supabase
-              .from('channel_integrations')
-              .update({
-                status: n8nData.status,
-                connected_at: n8nData.status === 'connected' ? new Date().toISOString() : integration.connected_at,
-                qr_code_base64: n8nData.status === 'connected' ? null : integration.qr_code_base64,
-              })
-              .eq('id', integrationId)
-          }
+          if (n8nResponse.ok) {
+            const n8nData = await n8nResponse.json()
+            
+            // Atualizar status no banco
+            if (n8nData.status && n8nData.status !== integration.status) {
+              await supabase
+                .from('channel_integrations')
+                .update({
+                  status: n8nData.status,
+                  connected_at: n8nData.status === 'connected' ? new Date().toISOString() : integration.connected_at,
+                  qr_code_base64: n8nData.status === 'connected' ? null : integration.qr_code_base64,
+                })
+                .eq('id', integrationId)
+            }
 
-          return {
-            success: true,
-            status: n8nData.status || integration.status,
-            error: n8nData.error || null,
+            return {
+              success: true,
+              status: n8nData.status || integration.status,
+              error: n8nData.error || null,
+            }
           }
+        } catch (error) {
+          console.error('Erro ao verificar status no n8n:', error)
+          // Continuar e retornar status atual do banco
         }
-      } catch (error) {
-        console.error('Erro ao verificar status no n8n:', error)
       }
     }
 

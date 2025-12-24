@@ -1,17 +1,27 @@
 import { getContact } from '@/app/actions/contacts'
+import { listCustomFields } from '@/app/actions/custom-fields'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import ProtectedLayout from '@/app/layout-protected'
-import { CustomFieldsDisplay } from '@/components/contacts/CustomFieldsDisplay'
+import { CustomFieldsDisplayAll } from '@/components/contacts/CustomFieldsDisplayAll'
+import { CustomFieldsEditor } from '@/components/contacts/CustomFieldsEditor'
+import { ContactStatusEditor } from '@/components/contacts/ContactStatusEditor'
+import { ContactConversations } from '@/components/contacts/ContactConversations'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+
+async function CustomFieldsEditorWrapper({ contactId, customFields }: { contactId: string; customFields: Record<string, unknown> }) {
+  const { data: fields } = await listCustomFields()
+  return <CustomFieldsEditor contactId={contactId} customFields={customFields} fields={fields || []} />
+}
 
 export default async function ContactDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const contact = await getContact(params.id)
+  const { id } = await params
+  const contact = await getContact(id)
 
   if (!contact) {
     notFound()
@@ -79,33 +89,30 @@ export default async function ContactDetailPage({
               </div>
             )}
 
-            {/* Campos Customizados */}
-            <CustomFieldsDisplay customFields={(contact.custom_fields as Record<string, unknown>) || {}} />
+            {/* Campos Customizados - Visualização */}
+            <CustomFieldsDisplayAll customFields={(contact.custom_fields as Record<string, unknown>) || {}} />
+
+            {/* Campos Customizados - Edição */}
+            <CustomFieldsEditorWrapper contactId={contact.id} customFields={(contact.custom_fields as Record<string, unknown>) || {}} />
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Status e Pipeline - Editor */}
+            <ContactStatusEditor 
+              contactId={id} 
+              currentStatus={contact.status}
+              currentPipelineId={(contact as any).pipeline_id}
+              currentPipelineStageId={(contact as any).pipeline_stage_id}
+            />
+
+            {/* Conversas do Contato */}
+            <ContactConversations contactId={contact.id} />
+
+            {/* Informações Adicionais */}
             <div className="rounded-lg bg-white p-6 shadow">
-              <h2 className="mb-4 text-xl font-bold text-gray-900">Status e Classificação</h2>
+              <h2 className="mb-4 text-xl font-bold text-gray-900">Informações Adicionais</h2>
               <dl className="space-y-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                        contact.status === 'client'
-                          ? 'bg-green-100 text-green-800'
-                          : contact.status === 'prospect'
-                          ? 'bg-blue-100 text-blue-800'
-                          : contact.status === 'inactive'
-                          ? 'bg-gray-100 text-gray-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {contact.status}
-                    </span>
-                  </dd>
-                </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Score</dt>
                   <dd className="mt-1 text-sm text-gray-900">{contact.score}/100</dd>

@@ -28,10 +28,14 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
   }
 
   return (
-    <>
-      <div className="sm:col-span-2 border-t border-gray-200 pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Campos Customizados</h3>
+    <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
+      <div className="mb-6 flex items-center gap-2 border-b border-gray-200 pb-4">
+        <svg className="h-5 w-5 text-[#039155]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+        </svg>
+        <h2 className="text-xl font-semibold text-gray-900">Campos Customizados</h2>
       </div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
       {activeFields.map((field: CustomField) => {
         const fieldValue = contactCustomFields[field.field_key] || ''
@@ -40,7 +44,7 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
           case 'text':
             return (
               <div key={field.id} className="sm:col-span-2">
-                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 mb-2">
                   {field.field_label}
                   {field.is_required && <span className="text-red-500 ml-1">*</span>}
                 </label>
@@ -50,7 +54,7 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
                   name={`custom_${field.field_key}`}
                   defaultValue={String(fieldValue)}
                   required={field.is_required}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
                 />
               </div>
             )
@@ -58,17 +62,17 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
           case 'textarea':
             return (
               <div key={field.id} className="sm:col-span-2">
-                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 mb-2">
                   {field.field_label}
                   {field.is_required && <span className="text-red-500 ml-1">*</span>}
                 </label>
                 <textarea
                   id={`custom_${field.field_key}`}
                   name={`custom_${field.field_key}`}
-                  rows={3}
+                  rows={4}
                   defaultValue={String(fieldValue)}
                   required={field.is_required}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 resize-none"
                 />
               </div>
             )
@@ -76,7 +80,7 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
           case 'number':
             return (
               <div key={field.id}>
-                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 mb-2">
                   {field.field_label}
                   {field.is_required && <span className="text-red-500 ml-1">*</span>}
                 </label>
@@ -86,7 +90,7 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
                   name={`custom_${field.field_key}`}
                   defaultValue={fieldValue ? Number(fieldValue) : ''}
                   required={field.is_required}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
                 />
               </div>
             )
@@ -94,7 +98,7 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
           case 'date':
             return (
               <div key={field.id}>
-                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 mb-2">
                   {field.field_label}
                   {field.is_required && <span className="text-red-500 ml-1">*</span>}
                 </label>
@@ -104,7 +108,7 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
                   name={`custom_${field.field_key}`}
                   defaultValue={fieldValue ? String(fieldValue).split('T')[0] : ''}
                   required={field.is_required}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
                 />
               </div>
             )
@@ -112,7 +116,7 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
           case 'select':
             return (
               <div key={field.id}>
-                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700">
+                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 mb-2">
                   {field.field_label}
                   {field.is_required && <span className="text-red-500 ml-1">*</span>}
                 </label>
@@ -121,7 +125,7 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
                   name={`custom_${field.field_key}`}
                   defaultValue={String(fieldValue)}
                   required={field.is_required}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
                 >
                   <option value="">Selecione...</option>
                   {field.field_options?.map((option) => (
@@ -136,20 +140,22 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
           case 'boolean':
             return (
               <div key={field.id} className="sm:col-span-2">
-                <label className="flex items-center">
+                <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
                   <input
                     type="checkbox"
                     id={`custom_${field.field_key}`}
                     name={`custom_${field.field_key}`}
                     value="true"
                     defaultChecked={fieldValue === true || fieldValue === 'true'}
-                    className="rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-[#039155] focus:ring-[#039155]"
                   />
-                  <span className="ml-2 text-sm text-gray-700">
-                    {field.field_label}
-                    {field.is_required && <span className="text-red-500 ml-1">*</span>}
-                  </span>
-                </label>
+                  <div className="flex-1">
+                    <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-900 cursor-pointer">
+                      {field.field_label}
+                      {field.is_required && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                  </div>
+                </div>
               </div>
             )
 
@@ -157,7 +163,8 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
             return null
         }
       })}
-    </>
+      </div>
+    </div>
   )
 }
 

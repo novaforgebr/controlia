@@ -1,58 +1,121 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { updateUserRole, toggleUserStatus, removeUser } from '@/app/actions/users'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/lib/hooks/use-toast'
 
 interface UserManagementActionsProps {
   companyUserId: string
   currentRole: string
   isActive: boolean
+  userRole?: string // Role do usuário atual (para verificar permissões)
 }
 
 export function UserManagementActions({
   companyUserId,
   currentRole,
   isActive,
+  userRole,
 }: UserManagementActionsProps) {
   const [loading, setLoading] = useState(false)
   const [showRoleMenu, setShowRoleMenu] = useState(false)
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false)
+  const [canManage, setCanManage] = useState(false)
   const router = useRouter()
+  const toast = useToast()
+
+  useEffect(() => {
+    // Verificar se o usuário atual pode gerenciar (apenas admin)
+    setCanManage(userRole === 'admin')
+  }, [userRole])
 
   const handleRoleChange = async (newRole: string) => {
+    if (!canManage) {
+      toast.error('Apenas administradores podem alterar papéis')
+      return
+    }
+
     setLoading(true)
-    const result = await updateUserRole(companyUserId, newRole)
-    setLoading(false)
-    setShowRoleMenu(false)
-    if (result.success) {
-      router.refresh()
-    } else {
-      alert(result.error || 'Erro ao atualizar papel')
+    const loadingToast = toast.loading('Atualizando papel do usuário...')
+    
+    try {
+      const result = await updateUserRole(companyUserId, newRole)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        toast.success('Papel do usuário atualizado com sucesso')
+        router.refresh()
+      } else {
+        toast.error(result.error || 'Erro ao atualizar papel')
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao atualizar papel. Tente novamente.')
+    } finally {
+      setLoading(false)
+      setShowRoleMenu(false)
     }
   }
 
   const handleToggleStatus = async () => {
+    if (!canManage) {
+      toast.error('Apenas administradores podem ativar/desativar usuários')
+      return
+    }
+
     setLoading(true)
-    const result = await toggleUserStatus(companyUserId, !isActive)
-    setLoading(false)
-    if (result.success) {
-      router.refresh()
-    } else {
-      alert(result.error || 'Erro ao atualizar status')
+    const loadingToast = toast.loading(isActive ? 'Desativando usuário...' : 'Ativando usuário...')
+    
+    try {
+      const result = await toggleUserStatus(companyUserId, !isActive)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        toast.success(isActive ? 'Usuário desativado com sucesso' : 'Usuário ativado com sucesso')
+        router.refresh()
+      } else {
+        toast.error(result.error || 'Erro ao atualizar status')
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao atualizar status. Tente novamente.')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleRemove = async () => {
-    setLoading(true)
-    const result = await removeUser(companyUserId)
-    setLoading(false)
-    setShowRemoveConfirm(false)
-    if (result.success) {
-      router.refresh()
-    } else {
-      alert(result.error || 'Erro ao remover usuário')
+    if (!canManage) {
+      toast.error('Apenas administradores podem remover usuários')
+      return
     }
+
+    setLoading(true)
+    const loadingToast = toast.loading('Removendo usuário...')
+    
+    try {
+      const result = await removeUser(companyUserId)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        toast.success('Usuário removido com sucesso')
+        router.refresh()
+      } else {
+        toast.error(result.error || 'Erro ao remover usuário')
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao remover usuário. Tente novamente.')
+    } finally {
+      setLoading(false)
+      setShowRemoveConfirm(false)
+    }
+  }
+
+  // Se não pode gerenciar, não mostrar ações
+  if (!canManage) {
+    return null
   }
 
   return (
@@ -149,4 +212,3 @@ export function UserManagementActions({
     </div>
   )
 }
-

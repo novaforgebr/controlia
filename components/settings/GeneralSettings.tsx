@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { updateCompanySettings } from '@/app/actions/companies'
+import { useToast } from '@/lib/hooks/use-toast'
 
 interface GeneralSettingsProps {
   settings: Record<string, unknown>
@@ -9,16 +10,27 @@ interface GeneralSettingsProps {
 
 export function GeneralSettings({ settings }: GeneralSettingsProps) {
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true)
-    const result = await updateCompanySettings(formData)
-    setLoading(false)
-    if (result.success) {
-      alert('Configurações salvas com sucesso!')
-      window.location.reload()
-    } else {
-      alert(result.error || 'Erro ao salvar configurações')
+    const loadingToast = toast.loading('Salvando configurações...')
+    
+    try {
+      const result = await updateCompanySettings(formData)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        toast.success('Configurações salvas com sucesso!')
+        window.location.reload()
+      } else {
+        toast.error(result.error || 'Erro ao salvar configurações')
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao salvar configurações. Tente novamente.')
+    } finally {
+      setLoading(false)
     }
   }
 

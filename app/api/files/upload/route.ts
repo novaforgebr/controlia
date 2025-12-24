@@ -30,9 +30,15 @@ export async function POST(request: NextRequest) {
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
     const filePath = `${company.id}/${fileName}`
 
+    // Bucket name
+    const bucketName = 'files'
+    
+    // Não verificar se o bucket existe - tentar fazer upload diretamente
+    // Se o bucket não existir, o erro virá no upload e será tratado abaixo
+
     // Upload para Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('files')
+      .from(bucketName)
       .upload(filePath, file, {
         contentType: file.type,
         upsert: false,
@@ -40,12 +46,32 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Erro no upload:', uploadError)
-      return NextResponse.json({ error: 'Erro ao fazer upload do arquivo' }, { status: 500 })
+      
+      // Se o erro for de bucket não encontrado
+      if (uploadError.message?.includes('Bucket not found') || uploadError.statusCode === '404') {
+        return NextResponse.json(
+          { error: 'Bucket de armazenamento não configurado' },
+          { status: 500 }
+        )
+      }
+      
+      // Se o erro for de permissão (RLS)
+      if (uploadError.message?.includes('permission') || uploadError.message?.includes('policy') || uploadError.statusCode === '403') {
+        return NextResponse.json(
+          { error: 'Erro de permissão ao fazer upload. Verifique as políticas RLS do bucket.' },
+          { status: 500 }
+        )
+      }
+      
+      return NextResponse.json(
+        { error: `Erro ao fazer upload do arquivo: ${uploadError.message || 'Erro desconhecido'}` },
+        { status: 500 }
+      )
     }
 
     // Obter URL pública
     const { data: urlData } = supabase.storage
-      .from('files')
+      .from(bucketName)
       .getPublicUrl(filePath)
 
     // Criar registro no banco
@@ -69,7 +95,7 @@ export async function POST(request: NextRequest) {
     if (dbError) {
       console.error('Erro ao criar registro:', dbError)
       // Tentar deletar do storage se falhar no banco
-      await supabase.storage.from('files').remove([filePath])
+      await supabase.storage.from(bucketName).remove([filePath])
       return NextResponse.json({ error: 'Erro ao salvar registro do arquivo' }, { status: 500 })
     }
 

@@ -168,6 +168,14 @@ export async function updateContact(contactId: string, formData: FormData) {
       }
     })
 
+    // Tratar pipeline_id e pipeline_stage_id separadamente (não passar pelo Zod primeiro)
+    const pipelineIdValue = formData.get('pipeline_id')
+    const stageIdValue = formData.get('pipeline_stage_id')
+    
+    // Converter strings vazias para null
+    rawData.pipeline_id = pipelineIdValue && pipelineIdValue !== '' ? pipelineIdValue : null
+    rawData.pipeline_stage_id = stageIdValue && stageIdValue !== '' ? stageIdValue : null
+
     // Extrair campos customizados
     const customFields: Record<string, unknown> = {}
     for (const [key, value] of formData.entries()) {
@@ -200,20 +208,26 @@ export async function updateContact(contactId: string, formData: FormData) {
       }
     }
 
-    // Validar dados
-    const validatedData = updateContactSchema.parse(rawData)
+    // Validar dados (sem pipeline_id e pipeline_stage_id para evitar problemas de validação)
+    const { pipeline_id, pipeline_stage_id, ...dataToValidate } = rawData
+    const validatedData = updateContactSchema.parse(dataToValidate)
 
     // Mesclar campos customizados existentes com novos
     const existingCustomFields = (currentContact.custom_fields as Record<string, unknown>) || {}
     const mergedCustomFields = { ...existingCustomFields, ...customFields }
 
+    // Preparar dados para atualização incluindo pipeline_id e pipeline_stage_id
+    const updateData: Record<string, unknown> = {
+      ...validatedData,
+      custom_fields: Object.keys(mergedCustomFields).length > 0 ? mergedCustomFields : {},
+      pipeline_id: pipeline_id || null,
+      pipeline_stage_id: pipeline_stage_id || null,
+    }
+
     // Atualizar contato
     const { data: updatedContact, error } = await supabase
       .from('contacts')
-      .update({
-        ...validatedData,
-        custom_fields: Object.keys(mergedCustomFields).length > 0 ? mergedCustomFields : {},
-      })
+      .update(updateData)
       .eq('id', contactId)
       .eq('company_id', company.id)
       .select()
@@ -221,7 +235,8 @@ export async function updateContact(contactId: string, formData: FormData) {
 
     if (error) {
       console.error('Erro ao atualizar contato:', error)
-      return { error: 'Erro ao atualizar contato' }
+      console.error('Dados enviados:', updateData)
+      return { error: `Erro ao atualizar contato: ${error.message || 'Erro desconhecido'}` }
     }
 
     // Registrar auditoria

@@ -45,13 +45,16 @@ export function NewDocumentForm() {
       const result = await response.json()
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Erro ao fazer upload')
+        const errorMessage = result.error || 'Erro ao fazer upload do arquivo'
+        setError(errorMessage)
+        setLoading(false)
+        return
       }
 
       router.push('/documents')
       router.refresh()
     } catch (err: any) {
-      setError(err.message || 'Erro ao fazer upload do arquivo')
+      setError(err.message || 'Erro ao fazer upload do arquivo. Verifique sua conexão e tente novamente.')
       setLoading(false)
     }
   }

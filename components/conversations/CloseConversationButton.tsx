@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { closeConversation } from '@/app/actions/conversations'
 import { useState } from 'react'
+import { useToast } from '@/lib/hooks/use-toast'
 
 interface CloseConversationButtonProps {
   conversationId: string
@@ -11,14 +12,28 @@ interface CloseConversationButtonProps {
 export function CloseConversationButton({ conversationId }: CloseConversationButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleClose = async () => {
     setLoading(true)
-    const result = await closeConversation(conversationId)
-    if (result.success) {
-      router.refresh()
+    const loadingToast = toast.loading('Fechando conversa...')
+    
+    try {
+      const result = await closeConversation(conversationId)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        toast.success('Conversa fechada com sucesso')
+        router.refresh()
+      } else {
+        toast.error(result.error || 'Erro ao fechar conversa')
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao fechar conversa. Tente novamente.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (

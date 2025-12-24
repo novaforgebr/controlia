@@ -6,20 +6,21 @@ import ProtectedLayout from '@/app/layout-protected'
 export default async function AILogsPage({
   searchParams,
 }: {
-  searchParams: { conversation_id?: string; status?: string; page?: string }
+  searchParams: Promise<{ conversation_id?: string; status?: string; page?: string }>
 }) {
   const company = await getCurrentCompany()
   if (!company) {
     return null
   }
 
-  const page = parseInt(searchParams.page || '1')
+  const params = await searchParams
+  const page = parseInt(params.page || '1')
   const limit = 20
   const offset = (page - 1) * limit
 
   const { data: logs, count } = await listAILogs({
-    conversation_id: searchParams.conversation_id,
-    status: searchParams.status,
+    conversation_id: params.conversation_id,
+    status: params.status,
     limit,
     offset,
   })
@@ -41,12 +42,12 @@ export default async function AILogsPage({
               type="text"
               name="conversation_id"
               placeholder="Ex: UUID da conversa..."
-              defaultValue={searchParams.conversation_id}
+              defaultValue={params.conversation_id}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-[#039155] focus:outline-none focus:ring-[#039155]"
             />
             <select
               name="status"
-              defaultValue={searchParams.status || ''}
+              defaultValue={params.status || ''}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
             >
               <option value="">Todos os status</option>
@@ -123,7 +124,7 @@ export default async function AILogsPage({
                     <div className="flex gap-2">
                       {page > 1 && (
                         <a
-                          href={`/ai/logs?page=${page - 1}${searchParams.conversation_id ? `&conversation_id=${searchParams.conversation_id}` : ''}${searchParams.status ? `&status=${searchParams.status}` : ''}`}
+                          href={`/ai/logs?page=${page - 1}${params.conversation_id ? `&conversation_id=${params.conversation_id}` : ''}${params.status ? `&status=${params.status}` : ''}`}
                           className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                           Anterior
@@ -131,7 +132,7 @@ export default async function AILogsPage({
                       )}
                       {page < totalPages && (
                         <a
-                          href={`/ai/logs?page=${page + 1}${searchParams.conversation_id ? `&conversation_id=${searchParams.conversation_id}` : ''}${searchParams.status ? `&status=${searchParams.status}` : ''}`}
+                          href={`/ai/logs?page=${page + 1}${params.conversation_id ? `&conversation_id=${params.conversation_id}` : ''}${params.status ? `&status=${params.status}` : ''}`}
                           className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                           Próxima

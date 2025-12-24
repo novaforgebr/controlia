@@ -12,6 +12,7 @@ import { createAIPromptSchema, updateAIPromptSchema } from '@/lib/validations/ai
 import { logHumanAction } from '@/lib/utils/audit'
 import type { AIPromptInsert, AIPrompt } from '@/lib/types/database'
 import { revalidatePath } from 'next/cache'
+import { ZodError } from 'zod'
 
 /**
  * Criar novo prompt de IA
@@ -28,11 +29,39 @@ export async function createAIPrompt(formData: FormData) {
       return { error: 'Usuário não autenticado' }
     }
 
+    // Parse JSON com tratamento de erro
+    let allowedActions: string[] = []
+    let forbiddenActions: string[] = []
+    
+    try {
+      const allowedActionsStr = formData.get('allowed_actions') as string
+      if (allowedActionsStr) {
+        allowedActions = JSON.parse(allowedActionsStr)
+      }
+    } catch (e) {
+      console.error('Erro ao fazer parse de allowed_actions:', e)
+      return { error: 'Erro ao processar ações permitidas: formato JSON inválido' }
+    }
+
+    try {
+      const forbiddenActionsStr = formData.get('forbidden_actions') as string
+      if (forbiddenActionsStr) {
+        forbiddenActions = JSON.parse(forbiddenActionsStr)
+      }
+    } catch (e) {
+      console.error('Erro ao fazer parse de forbidden_actions:', e)
+      return { error: 'Erro ao processar ações proibidas: formato JSON inválido' }
+    }
+
+    // Tratar parent_id: se for string vazia, converter para null
+    const parentIdRaw = formData.get('parent_id') as string
+    const parentId = parentIdRaw && parentIdRaw.trim() !== '' ? parentIdRaw : null
+
     const rawData = {
       name: formData.get('name') as string,
       description: formData.get('description') as string || '',
       version: parseInt(formData.get('version') as string) || 1,
-      parent_id: formData.get('parent_id') as string || '',
+      parent_id: parentId,
       prompt_text: formData.get('prompt_text') as string,
       system_prompt: formData.get('system_prompt') as string || '',
       model: formData.get('model') as string || 'gpt-4',
@@ -40,8 +69,8 @@ export async function createAIPrompt(formData: FormData) {
       max_tokens: parseInt(formData.get('max_tokens') as string) || 1000,
       context_type: formData.get('context_type') as string || '',
       channel: formData.get('channel') as string || '',
-      allowed_actions: formData.get('allowed_actions') ? JSON.parse(formData.get('allowed_actions') as string) : [],
-      forbidden_actions: formData.get('forbidden_actions') ? JSON.parse(formData.get('forbidden_actions') as string) : [],
+      allowed_actions: allowedActions,
+      forbidden_actions: forbiddenActions,
       constraints: formData.get('constraints') as string || '',
       is_active: formData.get('is_active') === 'true',
       is_default: formData.get('is_default') === 'true',
@@ -78,7 +107,12 @@ export async function createAIPrompt(formData: FormData) {
 
     if (error) {
       console.error('Erro ao criar prompt:', error)
-      return { error: 'Erro ao criar prompt de IA' }
+      return { error: error.message || 'Erro ao criar prompt de IA' }
+    }
+
+    if (!prompt) {
+      console.error('Prompt criado mas não retornado')
+      return { error: 'Erro ao criar prompt: dados não retornados' }
     }
 
     await logHumanAction(
@@ -93,11 +127,17 @@ export async function createAIPrompt(formData: FormData) {
     revalidatePath('/ai/prompts')
     return { success: true, data: prompt }
   } catch (error) {
-    if (error instanceof Error && error.name === 'ZodError') {
-      return { error: 'Dados inválidos', details: error }
+    if (error instanceof ZodError) {
+      // Erro de validação Zod
+      const messages = error.issues.map((issue) => {
+        const field = issue.path.join('.')
+        return `${field}: ${issue.message}`
+      })
+      return { error: `Dados inválidos: ${messages.join(', ')}` }
     }
     console.error('Erro ao criar prompt:', error)
-    return { error: 'Erro ao criar prompt de IA' }
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    return { error: `Erro ao criar prompt de IA: ${errorMessage}` }
   }
 }
 
@@ -470,6 +510,64 @@ export async function togglePromptStatus(promptId: string, isActive: boolean) {
   } catch (error) {
     console.error('Erro ao alterar status:', error)
     return { error: 'Erro ao alterar status do prompt' }
+  }
+}
+
+/**
+ * Excluir prompt
+ */
+export async function deleteAIPrompt(promptId: string) {
+  try {
+    const company = await getCurrentCompany()
+    if (!company) {
+      return { error: 'Empresa não encontrada' }
+    }
+
+    const user = await getUser()
+    if (!user) {
+      return { error: 'Usuário não autenticado' }
+    }
+
+    const supabase = await createClient()
+
+    // Verificar se o prompt existe e pertence à empresa
+    const { data: prompt } = await supabase
+      .from('ai_prompts')
+      .select('id, name')
+      .eq('id', promptId)
+      .eq('company_id', company.id)
+      .single()
+
+    if (!prompt) {
+      return { error: 'Prompt não encontrado' }
+    }
+
+    // Excluir o prompt (cascade vai excluir versões relacionadas se houver)
+    const { error } = await supabase
+      .from('ai_prompts')
+      .delete()
+      .eq('id', promptId)
+      .eq('company_id', company.id)
+
+    if (error) {
+      console.error('Erro ao excluir prompt:', error)
+      return { error: 'Erro ao excluir prompt' }
+    }
+
+    await logHumanAction(
+      company.id,
+      user.id,
+      'delete_ai_prompt',
+      'ai_prompt',
+      promptId,
+      { deleted: prompt }
+    )
+
+    revalidatePath('/ai/prompts')
+    return { success: true }
+  } catch (error) {
+    console.error('Erro ao excluir prompt:', error)
+    return { error: 'Erro ao excluir prompt' }
   }
 }
 

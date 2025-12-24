@@ -20,6 +20,22 @@ export const createContactSchema = z.object({
   notes: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).optional().default([]),
   ai_enabled: z.boolean().default(true),
+  pipeline_id: z
+    .union([
+      z.string().uuid(),
+      z.literal('').transform(() => null),
+      z.null(),
+    ])
+    .optional()
+    .nullable(),
+  pipeline_stage_id: z
+    .union([
+      z.string().uuid(),
+      z.literal('').transform(() => null),
+      z.null(),
+    ])
+    .optional()
+    .nullable(),
 })
 
 export const updateContactSchema = createContactSchema.partial()

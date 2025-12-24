@@ -9,6 +9,7 @@ import { ContactDetailsModal } from './ContactDetailsModal'
 import { toggleConversationAI } from '@/app/actions/conversations'
 import { Switch } from '@/components/ui/Switch'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/lib/hooks/use-toast'
 
 interface Conversation {
   id: string
@@ -54,6 +55,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
   const router = useRouter()
+  const toast = useToast()
 
   // Memoizar subscription key para evitar re-subscriptions
   const subscriptionKey = useMemo(() => `conversation-${conversation.id}`, [conversation.id])
@@ -172,25 +174,31 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
     setOptimisticAiEnabled(newValue)
     setTogglingAI(true)
 
+    const loadingToast = toast.loading(newValue ? 'Ativando IA...' : 'Desativando IA...')
+
     try {
       const result = await toggleConversationAI(conversation.id, newValue)
+      toast.dismiss(loadingToast)
+      
       if (result.success) {
         setAiEnabled(newValue)
+        toast.success(newValue ? 'IA ativada com sucesso' : 'IA desativada com sucesso')
         router.refresh()
       } else {
         // Reverter em caso de erro
         setOptimisticAiEnabled(optimisticAiEnabled)
-        alert('Erro ao atualizar IA: ' + (result.error || 'Erro desconhecido'))
+        toast.error(result.error || 'Erro ao atualizar IA')
       }
     } catch (error) {
       // Reverter em caso de erro
+      toast.dismiss(loadingToast)
       setOptimisticAiEnabled(optimisticAiEnabled)
       console.error('Erro ao atualizar IA:', error)
-      alert('Erro ao atualizar IA')
+      toast.error('Erro ao atualizar IA. Tente novamente.')
     } finally {
       setTogglingAI(false)
     }
-  }, [conversation.id, optimisticAiEnabled, router])
+  }, [conversation.id, optimisticAiEnabled, router, toast])
 
   // Agrupar mensagens por data para melhor visualização
   const groupedMessages = useMemo(() => {

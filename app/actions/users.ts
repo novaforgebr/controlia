@@ -78,7 +78,7 @@ export async function inviteUser(email: string, role: string = 'operator') {
       .eq('is_active', true)
       .single()
 
-    if (currentUserCompany?.role !== 'admin') {
+    if (currentUserCompany?.role !== 'admin' && currentUserCompany?.role !== 'owner') {
       return { error: 'Apenas administradores podem convidar usuários' }
     }
 
@@ -132,8 +132,71 @@ export async function inviteUser(email: string, role: string = 'operator') {
       return { success: true, data: companyUser }
     } else {
       // Usuário não existe, criar convite
-      // TODO: Implementar sistema de convites por email
-      return { error: 'Sistema de convites por email ainda não implementado' }
+      // Verificar se já existe convite ativo para este email
+      const { data: existingInvite } = await supabase
+        .from('user_invitations')
+        .select('id')
+        .eq('company_id', company.id)
+        .eq('email', email.toLowerCase())
+        .eq('is_active', true)
+        .single()
+
+      if (existingInvite) {
+        return { error: 'Já existe um convite ativo para este e-mail' }
+      }
+
+      // Gerar token único
+      let inviteToken: string
+      try {
+        const { data: tokenData, error: tokenError } = await supabase.rpc('generate_invite_token')
+        inviteToken = tokenError || !tokenData
+          ? Buffer.from(`${Date.now()}-${Math.random()}`).toString('base64url')
+          : tokenData
+      } catch {
+        // Fallback: gerar token manualmente
+        inviteToken = Buffer.from(`${Date.now()}-${Math.random()}`).toString('base64url')
+      }
+
+      // Criar convite (expira em 7 dias)
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + 7)
+
+      const { data: invitation, error: inviteError } = await supabase
+        .from('user_invitations')
+        .insert({
+          company_id: company.id,
+          email: email.toLowerCase(),
+          token: inviteToken,
+          role: role as 'admin' | 'operator' | 'observer',
+          invited_by: user.id,
+          expires_at: expiresAt.toISOString(),
+        })
+        .select()
+        .single()
+
+      if (inviteError) {
+        console.error('Erro ao criar convite:', inviteError)
+        return { error: 'Erro ao criar convite' }
+      }
+
+      // TODO: Enviar email com link de convite
+      // Por enquanto, apenas criar o convite
+      // O link será: {NEXT_PUBLIC_APP_URL}/invite/{token}
+
+      await logHumanAction(
+        company.id,
+        user.id,
+        'invite_user',
+        'user_invitation',
+        invitation.id,
+        { email, role, token: inviteToken }
+      )
+
+      revalidatePath('/users')
+      return { 
+        success: true, 
+        data: invitation
+      }
     }
   } catch (error) {
     console.error('Erro ao convidar usuário:', error)
@@ -166,7 +229,7 @@ export async function updateUserRole(companyUserId: string, role: string) {
       .eq('is_active', true)
       .single()
 
-    if (currentUserCompany?.role !== 'admin') {
+    if (currentUserCompany?.role !== 'admin' && currentUserCompany?.role !== 'owner') {
       return { error: 'Apenas administradores podem alterar papéis' }
     }
 
@@ -227,7 +290,7 @@ export async function toggleUserStatus(companyUserId: string, isActive: boolean)
       .eq('is_active', true)
       .single()
 
-    if (currentUserCompany?.role !== 'admin') {
+    if (currentUserCompany?.role !== 'admin' && currentUserCompany?.role !== 'owner') {
       return { error: 'Apenas administradores podem ativar/desativar usuários' }
     }
 
@@ -288,7 +351,7 @@ export async function removeUser(companyUserId: string) {
       .eq('is_active', true)
       .single()
 
-    if (currentUserCompany?.role !== 'admin') {
+    if (currentUserCompany?.role !== 'admin' && currentUserCompany?.role !== 'owner') {
       return { error: 'Apenas administradores podem remover usuários' }
     }
 

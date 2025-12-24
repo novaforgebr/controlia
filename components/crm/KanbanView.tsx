@@ -42,13 +42,17 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
   const router = useRouter()
   const [selectedPipeline, setSelectedPipeline] = useState<string | undefined>(selectedPipelineId)
   const [contacts, setContacts] = useState<Contact[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!!selectedPipelineId)
   const [draggedContact, setDraggedContact] = useState<string | null>(null)
 
   useEffect(() => {
     if (selectedPipeline) {
       loadContacts()
+    } else {
+      setContacts([])
+      setLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPipeline])
 
   const loadContacts = async () => {
@@ -126,11 +130,13 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
     : []
 
   const getContactsForStage = (stageId: string) => {
-    return contacts.filter((c) => c.pipeline_stage_id === stageId)
+    // Contatos que pertencem ao pipeline selecionado E estão neste estágio
+    return contacts.filter((c) => c.pipeline_id === selectedPipeline && c.pipeline_stage_id === stageId)
   }
 
   const getContactsWithoutStage = () => {
-    return contacts.filter((c) => !c.pipeline_stage_id || c.pipeline_id !== selectedPipeline)
+    // Contatos que pertencem ao pipeline mas não têm estágio definido
+    return contacts.filter((c) => c.pipeline_id === selectedPipeline && (!c.pipeline_stage_id || c.pipeline_stage_id === null))
   }
 
   if (pipelines.length === 0) {

@@ -6,15 +6,16 @@ import { KanbanView } from '@/components/crm/KanbanView'
 export default async function KanbanPage({
   searchParams,
 }: {
-  searchParams: { pipeline_id?: string }
+  searchParams: Promise<{ pipeline_id?: string }>
 }) {
   const company = await getCurrentCompany()
   if (!company) {
     return null
   }
 
+  const params = await searchParams
   const { data: pipelines } = await listPipelines()
-  const selectedPipelineId = searchParams.pipeline_id || pipelines?.find((p: any) => p.is_default)?.id
+  const selectedPipelineId = params.pipeline_id || pipelines?.find((p: any) => p.is_default)?.id
 
   return (
     <ProtectedLayout>
