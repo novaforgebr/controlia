@@ -259,7 +259,57 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Enviar resposta ao canal apropriado
+    // ✅ IMPORTANTE: Criar mensagem no banco ANTES de enviar ao canal
+    // Isso garante que a mensagem aparece na interface mesmo se o envio ao Telegram falhar
+    console.log('💾 PASSO 1: Salvando resposta da IA no Controlia ANTES de enviar ao Telegram...')
+    console.log('   - company_id:', company_id)
+    console.log('   - conversation_id:', conversation_id_final)
+    console.log('   - content:', output.substring(0, 50) + '...')
+    
+    const { data: messageResult, error: messageError } = await serviceClient
+      .from('messages')
+      .insert({
+        company_id,
+        conversation_id: conversation_id_final,
+        contact_id: conversation.contact_id || contact_id_final || '',
+        content: output,
+        sender_type: 'ai', // ✅ SEMPRE 'ai' para respostas da IA
+        ai_agent_id: null,
+        direction: 'outbound', // ✅ SEMPRE 'outbound' para respostas da IA
+        status: 'pending', // Será atualizado para 'sent' após enviar ao Telegram
+        channel_message_id: null, // Será atualizado após enviar ao Telegram
+      })
+      .select()
+      .single()
+
+    if (messageError) {
+      console.error('❌ Erro ao criar mensagem no Controlia:', messageError)
+      // Continuar mesmo com erro - tentar enviar ao Telegram
+    } else if (messageResult) {
+      console.log('✅ Mensagem da IA salva no Controlia:', messageResult.id)
+      console.log('✅ A mensagem JÁ ESTÁ disponível na interface do Controlia')
+      
+      // ✅ VALIDAÇÃO CRÍTICA: Garantir que resposta IA seja SEMPRE 'outbound' e 'ai'
+      if (messageResult.direction !== 'outbound') {
+        console.error('❌ ERRO CRÍTICO: Resposta IA salva como inbound!')
+        await serviceClient
+          .from('messages')
+          .update({ direction: 'outbound' })
+          .eq('id', messageResult.id)
+        messageResult.direction = 'outbound'
+      }
+      
+      if (messageResult.sender_type !== 'ai') {
+        console.error('❌ ERRO CRÍTICO: Resposta IA salva com sender_type incorreto!')
+        await serviceClient
+          .from('messages')
+          .update({ sender_type: 'ai' })
+          .eq('id', messageResult.id)
+        messageResult.sender_type = 'ai'
+      }
+    }
+
+    // ✅ PASSO 2: Enviar resposta ao canal apropriado
     let channelMessageId: string | null = null
 
     if (finalChannel === 'telegram') {
@@ -377,6 +427,23 @@ export async function POST(request: NextRequest) {
 
       const telegramData = await telegramResponse.json()
       channelMessageId = telegramData.result?.message_id?.toString() || null
+      
+      // ✅ PASSO 3: Atualizar mensagem com channel_message_id e status após enviar ao Telegram
+      if (messageResult) {
+        console.log('💾 PASSO 3: Atualizando mensagem com channel_message_id e status...')
+        await serviceClient
+          .from('messages')
+          .update({ 
+            channel_message_id: channelMessageId,
+            status: 'sent'
+          })
+          .eq('id', messageResult.id)
+        console.log('✅ Mensagem atualizada:', {
+          id: messageResult.id,
+          channel_message_id: channelMessageId,
+          status: 'sent'
+        })
+      }
 
     } else if (finalChannel === 'whatsapp') {
       const whatsappApiUrl = settings.whatsapp_api_url as string
@@ -432,70 +499,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Criar mensagem da IA no Controlia (sempre, usando service role para evitar RLS)
-    // ✅ GARANTIR: direction = 'outbound' e sender_type = 'ai'
-    const { data: messageResult, error: messageError } = await serviceClient
-      .from('messages')
-      .insert({
-        company_id,
-        conversation_id: conversation_id_final,
-        contact_id: conversation.contact_id || contact_id_final || '',
-        content: output,
-        sender_type: 'ai', // ✅ SEMPRE 'ai' para respostas da IA
-        // ai_agent_id deve ser um UUID; enquanto não houver agente configurado, deixamos null
-        ai_agent_id: null,
-        direction: 'outbound', // ✅ SEMPRE 'outbound' para respostas da IA
-        status: 'sent',
-        channel_message_id: channelMessageId || null,
-      })
-      .select()
-      .single()
-
-    if (messageError) {
-      console.error('❌ Erro ao criar mensagem no Controlia:', messageError)
-      // Não falhar, a mensagem já foi enviada ao canal
-    } else if (messageResult) {
-      // ✅ VALIDAÇÃO CRÍTICA: Garantir que resposta IA seja SEMPRE 'outbound' e 'ai'
-      if (messageResult.direction !== 'outbound') {
-        console.error('❌ ERRO CRÍTICO: Resposta IA salva como inbound!')
-        console.error('   - message_id:', messageResult.id)
-        console.error('   - direction atual:', messageResult.direction)
-        console.error('   - direction esperado: outbound')
-        
-        // Tentar corrigir no banco
-        try {
-          await serviceClient
-            .from('messages')
-            .update({ direction: 'outbound' })
-            .eq('id', messageResult.id)
-          console.log('✅ Direção corrigida no banco de dados')
-          messageResult.direction = 'outbound'
-        } catch (fixError) {
-          console.error('❌ Erro ao corrigir direção:', fixError)
-        }
-      }
-      
-      if (messageResult.sender_type !== 'ai') {
-        console.error('❌ ERRO CRÍTICO: Resposta IA salva com sender_type incorreto!')
-        console.error('   - message_id:', messageResult.id)
-        console.error('   - sender_type atual:', messageResult.sender_type)
-        console.error('   - sender_type esperado: ai')
-        
-        // Tentar corrigir no banco
-        try {
-          await serviceClient
-            .from('messages')
-            .update({ sender_type: 'ai' })
-            .eq('id', messageResult.id)
-          console.log('✅ Sender type corrigido no banco de dados')
-          messageResult.sender_type = 'ai'
-        } catch (fixError) {
-          console.error('❌ Erro ao corrigir sender_type:', fixError)
-        }
-      } else {
-        console.log('✅ Mensagem IA salva corretamente: direction=outbound, sender_type=ai')
-      }
-    }
+    // ✅ NOTA: Mensagem já foi criada ANTES de enviar ao canal (linha 269)
+    // Esta seção foi movida para antes do envio ao Telegram para garantir ordem correta
 
     return NextResponse.json({
       success: true,

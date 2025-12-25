@@ -278,7 +278,7 @@ export async function listMessages(conversationId: string, limit = 50) {
 
     const { data, error } = await supabase
       .from('messages')
-      .select('*, user_profiles(full_name, avatar_url)')
+      .select('*, user_profiles:sender_id(full_name)')
       .eq('conversation_id', conversationId)
       .eq('company_id', company.id)
       .order('created_at', { ascending: true })

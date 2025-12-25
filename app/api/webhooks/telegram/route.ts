@@ -520,11 +520,19 @@ export async function POST(request: NextRequest) {
 
     // Se houver automações configuradas, enviar para n8n
     if (automations && automations.length > 0) {
-      // Priorizar automação "Atendimento com IA" ou a que tem secret na URL
+      // Priorizar automação na seguinte ordem:
+      // 1. "Atendimento com IA - Mensagens Recebidas" (nome exato ou similar)
+      // 2. Qualquer automação com "Atendimento com IA" no nome
+      // 3. Automação que tem secret na URL
+      // 4. Primeira automação disponível
       let automation = automations.find(a => 
+        a.name?.toLowerCase().includes('mensagens recebidas') ||
+        (a.name?.toLowerCase().includes('atendimento') && a.name?.toLowerCase().includes('ia'))
+      ) || automations.find(a => 
         a.name?.toLowerCase().includes('ia') || 
-        a.name?.toLowerCase().includes('atendimento') ||
-        (a.n8n_webhook_url && a.n8n_webhook_url.includes('secret='))
+        a.name?.toLowerCase().includes('atendimento')
+      ) || automations.find(a => 
+        a.n8n_webhook_url && a.n8n_webhook_url.includes('secret=')
       ) || automations[0] // Fallback para primeira se não encontrar
       
       console.log('🎯 Automação selecionada:', {

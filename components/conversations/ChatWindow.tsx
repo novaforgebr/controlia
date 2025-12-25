@@ -7,6 +7,7 @@ import { CloseConversationButton } from './CloseConversationButton'
 import { MessageForm } from './MessageForm'
 import { ContactDetailsModal } from './ContactDetailsModal'
 import { toggleConversationAI } from '@/app/actions/conversations'
+import { listMessages } from '@/app/actions/messages'
 import { Switch } from '@/components/ui/Switch'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -61,70 +62,72 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   // Memoizar subscription key para evitar re-subscriptions
   const subscriptionKey = useMemo(() => `conversation-${conversation.id}`, [conversation.id])
 
+
   // Carregar mensagens iniciais
   const loadMessages = useCallback(async () => {
     try {
       setLoading(true)
       
-      // Primeiro, buscar a conversa para obter o company_id
-      const { data: conversationData, error: convError } = await supabase
-        .from('conversations')
-        .select('company_id')
-        .eq('id', conversation.id)
-        .single()
+      // IMPORTANTE: Usar server action para buscar mensagens
+      // Isso contorna problemas de RLS no cliente
+      const result = await listMessages(conversation.id, 100)
       
-      if (convError || !conversationData) {
-        console.error('Erro ao buscar conversa:', convError)
+      if (result.error) {
+        console.error('Erro ao carregar mensagens:', result.error)
+        
+        // Fallback: tentar buscar diretamente do cliente
+        
+        const { data: conversationData, error: convError } = await supabase
+          .from('conversations')
+          .select('company_id')
+          .eq('id', conversation.id)
+          .single()
+        
+        if (convError || !conversationData) {
+          console.error('Erro ao buscar conversa:', convError)
+          setLoading(false)
+          return
+        }
+
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*, user_profiles:sender_id(full_name)')
+          .eq('conversation_id', conversation.id)
+          .eq('company_id', conversationData.company_id)
+          .order('created_at', { ascending: true })
+          .limit(100)
+
+        if (error) {
+          console.error('Erro ao buscar mensagens:', error)
+          setLoading(false)
+          return
+        }
+
+        setMessages(data || [])
+        setLoading(false)
+        setTimeout(() => scrollToBottom(), 100)
         return
       }
-      
-      // Buscar mensagens filtrando por conversation_id E company_id
-      console.log('📥 Carregando mensagens:', {
-        conversation_id: conversation.id,
-        company_id: conversationData.company_id,
-      })
-      
-      // IMPORTANTE: Buscar mensagens com filtro por conversation_id e company_id
-      // O RLS deve permitir se o usuário pertence à empresa
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*, user_profiles:sender_id(full_name)')
-        .eq('conversation_id', conversation.id)
-        .eq('company_id', conversationData.company_id)
-        .order('created_at', { ascending: true })
-        .limit(100)
 
-      if (error) {
-        console.error('❌ Erro ao carregar mensagens:', error)
-        console.error('   - conversation_id:', conversation.id)
-        console.error('   - company_id:', conversationData.company_id)
-        console.error('   - Error details:', JSON.stringify(error, null, 2))
-        return
-      }
+      const data = result.data || []
 
-      console.log('✅ Mensagens carregadas:', {
-        total: data?.length || 0,
-        conversation_id: conversation.id,
-        company_id: conversationData.company_id,
-      })
+      // Transformar dados para garantir formato correto
+      const transformedMessages = (data || []).map((msg: any) => ({
+        ...msg,
+        user_profiles: msg.user_profiles || null,
+        created_at: msg.created_at || new Date().toISOString(),
+      }))
       
-      if (data && data.length > 0) {
-        console.log('📋 Primeira mensagem:', {
-          id: data[0].id,
-          direction: data[0].direction,
-          sender_type: data[0].sender_type,
-          content_preview: data[0].content?.substring(0, 50),
-        })
-      }
-
-      setMessages(data || [])
-      setTimeout(() => scrollToBottom(), 100)
+      setMessages(transformedMessages as Message[])
+      setLoading(false)
+      
+      // Scroll após um pequeno delay para garantir que o DOM foi atualizado
+      setTimeout(() => scrollToBottom(), 300)
     } catch (error) {
       console.error('Erro:', error)
-    } finally {
       setLoading(false)
     }
-  }, [conversation.id, supabase])
+  }, [conversation.id])
 
   useEffect(() => {
     loadMessages()
@@ -175,14 +178,6 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               }
               
               // Buscar dados completos da mensagem com relacionamentos
-              console.log('🆕 Nova mensagem recebida via Realtime:', {
-                message_id: newMessage.id,
-                conversation_id: conversation.id,
-                company_id: convData.company_id,
-                direction: newMessage.direction,
-                sender_type: newMessage.sender_type,
-              })
-              
               const { data: fullMessage, error: messageError } = await supabase
                 .from('messages')
                 .select('*, user_profiles:sender_id(full_name)')
@@ -321,22 +316,40 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
 
   // Agrupar mensagens por data para melhor visualização
   const groupedMessages = useMemo(() => {
+    if (messages.length === 0) {
+      return []
+    }
+
     const groups: { date: string; messages: Message[] }[] = []
     let currentDate = ''
 
     messages.forEach((message) => {
-      const messageDate = format(new Date(message.created_at), 'dd/MM/yyyy')
-      
-      if (messageDate !== currentDate) {
-        currentDate = messageDate
-        groups.push({ date: messageDate, messages: [message] })
-      } else {
-        groups[groups.length - 1].messages.push(message)
+      try {
+        if (!message.created_at) {
+          return
+        }
+
+        const messageDate = format(new Date(message.created_at), 'dd/MM/yyyy')
+        
+        if (messageDate !== currentDate) {
+          currentDate = messageDate
+          groups.push({ date: messageDate, messages: [message] })
+        } else {
+          if (groups.length > 0) {
+            groups[groups.length - 1].messages.push(message)
+          } else {
+            groups.push({ date: messageDate, messages: [message] })
+            currentDate = messageDate
+          }
+        }
+      } catch (error) {
+        // Ignorar mensagens com erro de data
       }
     })
 
     return groups
   }, [messages])
+
 
   return (
     <div className="flex h-full flex-col bg-white dark:bg-gray-900 overflow-hidden">
@@ -401,10 +414,14 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       </div>
 
       {/* Mensagens */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 min-h-0 bg-gray-50 dark:bg-gray-950">
+      <div 
+        ref={messagesContainerRef} 
+        className="flex-1 overflow-y-auto p-6 min-h-0 bg-gray-50 dark:bg-gray-950"
+      >
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-[#039155] border-r-transparent"></div>
+            <span className="ml-3 text-sm text-gray-500">Carregando mensagens...</span>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex h-full items-center justify-center">
@@ -413,9 +430,17 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               <p className="mt-1 text-xs">Envie a primeira mensagem abaixo</p>
             </div>
           </div>
+        ) : groupedMessages.length === 0 ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center text-gray-500 dark:text-gray-400">
+              <p className="text-sm">Erro ao agrupar mensagens</p>
+              <p className="mt-1 text-xs">Total de mensagens: {messages.length}</p>
+              <p className="mt-1 text-xs">Verifique o console para mais detalhes</p>
+            </div>
+          </div>
         ) : (
-          <div className="space-y-6">
-            {groupedMessages.map((group, groupIndex) => (
+          <div className="space-y-6" data-testid="messages-container">
+            {groupedMessages.map((group) => (
               <div key={group.date}>
                 {/* Separador de data */}
                 <div className="flex items-center gap-4 my-4">

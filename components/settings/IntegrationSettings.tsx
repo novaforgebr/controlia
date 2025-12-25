@@ -344,8 +344,7 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
             </div>
           </div>
           
-          {/* Status do Webhook */}
-          {settings.telegram_bot_token && (
+          {(settings.telegram_bot_token as string) && (
             <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

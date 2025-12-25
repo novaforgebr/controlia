@@ -342,7 +342,7 @@ export async function validateAllWebhookConfigurations(): Promise<{
         botTokenConfigured: !!botToken,
         webhookConfigured: false,
         webhookUrl: null as string | null,
-        webhookStatus: 'not_configured' as const,
+        webhookStatus: 'not_configured' as 'ok' | 'error' | 'not_configured',
         error: undefined as string | undefined,
       }
 
