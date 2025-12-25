@@ -30,11 +30,13 @@ export default async function SettingsPage() {
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb items={[{ label: 'Configurações' }]} />
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Configurações</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Gerencie as configurações da sua empresa e integrações</p>
+      <div className="mx-auto max-w-7xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb items={[{ label: 'Configurações' }]} />
+        </div>
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Configurações</h1>
+          <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">Gerencie as configurações da sua empresa e integrações</p>
         </div>
 
         <SettingsTabs

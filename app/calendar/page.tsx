@@ -20,12 +20,10 @@ export default async function CalendarPage() {
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Calendário</h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Visualize e gerencie suas agendas e eventos</p>
-          </div>
+      <div className="mx-auto max-w-7xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Calendário</h1>
+          <p className="mt-1 md:mt-2 text-sm text-gray-600 dark:text-gray-400">Visualize e gerencie suas agendas e eventos</p>
         </div>
 
         <CalendarView initialEvents={initialEvents || []} contacts={contacts || []} />

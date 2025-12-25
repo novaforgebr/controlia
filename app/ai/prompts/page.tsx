@@ -24,33 +24,35 @@ export default async function AIPromptsPage({
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb
-          items={[
-            { label: 'IA', href: '/ai' },
-            { label: 'Prompts' },
-          ]}
-        />
-        <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb
+            items={[
+              { label: 'IA', href: '/ai' },
+              { label: 'Prompts' },
+            ]}
+          />
+        </div>
+        <div className="mb-4 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Prompts de IA</h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Gerencie e versionize os prompts de inteligência artificial</p>
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Prompts de IA</h1>
+            <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">Gerencie e versionize os prompts de inteligência artificial</p>
           </div>
           <Link
             href="/ai/prompts/new"
-            className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"
+            className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2.5 md:py-2 text-base md:text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all min-h-[44px] md:min-h-0 w-full sm:w-auto flex items-center justify-center"
           >
             + Novo Prompt
           </Link>
         </div>
 
         {/* Filtros */}
-        <div className="mb-6 rounded-lg bg-white dark:bg-gray-900 p-4 shadow dark:shadow-gray-900/50">
-          <form method="get" className="flex gap-4">
+        <div className="mb-4 md:mb-6 rounded-lg bg-white dark:bg-gray-900 p-3 md:p-4 shadow dark:shadow-gray-900/50">
+          <form method="get" className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <select
               name="context_type"
               defaultValue={params.context_type || ''}
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             >
               <option value="">Todos os contextos</option>
               <option value="conversation">Conversa</option>
@@ -60,7 +62,7 @@ export default async function AIPromptsPage({
             <select
               name="channel"
               defaultValue={params.channel || ''}
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             >
               <option value="">Todos os canais</option>
               <option value="whatsapp">WhatsApp</option>
@@ -71,7 +73,7 @@ export default async function AIPromptsPage({
             <select
               name="active"
               defaultValue={params.active || ''}
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             >
               <option value="">Todos</option>
               <option value="true">Ativos</option>
@@ -79,7 +81,7 @@ export default async function AIPromptsPage({
             </select>
             <button
               type="submit"
-              className="rounded-md bg-gray-700 dark:bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+              className="rounded-md bg-gray-700 dark:bg-gray-600 px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:bg-gray-800 dark:hover:bg-gray-700 transition-colors min-h-[44px] md:min-h-0 w-full sm:w-auto"
             >
               Filtrar
             </button>
