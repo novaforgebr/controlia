@@ -545,60 +545,55 @@ export async function POST(request: NextRequest) {
           // 2. Como header HTTP (X-Webhook-Secret) - quando Authentication é "Header Auth"
           // 3. Sem autenticação (None) - não recomendado
           
-          // Verificar se o secret já está na URL
+          // IMPORTANTE: O n8n pode estar configurado para aceitar secret como:
+          // 1. Query parameter (?secret=xxx) - Authentication: None
+          // 2. Header HTTP (X-Webhook-Secret) - Authentication: Header Auth (MOSTRADO NAS IMAGENS)
+          // 3. Ambos (alguns n8n podem precisar dos dois)
+          
+          // Prioridade: usar secret das settings se disponível, senão extrair da URL
+          let secretToUse: string | null = null
           let hasSecretInUrl = false
-          let secretFromUrl: string | null = null
+          
+          // Primeiro, tentar usar secret das settings da empresa
+          if (n8nWebhookSecret) {
+            secretToUse = n8nWebhookSecret
+            console.log('🔐 Usando secret das settings da empresa')
+          }
+          
+          // Verificar se o secret está na URL (pode estar codificado ou não)
           try {
             const urlObj = new URL(webhookUrl)
             hasSecretInUrl = urlObj.searchParams.has('secret')
-            console.log('🔍 Verificação da URL:')
-            console.log('   - Secret na URL?', hasSecretInUrl)
+            
             if (hasSecretInUrl) {
-              secretFromUrl = urlObj.searchParams.get('secret')
-              console.log('   - Secret extraído da URL (não codificado):', secretFromUrl ? secretFromUrl.substring(0, 5) + '...' : 'null')
+              const secretFromUrl = urlObj.searchParams.get('secret')
               
-              // IMPORTANTE: O caractere @ precisa ser codificado como %40 na URL
-              // Se o secret contém @ e não está codificado, o n8n pode rejeitar
-              if (secretFromUrl && secretFromUrl.includes('@') && !webhookUrl.includes('%40')) {
-                console.warn('⚠️ Secret contém @ mas não está codificado na URL!')
-                console.warn('⚠️ Recodificando URL com secret codificado...')
-                // Recodificar a URL com o secret corretamente codificado
-                urlObj.searchParams.set('secret', secretFromUrl) // Isso vai codificar automaticamente
-                webhookUrl = urlObj.toString()
-                console.log('✅ URL recodificada:', webhookUrl)
+              if (secretFromUrl) {
+                // Decodificar o secret (converte %40 para @, etc)
+                const decodedSecret = decodeURIComponent(secretFromUrl)
+                
+                // Se não temos secret das settings, usar o da URL
+                if (!secretToUse) {
+                  secretToUse = decodedSecret
+                  console.log('🔐 Extraindo secret da URL (decodificado):', decodedSecret.substring(0, 5) + '...')
+                } else {
+                  // Se temos secret das settings, garantir que URL está codificada corretamente
+                  console.log('🔐 Secret também presente na URL (será usado apenas como query param)')
+                }
+                
+                // IMPORTANTE: Garantir que o @ está codificado como %40 na URL
+                if (decodedSecret.includes('@') && !webhookUrl.includes('%40')) {
+                  console.warn('⚠️ Secret contém @ mas não está codificado na URL!')
+                  console.warn('⚠️ Recodificando URL com secret codificado...')
+                  urlObj.searchParams.set('secret', decodedSecret) // Isso vai codificar automaticamente
+                  webhookUrl = urlObj.toString()
+                  console.log('✅ URL recodificada:', webhookUrl)
+                }
               }
             }
           } catch (urlError) {
             console.warn('⚠️ Erro ao processar URL do webhook:', urlError)
             hasSecretInUrl = webhookUrl.includes('secret=')
-            console.log('   - Fallback: verificando se URL contém "secret=":', hasSecretInUrl)
-          }
-          
-          // IMPORTANTE: O n8n pode estar configurado para aceitar secret como:
-          // 1. Query parameter (?secret=xxx) - Authentication: None
-          // 2. Header HTTP (X-Webhook-Secret) - Authentication: Header Auth
-          // 3. Ambos (alguns n8n podem precisar dos dois)
-          
-          // Prioridade: usar secret das settings se disponível, senão extrair da URL
-          let secretToUse: string | null = null
-          
-          if (n8nWebhookSecret) {
-            // Secret das settings tem prioridade
-            secretToUse = n8nWebhookSecret
-            console.log('🔐 Usando secret das settings da empresa')
-          } else if (hasSecretInUrl) {
-            // Extrair secret da URL se não estiver nas settings
-            try {
-              const urlObj = new URL(webhookUrl)
-              const secretFromUrl = urlObj.searchParams.get('secret')
-              if (secretFromUrl) {
-                // Decodificar o secret (pode estar codificado como %40 para @)
-                secretToUse = decodeURIComponent(secretFromUrl)
-                console.log('🔐 Extraindo secret da URL')
-              }
-            } catch (urlError) {
-              console.warn('⚠️ Erro ao extrair secret da URL:', urlError)
-            }
           }
           
           // IMPORTANTE: Sempre enviar secret como header HTTP se disponível
