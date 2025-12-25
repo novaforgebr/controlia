@@ -105,7 +105,9 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
 
         setMessages(data || [])
         setLoading(false)
-        setTimeout(() => scrollToBottom(), 100)
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
         return
       }
 
@@ -118,16 +120,23 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
         created_at: msg.created_at || new Date().toISOString(),
       }))
       
-      setMessages(transformedMessages as Message[])
+      // Ordenar mensagens por data (ascendente)
+      const sortedMessages = transformedMessages.sort((a, b) => {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      })
+      
+      setMessages(sortedMessages as Message[])
       setLoading(false)
       
       // Scroll após um pequeno delay para garantir que o DOM foi atualizado
-      setTimeout(() => scrollToBottom(), 300)
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 300)
     } catch (error) {
       console.error('Erro:', error)
       setLoading(false)
     }
-  }, [conversation.id])
+  }, [conversation.id, supabase])
 
   useEffect(() => {
     loadMessages()
@@ -163,6 +172,13 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               filter: `conversation_id=eq.${conversation.id}`,
             },
             async (payload) => {
+              console.log('🆕 Realtime: Nova mensagem recebida:', {
+                message_id: payload.new.id,
+                conversation_id: payload.new.conversation_id,
+                direction: payload.new.direction,
+                sender_type: payload.new.sender_type,
+              })
+              
               const newMessage = payload.new as any
               
               // Buscar company_id da conversa para garantir RLS
@@ -189,11 +205,13 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
                 console.error('❌ Erro ao buscar mensagem completa:', messageError)
                 console.error('   - message_id:', newMessage.id)
                 console.error('   - company_id:', convData.company_id)
+                // Tentar recarregar todas as mensagens como fallback
+                setTimeout(() => loadMessages(), 500)
                 return
               }
 
               if (fullMessage) {
-                console.log('✅ Mensagem completa carregada:', {
+                console.log('✅ Realtime: Mensagem adicionada ao estado:', {
                   id: fullMessage.id,
                   direction: fullMessage.direction,
                   sender_type: fullMessage.sender_type,
@@ -203,14 +221,23 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
                 setMessages((prev) => {
                   // Evitar duplicatas
                   if (prev.some((m) => m.id === fullMessage.id)) {
-                    console.log('⚠️ Mensagem já existe, ignorando duplicata:', fullMessage.id)
+                    console.log('⚠️ Realtime: Mensagem já existe, ignorando:', fullMessage.id)
                     return prev
                   }
-                  return [...prev, fullMessage as Message]
+                  
+                  // Adicionar mensagem e ordenar por created_at
+                  const updated = [...prev, fullMessage as Message].sort((a, b) => {
+                    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                  })
+                  
+                  console.log('✅ Realtime: Total de mensagens após adicionar:', updated.length)
+                  return updated
                 })
                 setTimeout(() => scrollToBottom(), 100)
               } else {
                 console.warn('⚠️ Mensagem não encontrada após Realtime event:', newMessage.id)
+                // Tentar recarregar todas as mensagens como fallback
+                setTimeout(() => loadMessages(), 500)
               }
             }
           )
@@ -270,15 +297,14 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   }, [messages, scrollToBottom])
 
   const handleMessageSent = useCallback(() => {
+    console.log('🔄 handleMessageSent chamado - recarregando mensagens...')
     // Recarregar mensagens após envio
-    console.log('🔄 Recarregando mensagens após envio...')
-    loadMessages()
-    
-    // Também forçar scroll para baixo após um pequeno delay
+    // Usar um delay maior para garantir que a mensagem foi salva no banco e o Realtime processou
     setTimeout(() => {
-      scrollToBottom()
-    }, 300)
-  }, [loadMessages, scrollToBottom])
+      console.log('🔄 Executando loadMessages após delay...')
+      loadMessages()
+    }, 1200)
+  }, [loadMessages])
 
   // Toggle IA com Optimistic Update
   const handleToggleAI = useCallback(async () => {

@@ -53,17 +53,16 @@ export function MessageForm({ conversationId, contactId, onMessageSent }: Messag
         return
       }
 
-      if (result.success) {
+      if (result.success && result.data) {
         setContent('')
         toast.success('Mensagem enviada com sucesso')
-        console.log('✅ Mensagem enviada com sucesso, chamando onMessageSent')
         
         // Sempre chamar onMessageSent se disponível, senão refresh
         if (onMessageSent) {
-          // Aguardar um pouco para garantir que a mensagem foi salva
+          // Aguardar um pouco mais para garantir que a mensagem foi salva e o Realtime processou
           setTimeout(() => {
             onMessageSent()
-          }, 500)
+          }, 1000)
         } else {
           router.refresh()
         }

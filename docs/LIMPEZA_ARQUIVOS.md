@@ -54,3 +54,4 @@ O projeto agora está mais limpo e organizado, mantendo apenas:
 
 Todos os arquivos removidos eram obsoletos, duplicados ou temporários. As informações importantes foram consolidadas nos arquivos mantidos.
 
+

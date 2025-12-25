@@ -143,3 +143,4 @@ Removendo (duplicados/obsoletos):
 - scripts/verificar-webhook-telegram.sh
 - scripts/verify-setup.ts
 
+

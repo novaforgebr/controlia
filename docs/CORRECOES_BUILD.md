@@ -66,3 +66,4 @@ Os seguintes avisos foram encontrados, mas não impedem o build:
 - Os avisos do ESLint sobre dependências de hooks são comuns e geralmente não causam problemas em produção
 - Os avisos sobre otimização de imagens podem ser corrigidos posteriormente usando o componente `Image` do Next.js
 
+
