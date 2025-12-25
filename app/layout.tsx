@@ -13,6 +13,24 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Controlia CRM - Centro de Comando Inteligente',
   description: 'Plataforma SaaS de CRM com automação, IA e controle total de dados',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Controlia CRM',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 }
 
 export default function RootLayout({

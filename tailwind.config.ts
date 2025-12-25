@@ -8,10 +8,21 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    screens: {
+      'xs': '475px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+      },
+      spacing: {
+        'touch': '44px', // Tamanho mínimo para área de toque
       },
     },
   },

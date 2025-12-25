@@ -117,18 +117,18 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex min-h-screen items-end md:items-center justify-center">
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity" onClick={onClose}></div>
         
-        <div className="relative w-full max-w-2xl rounded-lg bg-white dark:bg-gray-900 shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
-          <div className="border-b border-gray-200 dark:border-gray-800 px-6 py-4">
+        <div className="relative w-full max-w-2xl rounded-t-2xl md:rounded-lg bg-white dark:bg-gray-900 shadow-xl dark:shadow-gray-900/50 border-t md:border border-gray-200 dark:border-gray-800 max-h-[95vh] md:max-h-[90vh] flex flex-col m-0 md:m-4">
+          <div className="border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 py-4 flex-shrink-0 sticky top-0 bg-white dark:bg-gray-900 z-10">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Detalhes do Contato</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">Detalhes do Contato</h2>
               <button
                 onClick={onClose}
-                className="rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#039155] transition-colors"
+                className="rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#039155] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Fechar"
               >
-                <span className="sr-only">Fechar</span>
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -136,7 +136,7 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
             </div>
           </div>
 
-          <div className="max-h-[70vh] overflow-y-auto px-6 py-4 bg-gray-50 dark:bg-gray-950">
+          <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 bg-gray-50 dark:bg-gray-950">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-[#039155] border-r-transparent"></div>
@@ -319,19 +319,19 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                   </dl>
                 </div>
 
-                <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-800 pt-6">
+                <div className="flex flex-col-reverse md:flex-row justify-end gap-3 border-t border-gray-200 dark:border-gray-800 pt-6 flex-shrink-0 sticky bottom-0 bg-gray-50 dark:bg-gray-950 -mx-4 md:-mx-6 px-4 md:px-6 pb-4 md:pb-0">
                   <button
                     type="button"
                     onClick={onClose}
                     disabled={saving}
-                    className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                    className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 md:py-2 text-base md:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors min-h-[44px] md:min-h-0 w-full md:w-auto"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-3 md:py-2 text-base md:text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0 w-full md:w-auto"
                   >
                     {saving ? 'Salvando...' : 'Salvar Alterações'}
                   </button>

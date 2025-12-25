@@ -25,10 +25,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={`
-            block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100
+            block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 
+            px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100
             placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors
             focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20
             disabled:bg-gray-50 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed
+            min-h-[44px] md:min-h-0
             ${error ? 'border-red-300 dark:border-red-600 focus:border-red-500 focus:ring-red-500/20' : ''}
             ${className}
           `.trim()}

@@ -1,21 +1,53 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 interface SidebarProps {
   companyName: string
+  isMobileOpen?: boolean
+  onMobileClose?: () => void
 }
 
-export function Sidebar({ companyName }: SidebarProps) {
-  // Menu começa recolhido por padrão
+export function Sidebar({ companyName, isMobileOpen = false, onMobileClose }: SidebarProps) {
+  // Menu começa recolhido por padrão (desktop)
   const [isCollapsed, setIsCollapsed] = useState(true)
   const [isHovered, setIsHovered] = useState(false)
   const pathname = usePathname()
   
-  // Expandir no hover quando estiver recolhido
+  // Expandir no hover quando estiver recolhido (apenas desktop)
   const shouldExpand = isCollapsed && isHovered
+  
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  // Fechar drawer mobile ao clicar em link
+  const handleLinkClick = () => {
+    if (isMobile && onMobileClose) {
+      onMobileClose()
+    }
+  }
+  
+  // Prevenir scroll do body quando drawer está aberto em mobile
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMobileOpen])
 
   const menuItems = [
     {
@@ -129,13 +161,39 @@ export function Sidebar({ companyName }: SidebarProps) {
   }
 
   return (
-    <aside
-      className={`fixed left-0 top-0 z-40 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ${
-        shouldExpand ? 'w-64' : isCollapsed ? 'w-16' : 'w-64'
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <>
+      {/* Overlay para mobile */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={onMobileClose}
+          aria-hidden="true"
+        />
+      )}
+      
+      <aside
+        className={`
+          fixed left-0 top-0 z-40 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300
+          /* Mobile: drawer que abre/fecha */
+          md:translate-x-0
+          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+          /* Desktop: comportamento atual */
+          md:static md:translate-x-0
+          ${shouldExpand ? 'md:w-64' : isCollapsed ? 'md:w-16' : 'md:w-64'}
+          /* Mobile sempre full width quando aberto */
+          ${isMobileOpen ? 'w-64' : 'w-64'}
+        `}
+        onMouseEnter={() => {
+          if (!isMobile) {
+            setIsHovered(true)
+          }
+        }}
+        onMouseLeave={() => {
+          if (!isMobile) {
+            setIsHovered(false)
+          }
+        }}
+      >
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4">
@@ -158,10 +216,17 @@ export function Sidebar({ companyName }: SidebarProps) {
               </svg>
             </div>
           )}
+          {/* Botão de fechar em mobile, toggle em desktop */}
           <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="rounded-md p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-            aria-label={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
+            onClick={() => {
+              if (isMobile && onMobileClose) {
+                onMobileClose()
+              } else {
+                setIsCollapsed(!isCollapsed)
+              }
+            }}
+            className="rounded-md p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label={isMobile ? 'Fechar menu' : isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             <svg
               className="h-5 w-5"
@@ -169,7 +234,9 @@ export function Sidebar({ companyName }: SidebarProps) {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              {isCollapsed ? (
+              {isMobile ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : isCollapsed ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               ) : (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -186,22 +253,23 @@ export function Sidebar({ companyName }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                onClick={handleLinkClick}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors min-h-[44px] ${
                   active
                     ? 'bg-gradient-to-r from-[#039155]/10 to-[#18B0BB]/10 text-[#039155] dark:text-[#18B0BB]'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
-                } ${(isCollapsed && !shouldExpand) ? 'justify-center' : ''}`}
-                title={isCollapsed ? item.title : undefined}
+                } ${(isCollapsed && !shouldExpand && !isMobile) ? 'justify-center' : ''}`}
+                title={(isCollapsed && !shouldExpand && !isMobile) ? item.title : undefined}
               >
                 <span className={active ? 'text-[#039155] dark:text-[#18B0BB]' : 'text-gray-500 dark:text-gray-400'}>{item.icon}</span>
-                {(!isCollapsed || shouldExpand) && <span>{item.title}</span>}
+                {(!isCollapsed || shouldExpand || isMobile) && <span>{item.title}</span>}
               </Link>
             )
           })}
         </nav>
 
         {/* Footer - Company Info */}
-        {(!isCollapsed || shouldExpand) && (
+        {(!isCollapsed || shouldExpand || isMobile) && (
           <div className="border-t border-gray-200 dark:border-gray-800 p-4">
             <div className="rounded-lg bg-gradient-to-r from-[#039155]/5 to-[#18B0BB]/5 dark:from-[#039155]/10 dark:to-[#18B0BB]/10 p-3">
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Empresa</p>
@@ -211,6 +279,7 @@ export function Sidebar({ companyName }: SidebarProps) {
         )}
       </div>
     </aside>
+    </>
   )
 }
 

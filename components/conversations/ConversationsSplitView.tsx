@@ -339,6 +339,24 @@ export function ConversationsSplitView({
   }
 
   const selectedConversation = conversations.find((c) => c.id === selectedId)
+  const [isMobile, setIsMobile] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      // Em mobile, se há conversa selecionada, mostrar chat
+      if (mobile && selectedId) {
+        setShowChat(true)
+      } else if (mobile && !selectedId) {
+        setShowChat(false)
+      }
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [selectedId])
 
   if (loading) {
     return (
@@ -351,6 +369,147 @@ export function ConversationsSplitView({
     )
   }
 
+  // Em mobile, mostrar apenas lista OU chat (não ambos)
+  if (isMobile) {
+    if (showChat && selectedConversation) {
+      return (
+        <div className="flex h-full flex-col overflow-hidden">
+          <ConversationDetailView
+            conversation={selectedConversation}
+            onClose={() => {
+              setShowChat(false)
+              setSelectedId(undefined)
+              const params = new URLSearchParams(searchParams.toString())
+              params.delete('id')
+              router.push(`/conversations?${params.toString()}`)
+            }}
+          />
+        </div>
+      )
+    }
+
+    // Mostrar lista em mobile
+    return (
+      <div className="flex h-full flex-col overflow-hidden">
+        {/* Lista de conversas - mobile */}
+        <div className="flex flex-col border-b md:border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 h-full">
+          {/* Filtros */}
+          <div className="border-b border-gray-200 dark:border-gray-800 p-3 md:p-4">
+          <div className="grid grid-cols-2 md:block md:space-y-3 gap-3 md:gap-0">
+            <div>
+              <label htmlFor="status" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Status
+              </label>
+              <select
+                id="status"
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value)
+                  const params = new URLSearchParams()
+                  params.set('status', e.target.value)
+                  if (channelFilter !== 'all') params.set('channel', channelFilter)
+                  router.push(`/conversations?${params.toString()}`)
+                }}
+                className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-2.5 md:py-1.5 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
+              >
+                <option value="all">Todos</option>
+                <option value={ConversationStatus.OPEN}>Abertas</option>
+                <option value={ConversationStatus.CLOSED}>Fechadas</option>
+                <option value={ConversationStatus.WAITING}>Aguardando</option>
+                <option value={ConversationStatus.TRANSFERRED}>Transferidas</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="channel" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Canal
+              </label>
+              <select
+                id="channel"
+                value={channelFilter}
+                onChange={(e) => {
+                  setChannelFilter(e.target.value)
+                  const params = new URLSearchParams()
+                  if (statusFilter !== 'all') params.set('status', statusFilter)
+                  params.set('channel', e.target.value)
+                  router.push(`/conversations?${params.toString()}`)
+                }}
+                className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-2.5 md:py-1.5 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
+              >
+                <option value="all">Todos</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="telegram">Telegram</option>
+                <option value="email">Email</option>
+                <option value="chat">Chat</option>
+                <option value="phone">Telefone</option>
+              </select>
+            </div>
+          </div>
+          </div>
+
+          {/* Lista */}
+          <div className="flex-1 overflow-y-auto">
+            {conversations.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                <p className="text-sm">Nenhuma conversa encontrada</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                {conversations.map((conversation) => (
+                  <button
+                    key={conversation.id}
+                    onClick={() => {
+                      handleSelectConversation(conversation.id)
+                      if (isMobile) {
+                        setShowChat(true)
+                      }
+                    }}
+                    className={`w-full text-left p-3 md:p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 min-h-[44px] ${
+                      selectedId === conversation.id ? 'bg-gradient-to-r from-[#039155]/10 to-[#18B0BB]/10 dark:from-[#039155]/20 dark:to-[#18B0BB]/20 border-r-2 border-[#039155] dark:border-[#18B0BB]' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {conversation.contacts?.name || 'Sem nome'}
+                          </h3>
+                          {conversation.status === ConversationStatus.OPEN && (
+                            <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+                              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400"></span>
+                            </span>
+                          )}
+                        </div>
+                        {conversation.subject && (
+                          <p className="text-xs text-gray-600 dark:text-gray-400 truncate mb-2">{conversation.subject}</p>
+                        )}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(conversation.status)}`}
+                          >
+                            {getStatusLabel(conversation.status)}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">{conversation.channel}</span>
+                          {conversation.ai_assistant_enabled && (
+                            <span className="text-xs">🤖</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          {format(new Date(conversation.last_message_at), 'dd/MM HH:mm')}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Desktop: split view
   return (
     <div className="flex h-full gap-4 overflow-hidden">
       {/* Lista de conversas - lado esquerdo */}

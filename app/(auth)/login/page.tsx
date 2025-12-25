@@ -70,26 +70,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 px-4 py-8 md:py-12">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="mb-8 text-center">
+        <div className="mb-6 md:mb-8 text-center">
           <Link href="/" className="inline-block">
-            <div className="mb-4 flex items-center justify-center space-x-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#039155] to-[#18B0BB] shadow-lg">
-                <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="mb-3 md:mb-4 flex items-center justify-center space-x-2">
+              <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#039155] to-[#18B0BB] shadow-lg">
+                <svg className="h-6 w-6 md:h-7 md:w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">Controlia CRM</h1>
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">Controlia CRM</h1>
           </Link>
-          <p className="mt-3 text-lg font-medium text-gray-600 dark:text-gray-400">Bem-vindo de volta</p>
+          <p className="mt-2 md:mt-3 text-base md:text-lg font-medium text-gray-600 dark:text-gray-400">Bem-vindo de volta</p>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-500">Faça login para acessar sua conta</p>
         </div>
 
         {/* Login Form Card */}
-        <div className="rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+        <div className="rounded-xl md:rounded-2xl bg-white dark:bg-gray-900 p-6 md:p-8 shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
               <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 p-4">
@@ -122,7 +122,7 @@ export default function LoginPage() {
                     setEmail(e.target.value)
                     setError(null)
                   }}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 md:py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400 min-h-[44px] md:min-h-0"
                   placeholder="seu@email.com"
                   disabled={loading}
                 />
@@ -145,15 +145,16 @@ export default function LoginPage() {
                     setPassword(e.target.value)
                     setError(null)
                   }}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-12 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 md:py-2.5 pr-12 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400 min-h-[44px] md:min-h-0"
                   placeholder="••••••••"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0"
                   tabIndex={-1}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? (
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -169,23 +170,23 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center min-h-[44px] md:min-h-0">
                 <input
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155] dark:bg-gray-800"
+                  className="h-5 w-5 md:h-4 md:w-4 rounded border-gray-300 dark:border-gray-700 text-[#039155] focus:ring-[#039155] dark:bg-gray-800"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                   Lembrar-me
                 </label>
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-[#039155] dark:text-[#18B0BB] hover:text-[#18B0BB] dark:hover:text-[#039155] transition-colors">
+                <a href="#" className="font-medium text-[#039155] dark:text-[#18B0BB] hover:text-[#18B0BB] dark:hover:text-[#039155] transition-colors min-h-[44px] md:min-h-0 flex items-center">
                   Esqueceu a senha?
                 </a>
               </div>
@@ -195,7 +196,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full justify-center rounded-lg border border-transparent bg-gradient-to-r from-[#039155] to-[#18B0BB] px-6 py-3 text-base font-semibold text-white shadow-lg shadow-[#039155]/25 transition-all hover:shadow-xl hover:shadow-[#039155]/30 focus:outline-none focus:ring-2 focus:ring-[#039155] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full justify-center rounded-lg border border-transparent bg-gradient-to-r from-[#039155] to-[#18B0BB] px-6 py-3.5 md:py-3 text-base md:text-sm font-semibold text-white shadow-lg shadow-[#039155]/25 transition-all hover:shadow-xl hover:shadow-[#039155]/30 focus:outline-none focus:ring-2 focus:ring-[#039155] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[44px] md:min-h-0"
               >
                 {loading ? (
                   <span className="flex items-center">
