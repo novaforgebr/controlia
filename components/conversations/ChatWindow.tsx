@@ -110,22 +110,22 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   useEffect(() => {
     if (!conversation.id) return
 
-    let channel: ReturnType<typeof supabase.channel> | null = null
+    // Buscar company_id da conversa primeiro e configurar subscription
+    const setupSubscription = async () => {
+      try {
+        const { data: conversationData } = await supabase
+          .from('conversations')
+          .select('company_id')
+          .eq('id', conversation.id)
+          .single()
 
-    // Buscar company_id da conversa primeiro
-    supabase
-      .from('conversations')
-      .select('company_id')
-      .eq('id', conversation.id)
-      .single()
-      .then(({ data: conversationData }) => {
         if (!conversationData) {
           console.error('Erro: Conversa não encontrada para subscription')
           return
         }
 
         // Configurar subscription com filtro por conversation_id
-        channel = supabase
+        const newChannel = supabase
           .channel(subscriptionKey)
           .on(
             'postgres_changes',
@@ -171,10 +171,14 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
             }
           )
           .subscribe()
-      })
-      .catch((error) => {
+        
+        channelRef.current = newChannel
+      } catch (error) {
         console.error('Erro ao configurar subscription:', error)
-      })
+      }
+    }
+
+    setupSubscription()
 
     // Escutar mudanças no ai_assistant_enabled da conversa
     const conversationChannel = supabase
@@ -198,10 +202,14 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       .subscribe()
 
     return () => {
-      if (channel) {
-        supabase.removeChannel(channel)
+      // Cleanup será feito quando o componente desmontar
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
       }
-      supabase.removeChannel(conversationChannel)
+      if (conversationChannel) {
+        supabase.removeChannel(conversationChannel)
+      }
     }
   }, [conversation.id, subscriptionKey, supabase, aiEnabled])
 
