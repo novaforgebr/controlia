@@ -82,51 +82,74 @@ export async function POST(request: NextRequest) {
     const serviceClient = createServiceRoleClient()
     const supabase = serviceClient // Usar service role para todas as operações (bypass RLS) // Usar service client para todas as operações
 
-    // Buscar empresa pela configuração do bot token (se necessário)
-    // Por enquanto, vamos buscar contato pelo username ou ID do Telegram
+    // Buscar empresa pela configuração do bot token
     const telegramUserId = from.id.toString()
     const telegramUsername = from.username || null
+    
+    // Obter bot token da variável de ambiente ou buscar nas empresas
+    const botTokenFromEnv = process.env.TELEGRAM_BOT_TOKEN as string | undefined
+    console.log('🔍 Bot token da env:', botTokenFromEnv ? 'Configurado' : 'Não configurado')
 
     // Buscar todas as empresas e verificar configurações
     const { data: companies } = await supabase
       .from('companies')
-      .select('id, settings')
+      .select('id, name, settings')
       .limit(100) // Limitar para performance
 
     if (!companies || companies.length === 0) {
+      console.error('❌ Nenhuma empresa encontrada no banco')
       return NextResponse.json(
         { error: 'Nenhuma empresa encontrada' },
         { status: 404 }
       )
     }
 
-    // Buscar contato que tenha telegram_id ou username no custom_fields
-    let contact = null
-    for (const company of companies) {
-      const { data: contacts } = await supabase
-        .from('contacts')
-        .select('id, company_id, custom_fields')
-        .eq('company_id', company.id)
-        .limit(1000)
+    console.log(`🔍 Encontradas ${companies.length} empresa(s) no banco`)
 
-      if (contacts) {
-        contact = contacts.find((c) => {
-          const customFields = c.custom_fields as Record<string, unknown> || {}
-          return (
-            customFields.telegram_id === telegramUserId ||
-            customFields.telegram_username === telegramUsername
-          )
-        })
-
-        if (contact) break
+    // Tentar identificar empresa pelo bot token (prioridade)
+    let targetCompany = null
+    if (botTokenFromEnv) {
+      // Buscar empresa que tenha o mesmo bot token configurado
+      for (const company of companies) {
+        const settings = (company.settings as Record<string, unknown>) || {}
+        const companyBotToken = settings.telegram_bot_token as string | undefined
+        
+        if (companyBotToken && companyBotToken.trim() === botTokenFromEnv.trim()) {
+          targetCompany = company
+          console.log(`✅ Empresa identificada pelo bot token: ${company.name || company.id}`)
+          break
+        }
       }
     }
 
-    // Se não encontrou contato, criar um novo (opcional - pode ser configurável)
-    if (!contact && companies.length > 0) {
-      // Por padrão, usar a primeira empresa
-      // Em produção, você pode querer mapear bot token -> company_id
-      const company = companies[0]
+    // Se não encontrou pelo token, usar a primeira empresa (fallback)
+    if (!targetCompany) {
+      targetCompany = companies[0]
+      console.log(`⚠️ Usando primeira empresa como fallback: ${targetCompany.name || targetCompany.id}`)
+    }
+
+    // Buscar contato que tenha telegram_id ou username no custom_fields
+    let contact = null
+    const { data: contacts } = await supabase
+      .from('contacts')
+      .select('id, company_id, custom_fields')
+      .eq('company_id', targetCompany.id)
+      .limit(1000)
+
+    if (contacts) {
+      contact = contacts.find((c) => {
+        const customFields = c.custom_fields as Record<string, unknown> || {}
+        return (
+          customFields.telegram_id === telegramUserId ||
+          customFields.telegram_username === telegramUsername
+        )
+      })
+    }
+
+    // Se não encontrou contato, criar um novo
+    if (!contact) {
+      console.log('📝 Contato não encontrado, criando novo contato...')
+      const company = targetCompany
 
       const { data: newContact, error: contactError } = await supabase
         .from('contacts')
