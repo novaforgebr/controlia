@@ -169,3 +169,4 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
   )
 }
 
+

@@ -1,16 +1,68 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { updateCompanySettings } from '@/app/actions/companies'
+import { getTelegramWebhookInfo, testTelegramConnection } from '@/app/actions/telegram'
 import { IntegrationTutorialModal } from './IntegrationTutorialModal'
 
 interface IntegrationSettingsProps {
   settings: Record<string, unknown>
 }
 
+interface TelegramWebhookStatus {
+  configured: boolean
+  url: string | null
+  pendingUpdates: number | null
+  lastErrorDate: number | null
+  lastErrorMessage: string | null
+}
+
 export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
   const [loading, setLoading] = useState(false)
   const [tutorialOpen, setTutorialOpen] = useState<'whatsapp' | 'telegram' | 'email' | null>(null)
+  const [telegramWebhookStatus, setTelegramWebhookStatus] = useState<TelegramWebhookStatus | null>(null)
+  const [checkingWebhook, setCheckingWebhook] = useState(false)
+  const [testingConnection, setTestingConnection] = useState(false)
+
+  // Verificar status do webhook quando componente carrega ou quando token muda
+  useEffect(() => {
+    const checkWebhookStatus = async () => {
+      const botToken = (settings.telegram_bot_token as string) || ''
+      if (!botToken) {
+        setTelegramWebhookStatus(null)
+        return
+      }
+
+      setCheckingWebhook(true)
+      try {
+        const result = await getTelegramWebhookInfo(botToken)
+        if (result.success && result.data) {
+          setTelegramWebhookStatus({
+            configured: !!result.data.url,
+            url: result.data.url || null,
+            pendingUpdates: result.data.pending_update_count || null,
+            lastErrorDate: result.data.last_error_date || null,
+            lastErrorMessage: result.data.last_error_message || null,
+          })
+        } else {
+          setTelegramWebhookStatus({
+            configured: false,
+            url: null,
+            pendingUpdates: null,
+            lastErrorDate: null,
+            lastErrorMessage: result.error || null,
+          })
+        }
+      } catch (error) {
+        console.error('Erro ao verificar webhook:', error)
+        setTelegramWebhookStatus(null)
+      } finally {
+        setCheckingWebhook(false)
+      }
+    }
+
+    checkWebhookStatus()
+  }, [settings.telegram_bot_token])
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true)
@@ -18,9 +70,45 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
     setLoading(false)
     if (result.success) {
       alert('Configurações de integração salvas com sucesso!')
+      // Recarregar status do webhook após salvar
+      const botToken = formData.get('telegram_bot_token') as string
+      if (botToken) {
+        const webhookResult = await getTelegramWebhookInfo(botToken)
+        if (webhookResult.success && webhookResult.data) {
+          setTelegramWebhookStatus({
+            configured: !!webhookResult.data.url,
+            url: webhookResult.data.url || null,
+            pendingUpdates: webhookResult.data.pending_update_count || null,
+            lastErrorDate: webhookResult.data.last_error_date || null,
+            lastErrorMessage: webhookResult.data.last_error_message || null,
+          })
+        }
+      }
       window.location.reload()
     } else {
       alert(result.error || 'Erro ao salvar configurações')
+    }
+  }
+
+  const handleTestConnection = async () => {
+    const botToken = (settings.telegram_bot_token as string) || ''
+    if (!botToken) {
+      alert('Por favor, insira o Bot Token primeiro')
+      return
+    }
+
+    setTestingConnection(true)
+    try {
+      const result = await testTelegramConnection(botToken)
+      if (result.success && result.data) {
+        alert(`✅ Conexão bem-sucedida!\n\nBot: ${result.data.first_name} (@${result.data.username})\nID: ${result.data.id}`)
+      } else {
+        alert(`❌ Erro ao testar conexão: ${result.error || 'Token inválido'}`)
+      }
+    } catch (error) {
+      alert(`❌ Erro ao testar conexão: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    } finally {
+      setTestingConnection(false)
     }
   }
 
@@ -114,17 +202,84 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
                 <p className="text-sm text-gray-500">Configurações de integração com Telegram Bot</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setTutorialOpen('telegram')}
-              className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Como configurar
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleTestConnection}
+                disabled={testingConnection || !settings.telegram_bot_token}
+                className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {testingConnection ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                    Testando...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Testar Conexão
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setTutorialOpen('telegram')}
+                className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Como configurar
+              </button>
+            </div>
           </div>
+          
+          {/* Status do Webhook */}
+          {settings.telegram_bot_token && (
+            <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">Status do Webhook:</span>
+                  {checkingWebhook ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                  ) : telegramWebhookStatus?.configured ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-600"></span>
+                      Configurado
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+                      <span className="h-1.5 w-1.5 rounded-full bg-yellow-600"></span>
+                      Não configurado
+                    </span>
+                  )}
+                </div>
+              </div>
+              {telegramWebhookStatus?.configured && telegramWebhookStatus.url && (
+                <div className="mt-2 text-xs text-gray-600">
+                  <p className="font-mono break-all">{telegramWebhookStatus.url}</p>
+                  {telegramWebhookStatus.pendingUpdates !== null && telegramWebhookStatus.pendingUpdates > 0 && (
+                    <p className="mt-1 text-yellow-600">
+                      ⚠️ {telegramWebhookStatus.pendingUpdates} atualizações pendentes
+                    </p>
+                  )}
+                  {telegramWebhookStatus.lastErrorMessage && (
+                    <p className="mt-1 text-red-600">
+                      ❌ Último erro: {telegramWebhookStatus.lastErrorMessage}
+                    </p>
+                  )}
+                </div>
+              )}
+              {!telegramWebhookStatus?.configured && !checkingWebhook && (
+                <p className="mt-2 text-xs text-gray-500">
+                  O webhook será configurado automaticamente ao salvar o Bot Token.
+                </p>
+              )}
+            </div>
+          )}
+          
           <div className="mt-4 space-y-4">
             <div>
               <label htmlFor="telegram_bot_token" className="block text-sm font-medium text-gray-700">

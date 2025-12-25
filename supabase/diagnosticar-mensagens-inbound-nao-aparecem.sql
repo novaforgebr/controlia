@@ -78,3 +78,4 @@ WHERE company_id IS NULL
   AND created_at > NOW() - INTERVAL '2 hours'
 GROUP BY direction, sender_type;
 
+

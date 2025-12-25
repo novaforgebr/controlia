@@ -51,3 +51,4 @@ WHERE m.direction = 'inbound'
   AND m.created_at > NOW() - INTERVAL '24 hours'
 LIMIT 10;
 
+

@@ -46,3 +46,4 @@ GROUP BY c.id, c.channel, c.status, c.channel_thread_id, c.created_at, ct.name
 ORDER BY MAX(m.created_at) DESC NULLS LAST
 LIMIT 10;
 
+

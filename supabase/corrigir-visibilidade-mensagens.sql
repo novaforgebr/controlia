@@ -88,3 +88,4 @@ WHERE m.created_at >= NOW() - INTERVAL '24 hours'
 GROUP BY m.company_id
 ORDER BY total_mensagens DESC;
 
+

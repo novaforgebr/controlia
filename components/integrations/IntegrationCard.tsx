@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { connectChannel, disconnectChannel, checkConnectionStatus } from '@/app/actions/integrations'
+import { getTelegramWebhookInfo } from '@/app/actions/telegram'
 import { QRCodeModal } from './QRCodeModal'
 import { IntegrationStatusBadge } from './IntegrationStatusBadge'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal'
+import { createClient } from '@/lib/supabase/client'
 
 interface Channel {
   id: string
@@ -41,10 +43,73 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
   const [qrCodeData, setQrCodeData] = useState<string | null>(null)
   const [checkingStatus, setCheckingStatus] = useState(false)
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false)
+  const [telegramWebhookStatus, setTelegramWebhookStatus] = useState<{
+    configured: boolean
+    url: string | null
+  } | null>(null)
+  const [checkingWebhook, setCheckingWebhook] = useState(false)
   const toast = useToast()
+  const supabase = createClient()
 
   const isConnected = integration?.status === 'connected'
   const isConnecting = integration?.status === 'connecting'
+  const isTelegram = channel.id === 'telegram' || channel.name.toLowerCase() === 'telegram'
+
+  // Verificar status do webhook do Telegram se for canal Telegram
+  useEffect(() => {
+    if (!isTelegram) return
+
+    const checkWebhookStatus = async () => {
+      try {
+        // Buscar company_id do usuário atual
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data: companyUser } = await supabase
+          .from('company_users')
+          .select('company_id')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .single()
+
+        if (!companyUser) return
+
+        // Buscar settings da empresa
+        const { data: company } = await supabase
+          .from('companies')
+          .select('settings')
+          .eq('id', companyUser.company_id)
+          .single()
+
+        const settings = (company?.settings as Record<string, unknown>) || {}
+        const botToken = (settings.telegram_bot_token as string) || ''
+
+        if (!botToken) {
+          setTelegramWebhookStatus({ configured: false, url: null })
+          return
+        }
+
+        setCheckingWebhook(true)
+        const result = await getTelegramWebhookInfo(botToken)
+        
+        if (result.success && result.data) {
+          setTelegramWebhookStatus({
+            configured: !!result.data.url,
+            url: result.data.url || null,
+          })
+        } else {
+          setTelegramWebhookStatus({ configured: false, url: null })
+        }
+      } catch (error) {
+        console.error('Erro ao verificar webhook do Telegram:', error)
+        setTelegramWebhookStatus(null)
+      } finally {
+        setCheckingWebhook(false)
+      }
+    }
+
+    checkWebhookStatus()
+  }, [isTelegram, supabase])
 
   const handleConnect = async () => {
     setLoading(true)
@@ -168,6 +233,40 @@ export function IntegrationCard({ channel, integration, onUpdate }: IntegrationC
                   <span className="font-medium">{integration.total_conversations}</span> conversas
                 </span>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Status do Webhook do Telegram */}
+        {isTelegram && (
+          <div className="mb-4 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Webhook:</span>
+                {checkingWebhook ? (
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600 dark:border-gray-600 dark:border-t-gray-400"></div>
+                ) : telegramWebhookStatus?.configured ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-800 dark:text-green-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-600 dark:bg-green-400"></span>
+                    Configurado
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:text-yellow-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-yellow-600 dark:bg-yellow-400"></span>
+                    Não configurado
+                  </span>
+                )}
+              </div>
+            </div>
+            {telegramWebhookStatus?.configured && telegramWebhookStatus.url && (
+              <p className="mt-2 text-xs font-mono text-gray-600 dark:text-gray-400 break-all">
+                {telegramWebhookStatus.url}
+              </p>
+            )}
+            {!telegramWebhookStatus?.configured && !checkingWebhook && (
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Configure o webhook em <span className="font-medium">Configurações → Integrações</span>
+              </p>
             )}
           </div>
         )}

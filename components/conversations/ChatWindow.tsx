@@ -79,6 +79,11 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       }
       
       // Buscar mensagens filtrando por conversation_id E company_id
+      console.log('📥 Carregando mensagens:', {
+        conversation_id: conversation.id,
+        company_id: conversationData.company_id,
+      })
+      
       const { data, error } = await supabase
         .from('messages')
         .select('*, user_profiles:sender_id(full_name)')
@@ -88,10 +93,26 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
         .limit(100)
 
       if (error) {
-        console.error('Erro ao carregar mensagens:', error)
+        console.error('❌ Erro ao carregar mensagens:', error)
         console.error('   - conversation_id:', conversation.id)
         console.error('   - company_id:', conversationData.company_id)
+        console.error('   - Error details:', JSON.stringify(error, null, 2))
         return
+      }
+
+      console.log('✅ Mensagens carregadas:', {
+        total: data?.length || 0,
+        conversation_id: conversation.id,
+        company_id: conversationData.company_id,
+      })
+      
+      if (data && data.length > 0) {
+        console.log('📋 Primeira mensagem:', {
+          id: data[0].id,
+          direction: data[0].direction,
+          sender_type: data[0].sender_type,
+          content_preview: data[0].content?.substring(0, 50),
+        })
       }
 
       setMessages(data || [])
@@ -152,22 +173,47 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               }
               
               // Buscar dados completos da mensagem com relacionamentos
-              const { data: fullMessage } = await supabase
+              console.log('🆕 Nova mensagem recebida via Realtime:', {
+                message_id: newMessage.id,
+                conversation_id: conversation.id,
+                company_id: convData.company_id,
+                direction: newMessage.direction,
+                sender_type: newMessage.sender_type,
+              })
+              
+              const { data: fullMessage, error: messageError } = await supabase
                 .from('messages')
                 .select('*, user_profiles:sender_id(full_name)')
                 .eq('id', newMessage.id)
                 .eq('company_id', convData.company_id)
                 .single()
 
+              if (messageError) {
+                console.error('❌ Erro ao buscar mensagem completa:', messageError)
+                console.error('   - message_id:', newMessage.id)
+                console.error('   - company_id:', convData.company_id)
+                return
+              }
+
               if (fullMessage) {
+                console.log('✅ Mensagem completa carregada:', {
+                  id: fullMessage.id,
+                  direction: fullMessage.direction,
+                  sender_type: fullMessage.sender_type,
+                  content_preview: fullMessage.content?.substring(0, 50),
+                })
+                
                 setMessages((prev) => {
                   // Evitar duplicatas
                   if (prev.some((m) => m.id === fullMessage.id)) {
+                    console.log('⚠️ Mensagem já existe, ignorando duplicata:', fullMessage.id)
                     return prev
                   }
                   return [...prev, fullMessage as Message]
                 })
                 setTimeout(() => scrollToBottom(), 100)
+              } else {
+                console.warn('⚠️ Mensagem não encontrada após Realtime event:', newMessage.id)
               }
             }
           )
