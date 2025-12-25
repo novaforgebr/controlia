@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { updateCompanySettings } from '@/app/actions/companies'
-import { getTelegramWebhookInfo, testTelegramConnection } from '@/app/actions/telegram'
+import { getTelegramWebhookInfo, testTelegramConnection, reconfigureAllTelegramWebhooks, validateAllWebhookConfigurations } from '@/app/actions/telegram'
 import { IntegrationTutorialModal } from './IntegrationTutorialModal'
 
 interface IntegrationSettingsProps {
@@ -23,6 +23,9 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
   const [telegramWebhookStatus, setTelegramWebhookStatus] = useState<TelegramWebhookStatus | null>(null)
   const [checkingWebhook, setCheckingWebhook] = useState(false)
   const [testingConnection, setTestingConnection] = useState(false)
+  const [reconfiguringAll, setReconfiguringAll] = useState(false)
+  const [validatingAll, setValidatingAll] = useState(false)
+  const [validationReport, setValidationReport] = useState<any>(null)
 
   // Verificar status do webhook quando componente carrega ou quando token muda
   useEffect(() => {
@@ -112,11 +115,116 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
     }
   }
 
+  const handleReconfigureAll = async () => {
+    if (!confirm('Tem certeza que deseja reconfigurar todos os webhooks do Telegram? Isso irá atualizar o webhook de todas as empresas que têm bot token configurado.')) {
+      return
+    }
+
+    setReconfiguringAll(true)
+    try {
+      const result = await reconfigureAllTelegramWebhooks()
+      
+      if (result.success) {
+        const successCount = result.results.filter((r) => r.success).length
+        const errorCount = result.results.filter((r) => !r.success).length
+        
+        alert(`Reconfiguração concluída!\n\n✅ Sucessos: ${successCount}\n❌ Erros: ${errorCount}`)
+        
+        // Recarregar status do webhook atual
+        const botToken = (settings.telegram_bot_token as string) || ''
+        if (botToken) {
+          const webhookResult = await getTelegramWebhookInfo(botToken)
+          if (webhookResult.success && webhookResult.data) {
+            setTelegramWebhookStatus({
+              configured: !!webhookResult.data.url,
+              url: webhookResult.data.url || null,
+              pendingUpdates: webhookResult.data.pending_update_count || null,
+              lastErrorDate: webhookResult.data.last_error_date || null,
+              lastErrorMessage: webhookResult.data.last_error_message || null,
+            })
+          }
+        }
+      } else {
+        alert('Erro ao reconfigurar webhooks. Verifique os logs.')
+      }
+    } catch (error) {
+      console.error('Erro ao reconfigurar webhooks:', error)
+      alert('Erro ao reconfigurar webhooks. Tente novamente.')
+    } finally {
+      setReconfiguringAll(false)
+    }
+  }
+
+  const handleValidateAll = async () => {
+    setValidatingAll(true)
+    try {
+      const result = await validateAllWebhookConfigurations()
+      setValidationReport(result.report)
+      
+      if (result.success) {
+        const telegramOk = result.report.telegram.filter((t) => t.webhookStatus === 'ok').length
+        const telegramErrors = result.report.telegram.filter((t) => t.webhookStatus === 'error').length
+        const n8nActive = result.report.n8n.filter((n) => n.isActive).length
+        
+        alert(`Validação concluída!\n\nTelegram:\n✅ OK: ${telegramOk}\n❌ Erros: ${telegramErrors}\n\nn8n:\n🔗 Ativas: ${n8nActive}`)
+      }
+    } catch (error) {
+      console.error('Erro ao validar configurações:', error)
+      alert('Erro ao validar configurações. Tente novamente.')
+    } finally {
+      setValidatingAll(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">Integrações</h2>
-        <p className="mt-2 text-sm text-gray-600">Configure integrações externas e APIs</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Integrações</h2>
+          <p className="mt-2 text-sm text-gray-600">Configure integrações externas e APIs</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleValidateAll}
+            disabled={validatingAll}
+            className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            {validatingAll ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                Validando...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Validar Todas
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={handleReconfigureAll}
+            disabled={reconfiguringAll}
+            className="flex items-center gap-2 rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+          >
+            {reconfiguringAll ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                Reconfigurando...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reconfigurar Todos
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       <form action={handleSubmit} className="space-y-6">

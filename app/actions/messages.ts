@@ -17,27 +17,41 @@ import { revalidatePath } from 'next/cache'
  */
 export async function createMessage(formData: FormData) {
   try {
-    // company_id é opcional - pode vir do formData ou ser obtido da empresa atual
-    const company_id_from_form = formData.get('company_id') as string | null
-    let company_id: string | null = null
-    
-    if (company_id_from_form) {
-      company_id = company_id_from_form
-    } else {
-      // Tentar obter da empresa atual (se houver usuário autenticado)
-      const company = await getCurrentCompany()
-      if (company) {
-        company_id = company.id
-      }
-      // Se não houver empresa, company_id será NULL (permitido agora)
+    const supabase = await createClient()
+    const conversation_id = formData.get('conversation_id') as string
+
+    if (!conversation_id) {
+      return { error: 'conversation_id é obrigatório' }
+    }
+
+    // IMPORTANTE: Sempre obter company_id da conversa (mais confiável)
+    // Isso garante que a mensagem tenha o company_id correto para RLS
+    const { data: conversation, error: convError } = await supabase
+      .from('conversations')
+      .select('company_id, contact_id')
+      .eq('id', conversation_id)
+      .single()
+
+    if (convError || !conversation) {
+      console.error('Erro ao buscar conversa:', convError)
+      return { error: 'Conversa não encontrada' }
+    }
+
+    const company_id = conversation.company_id
+    const contact_id_from_conv = conversation.contact_id
+
+    // Usar contact_id da conversa se não foi fornecido
+    const contact_id = formData.get('contact_id') as string || contact_id_from_conv
+
+    if (!company_id) {
+      return { error: 'Conversa não possui company_id. Isso não deveria acontecer.' }
     }
 
     const user = await getUser()
-    // user não é obrigatório para mensagens do n8n
 
     const rawData = {
-      conversation_id: formData.get('conversation_id') as string,
-      contact_id: formData.get('contact_id') as string,
+      conversation_id,
+      contact_id,
       content: formData.get('content') as string,
       content_type: formData.get('content_type') as string || 'text',
       media_url: formData.get('media_url') as string || '',
@@ -62,17 +76,21 @@ export async function createMessage(formData: FormData) {
       ai_prompt_version_id: rawData.ai_prompt_version_id || null,
     })
 
-    const supabase = await createClient()
-
-    // Inserir mensagem (company_id pode ser NULL)
+    // IMPORTANTE: Sempre incluir company_id na mensagem
+    // Isso é crítico para RLS funcionar corretamente
     const messageData: Record<string, unknown> = {
       ...validatedData,
+      company_id, // Sempre incluir company_id da conversa
     }
-    
-    // Adicionar company_id apenas se existir
-    if (company_id) {
-      messageData.company_id = company_id
-    }
+
+    console.log('💾 Criando mensagem:', {
+      conversation_id,
+      company_id,
+      contact_id,
+      direction: validatedData.direction,
+      sender_type: validatedData.sender_type,
+      content: validatedData.content.substring(0, 50),
+    })
 
     const { data: message, error } = await supabase
       .from('messages')
@@ -81,9 +99,26 @@ export async function createMessage(formData: FormData) {
       .single()
 
     if (error) {
-      console.error('Erro ao criar mensagem:', error)
-      return { error: 'Erro ao criar mensagem' }
+      console.error('❌ Erro ao criar mensagem:', error)
+      console.error('   - Código:', error.code)
+      console.error('   - Mensagem:', error.message)
+      console.error('   - Detalhes:', JSON.stringify(error, null, 2))
+      console.error('   - Dados tentados:', JSON.stringify(messageData, null, 2))
+      return { error: `Erro ao criar mensagem: ${error.message}` }
     }
+
+    if (!message) {
+      console.error('❌ Mensagem não foi criada (retorno null)')
+      return { error: 'Mensagem não foi criada' }
+    }
+
+    console.log('✅ Mensagem criada com sucesso:', {
+      id: message.id,
+      conversation_id: message.conversation_id,
+      company_id: message.company_id,
+      direction: message.direction,
+      sender_type: message.sender_type,
+    })
 
     // Se for mensagem humana outbound, enviar para o canal externo (Telegram/WhatsApp)
     try {

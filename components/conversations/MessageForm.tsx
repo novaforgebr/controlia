@@ -56,8 +56,14 @@ export function MessageForm({ conversationId, contactId, onMessageSent }: Messag
       if (result.success) {
         setContent('')
         toast.success('Mensagem enviada com sucesso')
+        console.log('✅ Mensagem enviada com sucesso, chamando onMessageSent')
+        
+        // Sempre chamar onMessageSent se disponível, senão refresh
         if (onMessageSent) {
-          onMessageSent()
+          // Aguardar um pouco para garantir que a mensagem foi salva
+          setTimeout(() => {
+            onMessageSent()
+          }, 500)
         } else {
           router.refresh()
         }

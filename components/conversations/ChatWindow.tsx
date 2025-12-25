@@ -84,6 +84,8 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
         company_id: conversationData.company_id,
       })
       
+      // IMPORTANTE: Buscar mensagens com filtro por conversation_id e company_id
+      // O RLS deve permitir se o usuário pertence à empresa
       const { data, error } = await supabase
         .from('messages')
         .select('*, user_profiles:sender_id(full_name)')
@@ -273,8 +275,15 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   }, [messages, scrollToBottom])
 
   const handleMessageSent = useCallback(() => {
+    // Recarregar mensagens após envio
+    console.log('🔄 Recarregando mensagens após envio...')
     loadMessages()
-  }, [loadMessages])
+    
+    // Também forçar scroll para baixo após um pequeno delay
+    setTimeout(() => {
+      scrollToBottom()
+    }, 300)
+  }, [loadMessages, scrollToBottom])
 
   // Toggle IA com Optimistic Update
   const handleToggleAI = useCallback(async () => {
