@@ -614,30 +614,14 @@ export async function POST(request: NextRequest) {
             // Secret também está na URL (query parameter)
             console.log('🔐 Secret também presente na URL como query parameter')
             console.log('🔐 URL final:', webhookUrl)
-          } else if (!secretToUse) {
-            // Secret não na URL = usar Header Auth
-            console.log('🔐 Secret não na URL - usando Header Auth')
-            console.log('🔐 Secret das settings:', n8nWebhookSecret.substring(0, 5) + '...')
-            // O n8n está configurado para aceitar "X-Webhook-Secret" como nome do header
-            headers['X-Webhook-Secret'] = n8nWebhookSecret
-            console.log('🔐 Secret enviado como header HTTP: X-Webhook-Secret')
-            console.log('🔐 Valor do secret completo:', n8nWebhookSecret)
-            console.log('🔐 Tamanho do secret:', n8nWebhookSecret.length, 'caracteres')
-          } else {
+          }
+          
+          if (!secretToUse) {
             // Nenhum secret configurado
-            console.warn('⚠️ Nenhum secret configurado nas settings da empresa')
-            console.warn('⚠️ Verificando se o secret está na URL do webhook...')
-            try {
-              const urlObj = new URL(webhookUrl)
-              if (urlObj.searchParams.has('secret')) {
-                console.log('✅ Secret encontrado na URL do webhook - será usado automaticamente')
-              } else {
-                console.error('❌ Nenhum secret encontrado! O n8n pode rejeitar a requisição.')
-                console.error('💡 Configure n8n_webhook_secret nas settings da empresa ou adicione ?secret=xxx na URL do webhook')
-              }
-            } catch (urlError) {
-              console.warn('⚠️ Não foi possível processar URL do webhook:', urlError)
-            }
+            console.warn('⚠️ Nenhum secret configurado!')
+            console.warn('⚠️ O n8n pode rejeitar a requisição com erro 403.')
+            console.error('💡 Configure n8n_webhook_secret nas settings da empresa')
+            console.error('💡 Ou adicione ?secret=xxx na URL do webhook do n8n')
           }
 
           // Preparar payload para o n8n
