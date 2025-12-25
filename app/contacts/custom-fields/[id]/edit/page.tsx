@@ -2,13 +2,15 @@ import { getCustomField, updateCustomField } from '@/app/actions/custom-fields'
 import { notFound, redirect } from 'next/navigation'
 import ProtectedLayout from '@/app/layout-protected'
 import { CustomFieldsFormClient } from '@/components/contacts/CustomFieldsFormClient'
+import Link from 'next/link'
 
 export default async function EditCustomFieldPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const { data: field } = await getCustomField(params.id)
+  const { id } = await params
+  const { data: field } = await getCustomField(id)
 
   if (!field) {
     notFound()
@@ -16,7 +18,8 @@ export default async function EditCustomFieldPage({
 
   async function handleSubmit(formData: FormData) {
     'use server'
-    const result = await updateCustomField(params.id, formData)
+    const { id: fieldId } = await params
+    const result = await updateCustomField(fieldId, formData)
     if (result.success) {
       redirect('/contacts/custom-fields')
     } else {
@@ -144,12 +147,12 @@ export default async function EditCustomFieldPage({
           </div>
 
           <div className="flex justify-end gap-4">
-            <a
+            <Link
               href="/contacts/custom-fields"
               className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Cancelar
-            </a>
+            </Link>
             <button
               type="submit"
               className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"

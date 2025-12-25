@@ -4,6 +4,7 @@ import { ContactStatus } from '@/lib/types/database'
 import ProtectedLayout from '@/app/layout-protected'
 import { CustomFieldsForm } from '@/components/contacts/CustomFieldsForm'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import Link from 'next/link'
 
 export default function NewContactPage() {
   async function handleSubmit(formData: FormData) {
@@ -180,12 +181,12 @@ export default function NewContactPage() {
           </div>
 
           <div className="flex justify-end gap-4">
-            <a
+            <Link
               href="/contacts"
               className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Cancelar
-            </a>
+            </Link>
             <button
               type="submit"
               className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"

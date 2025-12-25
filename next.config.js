@@ -1,8 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Server Actions agora são estáveis no Next.js 15, não precisam mais de experimental
-  serverActions: {
-    bodySizeLimit: '2mb',
+  // Ignorar arquivos do Supabase Edge Functions (Deno)
+  webpack: (config) => {
+    config.externals = config.externals || []
+    config.externals.push({
+      'supabase/functions': 'commonjs supabase/functions',
+    })
+    return config
+  },
+  // Ignorar arquivos .ts do Supabase Functions durante a compilação
+  typescript: {
+    ignoreBuildErrors: false,
   },
   // Otimizações de performance
   compress: true,

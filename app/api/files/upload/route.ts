@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       console.error('Erro no upload:', uploadError)
       
       // Se o erro for de bucket não encontrado
-      if (uploadError.message?.includes('Bucket not found') || uploadError.statusCode === '404') {
+      if (uploadError.message?.includes('Bucket not found') || (uploadError as any).statusCode === '404') {
         return NextResponse.json(
           { error: 'Bucket de armazenamento não configurado' },
           { status: 500 }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       }
       
       // Se o erro for de permissão (RLS)
-      if (uploadError.message?.includes('permission') || uploadError.message?.includes('policy') || uploadError.statusCode === '403') {
+      if (uploadError.message?.includes('permission') || uploadError.message?.includes('policy') || (uploadError as any).statusCode === '403') {
         return NextResponse.json(
           { error: 'Erro de permissão ao fazer upload. Verifique as políticas RLS do bucket.' },
           { status: 500 }

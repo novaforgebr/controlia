@@ -7,9 +7,10 @@ import { EditPipelineForm } from '@/components/crm/EditPipelineForm'
 export default async function EditPipelinePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const { data: pipeline } = await getPipeline(params.id)
+  const { id } = await params
+  const { data: pipeline } = await getPipeline(id)
 
   if (!pipeline) {
     notFound()

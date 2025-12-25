@@ -38,9 +38,9 @@ export default async function InviteAcceptPage({
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (user) {
+  if (user && user.email) {
     // Usuário já está logado, verificar se é o mesmo email
-    if (user.email?.toLowerCase() === invitation.email.toLowerCase()) {
+    if (user.email.toLowerCase() === invitation.email.toLowerCase()) {
       // Mesmo email, mostrar modal de conclusão
       return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">

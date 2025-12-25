@@ -2,6 +2,7 @@ import { getCurrentCompany } from '@/lib/utils/company'
 import { createClient } from '@/lib/supabase/server'
 import ProtectedLayout from '@/app/layout-protected'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import Link from 'next/link'
 
 export default async function DashboardPage() {
   const company = await getCurrentCompany()
@@ -95,18 +96,18 @@ export default async function DashboardPage() {
                   configurando suas automações para potencializar seus resultados.
                 </p>
                 <div className="mt-4 flex gap-3">
-                  <a
+                  <Link
                     href="/contacts/new"
                     className="inline-flex items-center rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"
                   >
                     Criar Contato
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/automations"
                     className="inline-flex items-center rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     Ver Automações
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

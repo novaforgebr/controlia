@@ -8,9 +8,10 @@ import { EditCalendarEventForm } from '@/components/calendar/EditCalendarEventFo
 export default async function EditCalendarEventPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const { data: event } = await getCalendarEvent(params.id)
+  const { id } = await params
+  const { data: event } = await getCalendarEvent(id)
   const { data: contacts } = await listContacts()
 
   if (!event) {

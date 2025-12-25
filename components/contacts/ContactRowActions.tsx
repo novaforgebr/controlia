@@ -69,8 +69,8 @@ export function ContactRowActions({ contactId, contactName }: ContactRowActionsP
         onConfirm={handleDelete}
         title="Confirmar Exclusão"
         message={`Tem certeza que deseja excluir o contato "${contactName}"? Esta ação é irreversível e todas as conversas e mensagens relacionadas também serão excluídas.`}
-        confirmButtonText="Excluir"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        confirmText="Excluir"
+        variant="danger"
         loading={loading}
       />
     </>

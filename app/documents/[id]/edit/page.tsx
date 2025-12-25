@@ -7,9 +7,10 @@ import { EditDocumentForm } from '@/components/documents/EditDocumentForm'
 export default async function EditDocumentPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const { data: file } = await getFile(params.id)
+  const { id } = await params
+  const { data: file } = await getFile(id)
 
   if (!file) {
     notFound()

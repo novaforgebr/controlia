@@ -215,8 +215,8 @@ export function PromptCard({ prompt }: PromptCardProps) {
         onConfirm={handleDelete}
         title="Confirmar Exclusão"
         message={`Tem certeza que deseja excluir o prompt "${prompt.name}"? Esta ação é irreversível e todas as versões relacionadas também serão excluídas.`}
-        confirmButtonText="Excluir"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        confirmText="Excluir"
+        variant="danger"
         loading={loading}
       />
     </>
