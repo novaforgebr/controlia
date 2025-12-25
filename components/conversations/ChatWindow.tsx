@@ -54,6 +54,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
+  const channelRef = useRef<any>(null)
   const router = useRouter()
   const toast = useToast()
 
@@ -170,9 +171,12 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               }
             }
           )
-          .subscribe()
         
+        // Armazenar channel antes de subscribe
         channelRef.current = newChannel
+        
+        // Subscribe retorna Promise, mas não precisamos aguardar
+        newChannel.subscribe()
       } catch (error) {
         console.error('Erro ao configurar subscription:', error)
       }
