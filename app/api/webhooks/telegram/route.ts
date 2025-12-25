@@ -574,21 +574,47 @@ export async function POST(request: NextRequest) {
             console.log('   - Fallback: verificando se URL contém "secret=":', hasSecretInUrl)
           }
           
-          // IMPORTANTE: Mesmo com secret na URL, o n8n pode estar configurado para usar Header Auth
-          // Se o n8n rejeitar com 403 mesmo com secret na URL, tente usar Header Auth
+          // IMPORTANTE: O n8n pode estar configurado para aceitar secret como:
+          // 1. Query parameter (?secret=xxx) - Authentication: None
+          // 2. Header HTTP (X-Webhook-Secret) - Authentication: Header Auth
+          // 3. Ambos (alguns n8n podem precisar dos dois)
+          
+          // Prioridade: usar secret das settings se disponível, senão extrair da URL
+          let secretToUse: string | null = null
+          
+          if (n8nWebhookSecret) {
+            // Secret das settings tem prioridade
+            secretToUse = n8nWebhookSecret
+            console.log('🔐 Usando secret das settings da empresa')
+          } else if (hasSecretInUrl) {
+            // Extrair secret da URL se não estiver nas settings
+            try {
+              const urlObj = new URL(webhookUrl)
+              const secretFromUrl = urlObj.searchParams.get('secret')
+              if (secretFromUrl) {
+                // Decodificar o secret (pode estar codificado como %40 para @)
+                secretToUse = decodeURIComponent(secretFromUrl)
+                console.log('🔐 Extraindo secret da URL')
+              }
+            } catch (urlError) {
+              console.warn('⚠️ Erro ao extrair secret da URL:', urlError)
+            }
+          }
+          
+          // IMPORTANTE: Sempre enviar secret como header HTTP se disponível
+          // Mesmo que o secret esteja na URL, muitos n8n também precisam como header
+          if (secretToUse) {
+            headers['X-Webhook-Secret'] = secretToUse
+            console.log('🔐 Secret enviado como header HTTP: X-Webhook-Secret')
+            console.log('🔐 Valor do secret:', secretToUse)
+            console.log('🔐 Tamanho do secret:', secretToUse.length, 'caracteres')
+          }
+          
           if (hasSecretInUrl) {
-            // Secret na URL = tentar query parameter primeiro
-            console.log('🔐 Secret encontrado na URL - usando query parameter (Authentication: None)')
+            // Secret também está na URL (query parameter)
+            console.log('🔐 Secret também presente na URL como query parameter')
             console.log('🔐 URL final:', webhookUrl)
-            console.log('🔐 NÃO adicionando headers de autenticação - o secret já está na URL')
-            
-            // Mas também adicionar como header como fallback (alguns n8n podem precisar de ambos)
-            // Comentado por enquanto - descomente se necessário
-            // if (n8nWebhookSecret) {
-            //   headers['X-Webhook-Secret'] = n8nWebhookSecret
-            //   console.log('🔐 Também adicionando como header (fallback)')
-            // }
-          } else if (n8nWebhookSecret) {
+          } else if (!secretToUse) {
             // Secret não na URL = usar Header Auth
             console.log('🔐 Secret não na URL - usando Header Auth')
             console.log('🔐 Secret das settings:', n8nWebhookSecret.substring(0, 5) + '...')
