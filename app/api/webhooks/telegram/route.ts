@@ -373,6 +373,32 @@ export async function POST(request: NextRequest) {
     console.log('✅ Mensagem inbound salva no banco - ID:', newMessage.id, 'Direction:', newMessage.direction, 'Sender:', newMessage.sender_type)
     console.log('✅ PASSO 1 CONCLUÍDO: Mensagem salva no Controlia ANTES de enviar para n8n')
     console.log('✅ Mensagem está disponível na interface do Controlia agora')
+    console.log('✅ VALIDAÇÃO: Mensagem salva com company_id:', newMessage.company_id)
+    console.log('✅ VALIDAÇÃO: Mensagem salva com conversation_id:', newMessage.conversation_id)
+    console.log('✅ VALIDAÇÃO: Mensagem salva com contact_id:', newMessage.contact_id)
+    
+    // ✅ VALIDAÇÃO CRÍTICA: Verificar se a mensagem realmente foi salva e pode ser lida
+    try {
+      const { data: verifyMessage, error: verifyError } = await serviceClient
+        .from('messages')
+        .select('id, direction, sender_type, company_id, conversation_id')
+        .eq('id', newMessage.id)
+        .single()
+      
+      if (verifyError) {
+        console.error('❌ ERRO CRÍTICO: Mensagem não pode ser lida após salvar!')
+        console.error('   - Erro:', verifyError.message)
+        console.error('   - Código:', verifyError.code)
+      } else if (verifyMessage) {
+        console.log('✅ VALIDAÇÃO: Mensagem confirmada no banco - pode ser lida')
+        console.log('   - ID:', verifyMessage.id)
+        console.log('   - Direction:', verifyMessage.direction)
+        console.log('   - Sender Type:', verifyMessage.sender_type)
+        console.log('   - Company ID:', verifyMessage.company_id)
+      }
+    } catch (verifyErr) {
+      console.error('❌ Erro ao verificar mensagem:', verifyErr)
+    }
 
     // ✅ VALIDAÇÃO CRÍTICA: Garantir que mensagem recebida seja SEMPRE 'inbound' e 'human'
     if (newMessage.direction !== 'inbound') {
@@ -781,6 +807,34 @@ export async function POST(request: NextRequest) {
     console.log('   - Sender Type:', newMessage.sender_type)
     console.log('   - Content:', newMessage.content?.substring(0, 50))
     console.log('   - Company ID:', newMessage.company_id)
+    console.log('✅ IMPORTANTE: Mensagem JÁ FOI SALVA no Controlia e está disponível na interface')
+    console.log('✅ IMPORTANTE: Se a mensagem não aparecer na interface, verifique RLS ou queries')
+    
+    // ✅ VALIDAÇÃO FINAL: Garantir que mensagem pode ser consultada antes de retornar
+    try {
+      const { data: finalCheck, error: finalCheckError } = await serviceClient
+        .from('messages')
+        .select('id, direction, sender_type, company_id')
+        .eq('id', newMessage.id)
+        .eq('direction', 'inbound')
+        .eq('sender_type', 'human')
+        .single()
+      
+      if (finalCheckError || !finalCheck) {
+        console.error('❌ ERRO CRÍTICO: Mensagem não pode ser consultada após salvar!')
+        console.error('   - Isso pode indicar problema de RLS ou dados inconsistentes')
+        console.error('   - Erro:', finalCheckError?.message)
+        console.error('   - Código:', finalCheckError?.code)
+      } else {
+        console.log('✅ VALIDAÇÃO FINAL: Mensagem confirmada e pode ser consultada')
+        console.log('   - ID:', finalCheck.id)
+        console.log('   - Direction:', finalCheck.direction)
+        console.log('   - Sender Type:', finalCheck.sender_type)
+        console.log('   - Company ID:', finalCheck.company_id)
+      }
+    } catch (finalErr) {
+      console.error('❌ Erro na validação final:', finalErr)
+    }
     
     return NextResponse.json({
       success: true,
@@ -788,6 +842,7 @@ export async function POST(request: NextRequest) {
       conversation_id: conversation.id,
       direction: newMessage.direction,
       sender_type: newMessage.sender_type,
+      saved_to_controlia: true, // ✅ Confirmar que foi salvo no Controlia
     })
   } catch (error) {
     console.error('❌ Erro no webhook do Telegram:', error)
