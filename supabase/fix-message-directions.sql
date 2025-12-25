@@ -15,9 +15,7 @@
 -- CORRIGIR: Mensagens humanas marcadas como outbound em conversas do Telegram
 -- Essas mensagens devem ser 'inbound' porque foram RECEBIDAS do usuário
 UPDATE messages m
-SET 
-  direction = 'inbound',
-  updated_at = NOW()
+SET direction = 'inbound'
 WHERE m.direction = 'outbound'
   AND m.sender_type = 'human'
   AND EXISTS (
@@ -40,9 +38,7 @@ END $$;
 -- CORRIGIR: Mensagens IA marcadas como inbound
 -- Essas mensagens devem ser 'outbound' porque foram ENVIADAS pela IA
 UPDATE messages m
-SET 
-  direction = 'outbound',
-  updated_at = NOW()
+SET direction = 'outbound'
 WHERE m.direction = 'inbound'
   AND m.sender_type = 'ai'
   AND EXISTS (
@@ -64,9 +60,7 @@ END $$;
 
 -- CORRIGIR: Mensagens IA com sender_type incorreto
 UPDATE messages m
-SET 
-  sender_type = 'ai',
-  updated_at = NOW()
+SET sender_type = 'ai'
 WHERE m.sender_type != 'ai'
   AND m.direction = 'outbound'
   AND EXISTS (
@@ -80,9 +74,7 @@ WHERE m.sender_type != 'ai'
 
 -- CORRIGIR: Mensagens humanas com sender_type incorreto
 UPDATE messages m
-SET 
-  sender_type = 'human',
-  updated_at = NOW()
+SET sender_type = 'human'
 WHERE m.sender_type != 'human'
   AND m.direction = 'inbound'
   AND EXISTS (

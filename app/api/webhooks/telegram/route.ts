@@ -371,6 +371,8 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Mensagem criada com sucesso:', newMessage.id, 'Content:', content.substring(0, 50))
     console.log('✅ Mensagem inbound salva no banco - ID:', newMessage.id, 'Direction:', newMessage.direction, 'Sender:', newMessage.sender_type)
+    console.log('✅ PASSO 1 CONCLUÍDO: Mensagem salva no Controlia ANTES de enviar para n8n')
+    console.log('✅ Mensagem está disponível na interface do Controlia agora')
 
     // ✅ VALIDAÇÃO CRÍTICA: Garantir que mensagem recebida seja SEMPRE 'inbound' e 'human'
     if (newMessage.direction !== 'inbound') {
@@ -411,8 +413,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Buscar automações ativas para processar mensagens
-    console.log('🔍 Buscando automações para company_id:', contact.company_id)
+    // ✅ PASSO 2: Buscar automações ativas para processar mensagens
+    // IMPORTANTE: Mensagem JÁ FOI SALVA no passo anterior
+    console.log('📋 PASSO 2: Buscando automações para company_id:', contact.company_id)
     console.log('🔍 Critérios de busca:')
     console.log('   - company_id:', contact.company_id)
     console.log('   - trigger_event: "new_message"')
@@ -446,6 +449,7 @@ export async function POST(request: NextRequest) {
       console.error('   - is_active: true')
       console.error('   - is_paused: false')
       console.error('❌ Isso significa que a mensagem NÃO será enviada para o n8n')
+      console.error('✅ MAS a mensagem JÁ FOI SALVA no Controlia e está disponível na interface!')
       
       // Tentar buscar TODAS as automações da empresa para debug
       const { data: allAutomations } = await supabase
@@ -506,8 +510,13 @@ export async function POST(request: NextRequest) {
           console.error('❌ Erro ao registrar log de automação:', logError)
         }
       } else {
-        // ✅ SEMPRE tentar enviar para n8n se houver URL
-        console.log('📤 PREPARANDO envio para n8n')
+        // ✅ PASSO 3: Enviar para n8n
+        // IMPORTANTE: Mensagem JÁ FOI SALVA no Controlia (PASSO 1)
+        // A mensagem JÁ ESTÁ disponível na interface do Controlia
+        console.log('📤 PASSO 3: PREPARANDO envio para n8n')
+        console.log('✅ LEMBRETE: Mensagem JÁ FOI SALVA no Controlia (ID:', newMessage.id, ')')
+        console.log('✅ A mensagem JÁ ESTÁ disponível na interface do Controlia')
+        console.log('📤 Agora vamos enviar para n8n para processamento adicional')
         console.log('📤 URL completa:', automation.n8n_webhook_url)
         try {
           // Preparar headers
