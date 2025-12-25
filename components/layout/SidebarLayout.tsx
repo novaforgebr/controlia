@@ -10,28 +10,31 @@ interface SidebarLayoutProps {
 }
 
 export function SidebarLayout({ companyName, children }: SidebarLayoutProps) {
-  const [sidebarWidth, setSidebarWidth] = useState(256)
+  // Estado inicial: menu começa recolhido (64px)
+  const [sidebarWidth, setSidebarWidth] = useState(64)
 
   useEffect(() => {
     const sidebar = document.querySelector('aside')
     if (!sidebar) return
 
     const updateWidth = () => {
-      // Verificar se está expandido (w-64) ou recolhido (w-16)
-      // Quando está no hover, pode ter w-64 mesmo estando recolhido
+      // Verificar a largura atual do sidebar através do CSS computado
+      // Isso captura tanto o estado permanente quanto o hover
       const computedStyle = window.getComputedStyle(sidebar)
       const width = parseInt(computedStyle.width, 10)
       
-      // Se a largura for menor que 100px, está recolhido
-      if (width < 100) {
-        setSidebarWidth(64)
-      } else {
-        setSidebarWidth(256)
-      }
+      // Usar a largura real do sidebar
+      // Se estiver recolhido (w-16 = 64px), usar 64px
+      // Se estiver expandido (w-64 = 256px) ou no hover, usar 256px
+      setSidebarWidth(width)
     }
 
     const observer = new MutationObserver(updateWidth)
-    observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] })
+    observer.observe(sidebar, { 
+      attributes: true, 
+      attributeFilter: ['class'],
+      subtree: false
+    })
 
     // Verificar estado inicial
     updateWidth()
@@ -39,11 +42,15 @@ export function SidebarLayout({ companyName, children }: SidebarLayoutProps) {
     // Atualizar quando o mouse entrar ou sair do sidebar (para capturar hover)
     sidebar.addEventListener('mouseenter', updateWidth)
     sidebar.addEventListener('mouseleave', updateWidth)
+    
+    // Atualizar também quando a transição CSS terminar
+    sidebar.addEventListener('transitionend', updateWidth)
 
     return () => {
       observer.disconnect()
       sidebar.removeEventListener('mouseenter', updateWidth)
       sidebar.removeEventListener('mouseleave', updateWidth)
+      sidebar.removeEventListener('transitionend', updateWidth)
     }
   }, [])
 
