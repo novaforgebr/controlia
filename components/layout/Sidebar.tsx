@@ -9,8 +9,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ companyName }: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  // Menu começa recolhido por padrão
+  const [isCollapsed, setIsCollapsed] = useState(true)
+  const [isHovered, setIsHovered] = useState(false)
   const pathname = usePathname()
+  
+  // Expandir no hover quando estiver recolhido
+  const shouldExpand = isCollapsed && isHovered
 
   const menuItems = [
     {
@@ -126,13 +131,15 @@ export function Sidebar({ companyName }: SidebarProps) {
   return (
     <aside
       className={`fixed left-0 top-0 z-40 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ${
-        isCollapsed ? 'w-16' : 'w-64'
+        shouldExpand ? 'w-64' : isCollapsed ? 'w-16' : 'w-64'
       }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4">
-          {!isCollapsed && (
+          {(!isCollapsed || shouldExpand) && (
             <Link href="/dashboard" className="flex items-center space-x-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#039155] to-[#18B0BB]">
                 <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -144,7 +151,7 @@ export function Sidebar({ companyName }: SidebarProps) {
               </span>
             </Link>
           )}
-          {isCollapsed && (
+          {isCollapsed && !shouldExpand && (
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#039155] to-[#18B0BB] mx-auto">
               <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -183,18 +190,18 @@ export function Sidebar({ companyName }: SidebarProps) {
                   active
                     ? 'bg-gradient-to-r from-[#039155]/10 to-[#18B0BB]/10 text-[#039155] dark:text-[#18B0BB]'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
-                } ${isCollapsed ? 'justify-center' : ''}`}
+                } ${(isCollapsed && !shouldExpand) ? 'justify-center' : ''}`}
                 title={isCollapsed ? item.title : undefined}
               >
                 <span className={active ? 'text-[#039155] dark:text-[#18B0BB]' : 'text-gray-500 dark:text-gray-400'}>{item.icon}</span>
-                {!isCollapsed && <span>{item.title}</span>}
+                {(!isCollapsed || shouldExpand) && <span>{item.title}</span>}
               </Link>
             )
           })}
         </nav>
 
         {/* Footer - Company Info */}
-        {!isCollapsed && (
+        {(!isCollapsed || shouldExpand) && (
           <div className="border-t border-gray-200 dark:border-gray-800 p-4">
             <div className="rounded-lg bg-gradient-to-r from-[#039155]/5 to-[#18B0BB]/5 dark:from-[#039155]/10 dark:to-[#18B0BB]/10 p-3">
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Empresa</p>

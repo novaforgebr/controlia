@@ -16,22 +16,35 @@ export function SidebarLayout({ companyName, children }: SidebarLayoutProps) {
     const sidebar = document.querySelector('aside')
     if (!sidebar) return
 
-    const observer = new MutationObserver(() => {
-      if (sidebar.classList.contains('w-16')) {
+    const updateWidth = () => {
+      // Verificar se está expandido (w-64) ou recolhido (w-16)
+      // Quando está no hover, pode ter w-64 mesmo estando recolhido
+      const computedStyle = window.getComputedStyle(sidebar)
+      const width = parseInt(computedStyle.width, 10)
+      
+      // Se a largura for menor que 100px, está recolhido
+      if (width < 100) {
         setSidebarWidth(64)
       } else {
         setSidebarWidth(256)
       }
-    })
+    }
 
+    const observer = new MutationObserver(updateWidth)
     observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] })
 
     // Verificar estado inicial
-    if (sidebar.classList.contains('w-16')) {
-      setSidebarWidth(64)
-    }
+    updateWidth()
 
-    return () => observer.disconnect()
+    // Atualizar quando o mouse entrar ou sair do sidebar (para capturar hover)
+    sidebar.addEventListener('mouseenter', updateWidth)
+    sidebar.addEventListener('mouseleave', updateWidth)
+
+    return () => {
+      observer.disconnect()
+      sidebar.removeEventListener('mouseenter', updateWidth)
+      sidebar.removeEventListener('mouseleave', updateWidth)
+    }
   }, [])
 
   return (

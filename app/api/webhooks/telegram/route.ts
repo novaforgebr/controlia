@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     let contact = null
     const { data: contacts } = await supabase
       .from('contacts')
-      .select('id, company_id, custom_fields')
+      .select('id, company_id, custom_fields, ai_enabled')
       .eq('company_id', targetCompany.id)
       .limit(1000)
 
@@ -162,8 +162,9 @@ export async function POST(request: NextRequest) {
           },
           status: 'lead',
           source: 'telegram',
+          ai_enabled: true, // Habilitar IA por padrão para novos contatos
         })
-        .select()
+        .select('id, company_id, custom_fields, ai_enabled')
         .single()
 
       if (contactError) {
@@ -194,7 +195,7 @@ export async function POST(request: NextRequest) {
     
     let { data: conversation } = await supabase
       .from('conversations')
-      .select('id')
+      .select('id, ai_assistant_enabled')
       .eq('company_id', contact.company_id)
       .eq('contact_id', contact.id)
       .eq('channel', 'telegram')
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest) {
           priority: 'normal',
           ai_assistant_enabled: true,
         })
-        .select('id, company_id') // IMPORTANTE: Selecionar company_id também
+        .select('id, company_id, ai_assistant_enabled') // IMPORTANTE: Selecionar ai_assistant_enabled também
         .single()
 
       if (convError) {
@@ -400,6 +401,25 @@ export async function POST(request: NextRequest) {
     console.log('✅ VALIDAÇÃO: Mensagem salva com conversation_id:', newMessage.conversation_id)
     console.log('✅ VALIDAÇÃO: Mensagem salva com contact_id:', newMessage.contact_id)
     
+    // ✅ IMPORTANTE: Buscar conversa novamente para garantir que temos o valor mais atualizado de ai_assistant_enabled
+    // Isso é crítico porque o usuário pode ter desativado a IA após a conversa ter sido criada/buscada
+    console.log('🔄 Buscando conversa novamente para verificar status atual da IA...')
+    const { data: updatedConversation, error: convUpdateError } = await supabase
+      .from('conversations')
+      .select('id, ai_assistant_enabled')
+      .eq('id', conversation.id)
+      .single()
+    
+    if (convUpdateError) {
+      console.error('⚠️ Erro ao buscar conversa atualizada:', convUpdateError)
+      // Continuar com a conversa anterior se houver erro
+    } else if (updatedConversation) {
+      console.log('✅ Conversa atualizada obtida')
+      console.log('   - ai_assistant_enabled:', updatedConversation.ai_assistant_enabled)
+      // Atualizar objeto conversation com valores mais recentes
+      conversation = { ...conversation, ...updatedConversation }
+    }
+    
     // ✅ VALIDAÇÃO CRÍTICA: Verificar se a mensagem realmente foi salva e pode ser lida
     try {
       const { data: verifyMessage, error: verifyError } = await serviceClient
@@ -462,9 +482,37 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ✅ PASSO 2: Buscar automações ativas para processar mensagens
+    // ✅ PASSO 2: Verificar se IA está habilitada antes de buscar automações
     // IMPORTANTE: Mensagem JÁ FOI SALVA no passo anterior
-    console.log('📋 PASSO 2: Buscando automações para company_id:', contact.company_id)
+    // Verificar se a IA está habilitada na conversa e no contato
+    const isAIEnabled = conversation?.ai_assistant_enabled === true && contact?.ai_enabled === true
+    
+    console.log('📋 PASSO 2: Verificando se IA está habilitada')
+    console.log('   - conversation.ai_assistant_enabled:', conversation?.ai_assistant_enabled)
+    console.log('   - contact.ai_enabled:', contact?.ai_enabled)
+    console.log('   - IA habilitada:', isAIEnabled)
+    
+    if (!isAIEnabled) {
+      console.log('⚠️ IA não está habilitada para esta conversa/contato')
+      console.log('⚠️ Mensagem foi salva no Controlia, mas NÃO será enviada para n8n')
+      console.log('✅ Fluxo: Telegram -> Controlia (sem n8n)')
+      
+      // Retornar sucesso - mensagem foi salva, apenas não será processada pela IA
+      return NextResponse.json({
+        success: true,
+        message_id: newMessage.id,
+        conversation_id: conversation.id,
+        direction: newMessage.direction,
+        sender_type: newMessage.sender_type,
+        saved_to_controlia: true,
+        ai_processing: false,
+        reason: 'IA não habilitada para esta conversa/contato'
+      })
+    }
+    
+    // ✅ PASSO 3: Buscar automações ativas para processar mensagens
+    // IMPORTANTE: Só chegamos aqui se a IA estiver habilitada
+    console.log('📋 PASSO 3: Buscando automações para company_id:', contact.company_id)
     console.log('🔍 Critérios de busca:')
     console.log('   - company_id:', contact.company_id)
     console.log('   - trigger_event: "new_message"')
@@ -567,10 +615,11 @@ export async function POST(request: NextRequest) {
           console.error('❌ Erro ao registrar log de automação:', logError)
         }
       } else {
-        // ✅ PASSO 3: Enviar para n8n
+        // ✅ PASSO 4: Enviar para n8n
         // IMPORTANTE: Mensagem JÁ FOI SALVA no Controlia (PASSO 1)
         // A mensagem JÁ ESTÁ disponível na interface do Controlia
-        console.log('📤 PASSO 3: PREPARANDO envio para n8n')
+        // IMPORTANTE: Só chegamos aqui se a IA estiver habilitada (verificado no PASSO 2)
+        console.log('📤 PASSO 4: PREPARANDO envio para n8n')
         console.log('✅ LEMBRETE: Mensagem JÁ FOI SALVA no Controlia (ID:', newMessage.id, ')')
         console.log('✅ A mensagem JÁ ESTÁ disponível na interface do Controlia')
         console.log('📤 Agora vamos enviar para n8n para processamento adicional')
