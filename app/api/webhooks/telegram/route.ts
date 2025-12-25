@@ -730,9 +730,26 @@ export async function POST(request: NextRequest) {
 
           if (!n8nResponse.ok) {
             const errorText = await n8nResponse.text()
+            let errorMessage = errorText
+            
+            // Verificar se é erro 404 (workflow não ativo)
+            if (n8nResponse.status === 404) {
+              try {
+                const errorJson = JSON.parse(errorText)
+                if (errorJson.message?.includes('not registered') || errorJson.message?.includes('workflow must be active')) {
+                  errorMessage = '❌ WORKFLOW DO N8N NÃO ESTÁ ATIVO! Ative o workflow no n8n usando o toggle no canto superior direito do editor.'
+                  console.error('❌ CRÍTICO: Workflow do n8n não está ativo!')
+                  console.error('   💡 Acesse o n8n e ative o workflow usando o toggle no canto superior direito')
+                  console.error('   💡 O workflow deve estar ATIVO para receber webhooks em produção')
+                }
+              } catch {
+                // Se não conseguir parsear, usar mensagem original
+              }
+            }
+            
             console.error('❌ Erro ao enviar para n8n:')
             console.error('   Status HTTP:', n8nResponse.status)
-            console.error('   Resposta:', errorText)
+            console.error('   Resposta:', errorMessage)
             console.error('   URL tentada:', webhookUrl)
             console.error('   Headers enviados:', JSON.stringify(headers, null, 2))
             
@@ -749,7 +766,7 @@ export async function POST(request: NextRequest) {
                   webhook_url: webhookUrl,
                 },
                 status: 'error',
-                error_message: `HTTP ${n8nResponse.status}: ${errorText.substring(0, 500)}`,
+                error_message: `HTTP ${n8nResponse.status}: ${errorMessage.substring(0, 500)}`,
                 started_at: new Date().toISOString(),
               })
             } catch (logError) {

@@ -64,15 +64,32 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const loadMessages = useCallback(async () => {
     try {
       setLoading(true)
+      
+      // Primeiro, buscar a conversa para obter o company_id
+      const { data: conversationData, error: convError } = await supabase
+        .from('conversations')
+        .select('company_id')
+        .eq('id', conversation.id)
+        .single()
+      
+      if (convError || !conversationData) {
+        console.error('Erro ao buscar conversa:', convError)
+        return
+      }
+      
+      // Buscar mensagens filtrando por conversation_id E company_id
       const { data, error } = await supabase
         .from('messages')
         .select('*, user_profiles:sender_id(full_name)')
         .eq('conversation_id', conversation.id)
+        .eq('company_id', conversationData.company_id)
         .order('created_at', { ascending: true })
         .limit(100)
 
       if (error) {
         console.error('Erro ao carregar mensagens:', error)
+        console.error('   - conversation_id:', conversation.id)
+        console.error('   - company_id:', conversationData.company_id)
         return
       }
 
@@ -93,38 +110,71 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   useEffect(() => {
     if (!conversation.id) return
 
-    const channel = supabase
-      .channel(subscriptionKey)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        async (payload) => {
-          const newMessage = payload.new as any
-          // Buscar dados completos da mensagem com relacionamentos
-          const { data: fullMessage } = await supabase
-            .from('messages')
-            .select('*, user_profiles:sender_id(full_name)')
-            .eq('id', newMessage.id)
-            .single()
+    let channel: ReturnType<typeof supabase.channel> | null = null
 
-          if (fullMessage) {
-            setMessages((prev) => {
-              // Evitar duplicatas
-              if (prev.some((m) => m.id === fullMessage.id)) {
-                return prev
-              }
-              return [...prev, fullMessage as Message]
-            })
-            setTimeout(() => scrollToBottom(), 100)
-          }
+    // Buscar company_id da conversa primeiro
+    supabase
+      .from('conversations')
+      .select('company_id')
+      .eq('id', conversation.id)
+      .single()
+      .then(({ data: conversationData }) => {
+        if (!conversationData) {
+          console.error('Erro: Conversa não encontrada para subscription')
+          return
         }
-      )
-      .subscribe()
+
+        // Configurar subscription com filtro por conversation_id
+        channel = supabase
+          .channel(subscriptionKey)
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'messages',
+              filter: `conversation_id=eq.${conversation.id}`,
+            },
+            async (payload) => {
+              const newMessage = payload.new as any
+              
+              // Buscar company_id da conversa para garantir RLS
+              const { data: convData } = await supabase
+                .from('conversations')
+                .select('company_id')
+                .eq('id', conversation.id)
+                .single()
+              
+              if (!convData) {
+                console.error('Erro: Conversa não encontrada para nova mensagem')
+                return
+              }
+              
+              // Buscar dados completos da mensagem com relacionamentos
+              const { data: fullMessage } = await supabase
+                .from('messages')
+                .select('*, user_profiles:sender_id(full_name)')
+                .eq('id', newMessage.id)
+                .eq('company_id', convData.company_id)
+                .single()
+
+              if (fullMessage) {
+                setMessages((prev) => {
+                  // Evitar duplicatas
+                  if (prev.some((m) => m.id === fullMessage.id)) {
+                    return prev
+                  }
+                  return [...prev, fullMessage as Message]
+                })
+                setTimeout(() => scrollToBottom(), 100)
+              }
+            }
+          )
+          .subscribe()
+      })
+      .catch((error) => {
+        console.error('Erro ao configurar subscription:', error)
+      })
 
     // Escutar mudanças no ai_assistant_enabled da conversa
     const conversationChannel = supabase
@@ -148,7 +198,9 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
       supabase.removeChannel(conversationChannel)
     }
   }, [conversation.id, subscriptionKey, supabase, aiEnabled])

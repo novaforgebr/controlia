@@ -55,8 +55,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        1152,
-        48
+        1024,
+        144
       ],
       "id": "94d8922a-d802-42f6-9fd2-9e492fc6f9d9",
       "name": "Webhook",
@@ -140,6 +140,32 @@
           "name": "Supabase account"
         }
       }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        -48
+      ],
+      "id": "8097328d-757f-4d4d-8f00-4f2e6cb27233",
+      "name": "Telegram Trigger",
+      "webhookId": "7ab5d664-349d-4ad2-84f1-23da3b2df1a7",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "2PrZ7t1xeMrYKZzv",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "connections": {
@@ -208,6 +234,17 @@
         [
           {
             "node": "Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
             "type": "main",
             "index": 0
           }
