@@ -560,7 +560,15 @@ export async function POST(request: NextRequest) {
             .single()
 
           const settings = (companySettings?.settings as Record<string, unknown>) || {}
-          const n8nWebhookSecret = settings.n8n_webhook_secret as string | undefined
+          // IMPORTANTE: Remover espaços em branco do secret ao ler das settings
+          const n8nWebhookSecretRaw = settings.n8n_webhook_secret as string | undefined
+          const n8nWebhookSecret = n8nWebhookSecretRaw?.trim() || undefined
+          
+          if (n8nWebhookSecretRaw && n8nWebhookSecretRaw !== n8nWebhookSecret) {
+            console.warn('⚠️ Secret das settings tinha espaços em branco e foi removido')
+            console.warn('   - Original:', JSON.stringify(n8nWebhookSecretRaw))
+            console.warn('   - Limpo:', JSON.stringify(n8nWebhookSecret))
+          }
 
           // Preparar URL do webhook
           let webhookUrl = automation.n8n_webhook_url
@@ -600,8 +608,10 @@ export async function POST(request: NextRequest) {
                 
                 // Se não temos secret das settings, usar o da URL
                 if (!secretToUse) {
-                  secretToUse = decodedSecret
+                  // IMPORTANTE: Remover espaços em branco e caracteres invisíveis
+                  secretToUse = decodedSecret.trim()
                   console.log('🔐 Extraindo secret da URL (decodificado):', decodedSecret.substring(0, 5) + '...')
+                  console.log('🔐 Secret após trim:', JSON.stringify(secretToUse))
                 } else {
                   // Se temos secret das settings, garantir que URL está codificada corretamente
                   console.log('🔐 Secret também presente na URL (será usado apenas como query param)')
@@ -625,10 +635,13 @@ export async function POST(request: NextRequest) {
           // IMPORTANTE: Sempre enviar secret como header HTTP se disponível
           // Mesmo que o secret esteja na URL, muitos n8n também precisam como header
           if (secretToUse) {
-            headers['X-Webhook-Secret'] = secretToUse
+            // IMPORTANTE: Garantir que não há espaços ou caracteres invisíveis
+            const cleanSecret = secretToUse.trim()
+            headers['X-Webhook-Secret'] = cleanSecret
             console.log('🔐 Secret enviado como header HTTP: X-Webhook-Secret')
-            console.log('🔐 Valor do secret:', secretToUse)
-            console.log('🔐 Tamanho do secret:', secretToUse.length, 'caracteres')
+            console.log('🔐 Valor do secret (original):', JSON.stringify(secretToUse))
+            console.log('🔐 Valor do secret (limpo):', JSON.stringify(cleanSecret))
+            console.log('🔐 Tamanho do secret:', cleanSecret.length, 'caracteres')
           }
           
           if (hasSecretInUrl) {
