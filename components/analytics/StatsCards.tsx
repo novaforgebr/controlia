@@ -62,20 +62,20 @@ export function StatsCards({
   ]
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card, index) => (
         <div
           key={index}
-          className="relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-transform hover:scale-105 border border-gray-200 dark:border-gray-800"
+          className="relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow-lg dark:shadow-gray-900/50 transition-transform hover:scale-105 border border-gray-200 dark:border-gray-800"
         >
-          <div className={`absolute top-0 right-0 h-20 w-20 rounded-bl-full bg-gradient-to-br ${card.gradient} opacity-10`} />
+          <div className={`absolute top-0 right-0 h-16 w-16 md:h-20 md:w-20 rounded-bl-full bg-gradient-to-br ${card.gradient} opacity-10`} />
           <div className="relative">
-            <div className={`inline-flex rounded-lg bg-gradient-to-br ${card.gradient} p-3 text-white`}>
+            <div className={`inline-flex rounded-lg bg-gradient-to-br ${card.gradient} p-2 md:p-3 text-white`}>
               {card.icon}
             </div>
-            <div className="mt-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{card.title}</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{card.value}</p>
+            <div className="mt-3 md:mt-4">
+              <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">{card.title}</p>
+              <p className="mt-1 md:mt-2 text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">{card.value}</p>
               {card.subtitle && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{card.subtitle}</p>}
             </div>
           </div>

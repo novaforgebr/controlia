@@ -11,20 +11,22 @@ export default async function CRMPage() {
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb items={[{ label: 'CRM' }]} />
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">CRM</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb items={[{ label: 'CRM' }]} />
+        </div>
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">CRM</h1>
+          <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
             Gerencie pipelines, visualize contatos em Kanban e configure campos personalizados
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-3">
           {/* Card Kanban */}
           <Link
             href="/crm/kanban"
-            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1"
+            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1 min-h-[44px] md:min-h-0"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -52,7 +54,7 @@ export default async function CRMPage() {
           {/* Card Pipelines */}
           <Link
             href="/crm/pipelines"
-            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1"
+            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1 min-h-[44px] md:min-h-0"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -80,7 +82,7 @@ export default async function CRMPage() {
           {/* Card Campos Personalizados */}
           <Link
             href="/contacts/custom-fields"
-            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1"
+            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1 min-h-[44px] md:min-h-0"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">

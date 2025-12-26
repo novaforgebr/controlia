@@ -15,23 +15,25 @@ export default async function CustomFieldsPage() {
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb
-          items={[
-            { label: 'Contatos', href: '/contacts' },
-            { label: 'Campos Customizados' },
-          ]}
-        />
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Campos Customizados</h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb
+            items={[
+              { label: 'Contatos', href: '/contacts' },
+              { label: 'Campos Customizados' },
+            ]}
+          />
+        </div>
+        <div className="mb-4 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Campos Customizados</h1>
+            <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
               Crie campos personalizados para seus contatos. Estes campos aparecerão nos formulários de criação e edição.
             </p>
           </div>
           <Link
             href="/contacts/custom-fields/new"
-            className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"
+            className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2.5 md:py-2 text-base md:text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all min-h-[44px] md:min-h-0 w-full sm:w-auto flex items-center justify-center"
           >
             + Novo Campo
           </Link>
@@ -68,12 +70,12 @@ export default async function CustomFieldsPage() {
               {fields.map((field: any) => (
                 <div
                   key={field.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{field.field_label}</h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{field.field_label}</h3>
                         <span className="inline-flex rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-400">
                           {field.field_type}
                         </span>
@@ -94,8 +96,8 @@ export default async function CustomFieldsPage() {
                           </span>
                         )}
                       </div>
-                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                        <span>Chave: <code className="rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-xs font-mono text-gray-900 dark:text-gray-100">{field.field_key}</code></span>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                        <span className="break-all">Chave: <code className="rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-xs font-mono text-gray-900 dark:text-gray-100 break-all">{field.field_key}</code></span>
                         {field.field_options && field.field_options.length > 0 && (
                           <span>
                             Opções: {field.field_options.length} {field.field_options.length === 1 ? 'opção' : 'opções'}
@@ -125,9 +127,9 @@ export default async function CustomFieldsPage() {
         </div>
 
         {/* Informações */}
-        <div className="mt-6 rounded-lg bg-gradient-to-r from-[#039155]/5 to-[#18B0BB]/5 dark:from-[#039155]/10 dark:to-[#18B0BB]/10 border border-[#039155]/20 dark:border-[#039155]/30 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Como funciona?</h3>
-          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-4 md:mt-6 rounded-lg bg-gradient-to-r from-[#039155]/5 to-[#18B0BB]/5 dark:from-[#039155]/10 dark:to-[#18B0BB]/10 border border-[#039155]/20 dark:border-[#039155]/30 p-4 md:p-6">
+          <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Como funciona?</h3>
+          <ul className="space-y-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
             <li className="flex items-start gap-2">
               <svg className="h-5 w-5 text-[#039155] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />

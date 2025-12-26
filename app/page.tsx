@@ -18,14 +18,14 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="fixed top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-20 items-center justify-between">
+          <div className="flex h-16 md:h-20 items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#039155] to-[#18B0BB]">
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#039155] to-[#18B0BB]">
+                <svg className="h-5 w-5 md:h-6 md:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <span className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Controlia</span>
+              <span className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-100">Controlia</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#039155] dark:hover:text-[#18B0BB] transition-colors">
@@ -55,7 +55,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-32">
+      <section className="relative overflow-hidden pt-24 pb-12 sm:pt-32 sm:pb-20 md:pt-40 md:pb-32">
         <div className="absolute inset-0 bg-gradient-to-br from-[#039155]/5 via-white dark:via-gray-950 to-[#18B0BB]/5" />
         <div className="absolute inset-0 opacity-5 dark:opacity-10">
           <div className="h-full w-full" style={{
@@ -73,29 +73,29 @@ export default function HomePage() {
               Novo: Integração com WhatsApp Business API
             </div>
             
-            <h1 className="mb-6 text-5xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-6xl lg:text-7xl">
+            <h1 className="mb-4 md:mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               CRM Inteligente com
               <span className="block bg-gradient-to-r from-[#039155] via-[#18B0BB] to-[#039155] bg-clip-text text-transparent">
                 Controle Total
               </span>
             </h1>
             
-            <p className="mx-auto mb-10 max-w-2xl text-xl leading-8 text-gray-600 dark:text-gray-400">
+            <p className="mx-auto mb-6 md:mb-10 max-w-2xl text-base sm:text-lg md:text-xl leading-7 md:leading-8 text-gray-600 dark:text-gray-400 px-4">
               Centralize contatos, conversas, pagamentos e automações em uma única plataforma.
               Com inteligência artificial que você controla completamente. Seus dados, suas regras.
             </p>
             
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 sm:flex-row w-full px-4">
               <Link
                 href="/register"
-                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#039155] to-[#18B0BB] px-8 py-4 text-lg font-semibold text-white shadow-2xl shadow-[#039155]/30 transition-all hover:shadow-[#039155]/40 hover:scale-105"
+                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#039155] to-[#18B0BB] px-6 py-3.5 md:px-8 md:py-4 text-base md:text-lg font-semibold text-white shadow-2xl shadow-[#039155]/30 transition-all hover:shadow-[#039155]/40 hover:scale-105 w-full sm:w-auto min-h-[44px] md:min-h-0 flex items-center justify-center"
               >
                 <span className="relative z-10">Começar Grátis</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-[#18B0BB] to-[#039155] opacity-0 transition-opacity group-hover:opacity-100" />
               </Link>
               <Link
                 href="#demo"
-                className="rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-8 py-4 text-lg font-semibold text-gray-900 dark:text-gray-100 transition-all hover:border-[#039155] dark:hover:border-[#18B0BB] hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-3.5 md:px-8 md:py-4 text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 transition-all hover:border-[#039155] dark:hover:border-[#18B0BB] hover:bg-gray-50 dark:hover:bg-gray-800 w-full sm:w-auto min-h-[44px] md:min-h-0 flex items-center justify-center"
               >
                 Ver Demonstração
               </Link>

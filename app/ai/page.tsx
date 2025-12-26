@@ -17,18 +17,20 @@ export default async function AIPage() {
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb items={[{ label: 'IA' }]} />
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Inteligência Artificial</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb items={[{ label: 'IA' }]} />
+        </div>
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Inteligência Artificial</h1>
+          <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
             Gerencie prompts, monitore decisões da IA e configure automações inteligentes
           </p>
         </div>
 
         {/* Cards de Estatísticas */}
-        <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+        <div className="mb-4 md:mb-8 grid grid-cols-1 gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50">
             <div className="flex items-center">
               <div className="flex-shrink-0 rounded-md bg-purple-100 dark:bg-purple-900/30 p-3">
                 <svg
@@ -52,9 +54,9 @@ export default async function AIPage() {
             </div>
           </div>
 
-          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50">
             <div className="flex items-center">
-              <div className="flex-shrink-0 rounded-md bg-green-100 dark:bg-green-900/30 p-3">
+              <div className="flex-shrink-0 rounded-md bg-green-100 dark:bg-green-900/30 p-2 md:p-3">
                 <svg
                   className="h-6 w-6 text-green-600 dark:text-green-400"
                   fill="none"
@@ -76,9 +78,9 @@ export default async function AIPage() {
             </div>
           </div>
 
-          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50">
             <div className="flex items-center">
-              <div className="flex-shrink-0 rounded-md bg-blue-100 dark:bg-blue-900/30 p-3">
+              <div className="flex-shrink-0 rounded-md bg-blue-100 dark:bg-blue-900/30 p-2 md:p-3">
                 <svg
                   className="h-6 w-6 text-blue-600 dark:text-blue-400"
                   fill="none"
@@ -102,11 +104,11 @@ export default async function AIPage() {
         </div>
 
         {/* Módulos */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
           {/* Prompts */}
           <Link
             href="/ai/prompts"
-            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1"
+            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1 min-h-[44px] md:min-h-0"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -156,7 +158,7 @@ export default async function AIPage() {
           {/* Logs */}
           <Link
             href="/ai/logs"
-            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1"
+            className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-lg dark:shadow-gray-900/50 transition-all hover:shadow-xl hover:-translate-y-1 min-h-[44px] md:min-h-0"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -205,24 +207,24 @@ export default async function AIPage() {
         </div>
 
         {/* Ações Rápidas */}
-        <div className="mt-8 rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Ações Rápidas</h2>
-          <div className="flex flex-wrap gap-3">
+        <div className="mt-4 md:mt-8 rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50">
+          <h2 className="mb-3 md:mb-4 text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">Ações Rápidas</h2>
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
             <Link
               href="/ai/prompts/new"
-              className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"
+              className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2.5 md:py-2 text-base md:text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all min-h-[44px] md:min-h-0 flex items-center justify-center"
             >
               + Criar Novo Prompt
             </Link>
             <Link
               href="/ai/prompts"
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center"
             >
               Ver Todos os Prompts
             </Link>
             <Link
               href="/ai/logs"
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center"
             >
               Ver Logs de IA
             </Link>

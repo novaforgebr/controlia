@@ -29,40 +29,42 @@ export default async function ContactDetailPage({
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb
-          items={[
-            { label: 'Contatos', href: '/contacts' },
-            { label: contact.name },
-          ]}
-        />
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{contact.name}</h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Detalhes do contato</p>
+      <div className="mx-auto max-w-4xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb
+            items={[
+              { label: 'Contatos', href: '/contacts' },
+              { label: contact.name },
+            ]}
+          />
+        </div>
+        <div className="mb-4 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">{contact.name}</h1>
+            <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">Detalhes do contato</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Link
               href={`/contacts/${contact.id}/edit`}
-              className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all"
+              className="rounded-md bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2.5 md:py-2 text-base md:text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all min-h-[44px] md:min-h-0 flex-1 sm:flex-initial flex items-center justify-center"
             >
               Editar
             </Link>
             <Link
               href="/contacts"
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 md:py-2 text-base md:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] md:min-h-0 flex-1 sm:flex-initial flex items-center justify-center"
             >
               Voltar
             </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
           {/* Informações principais */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
-              <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Informações de Contato</h2>
-              <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50">
+              <h2 className="mb-3 md:mb-4 text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Informações de Contato</h2>
+              <dl className="grid grid-cols-1 gap-3 md:gap-4 sm:grid-cols-2">
                 <div>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
                   <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{contact.email || '-'}</dd>
@@ -83,9 +85,9 @@ export default async function ContactDetailPage({
             </div>
 
             {contact.notes && (
-              <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
-                <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Observações</h2>
-                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{contact.notes}</p>
+              <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50">
+                <h2 className="mb-3 md:mb-4 text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Observações</h2>
+                <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{contact.notes}</p>
               </div>
             )}
 
@@ -110,8 +112,8 @@ export default async function ContactDetailPage({
             <ContactConversations contactId={contact.id} />
 
             {/* Informações Adicionais */}
-            <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50">
-              <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Informações Adicionais</h2>
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50">
+              <h2 className="mb-3 md:mb-4 text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Informações Adicionais</h2>
               <dl className="space-y-4">
                 <div>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Score</dt>

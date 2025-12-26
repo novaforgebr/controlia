@@ -11,9 +11,9 @@ interface AnalyticsFiltersProps {
 
 export function AnalyticsFilters({ filters, onFiltersChange }: AnalyticsFiltersProps) {
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros</h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+      <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4">Filtros</h2>
+      <div className="grid grid-cols-1 gap-3 md:gap-4 sm:grid-cols-3">
         <div>
           <label htmlFor="dateRange" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Período
@@ -22,7 +22,7 @@ export function AnalyticsFilters({ filters, onFiltersChange }: AnalyticsFiltersP
             id="dateRange"
             value={filters.dateRange}
             onChange={(e) => onFiltersChange({ ...filters, dateRange: e.target.value })}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
           >
             <option value="7">Últimos 7 dias</option>
             <option value="30">Últimos 30 dias</option>
@@ -40,7 +40,7 @@ export function AnalyticsFilters({ filters, onFiltersChange }: AnalyticsFiltersP
             id="status"
             value={filters.status}
             onChange={(e) => onFiltersChange({ ...filters, status: e.target.value })}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
           >
             <option value="all">Todos</option>
             <option value="open">Abertas</option>
@@ -57,7 +57,7 @@ export function AnalyticsFilters({ filters, onFiltersChange }: AnalyticsFiltersP
             id="channel"
             value={filters.channel}
             onChange={(e) => onFiltersChange({ ...filters, channel: e.target.value })}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
           >
             <option value="all">Todos</option>
             <option value="whatsapp">WhatsApp</option>

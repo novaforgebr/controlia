@@ -28,18 +28,20 @@ export default async function EditAIPromptPage({
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb
-          items={[
-            { label: 'IA', href: '/ai' },
-            { label: 'Prompts', href: '/ai/prompts' },
-            { label: prompt.name, href: `/ai/prompts/${prompt.id}` },
-            { label: 'Editar' },
-          ]}
-        />
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Editar Prompt de IA</h1>
-          <p className="mt-2 text-gray-600">Atualize as informações do prompt</p>
+      <div className="mx-auto max-w-4xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb
+            items={[
+              { label: 'IA', href: '/ai' },
+              { label: 'Prompts', href: '/ai/prompts' },
+              { label: prompt.name, href: `/ai/prompts/${prompt.id}` },
+              { label: 'Editar' },
+            ]}
+          />
+        </div>
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Editar Prompt de IA</h1>
+          <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">Atualize as informações do prompt</p>
         </div>
 
         <PromptEditor prompt={prompt} onSubmit={handleSubmit} />

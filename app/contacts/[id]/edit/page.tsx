@@ -28,24 +28,26 @@ export default async function EditContactPage({
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb
-          items={[
-            { label: 'Contatos', href: '/contacts' },
-            { label: contact.name, href: `/contacts/${contact.id}` },
-            { label: 'Editar' },
-          ]}
-        />
+      <div className="mx-auto max-w-5xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb
+            items={[
+              { label: 'Contatos', href: '/contacts' },
+              { label: contact.name, href: `/contacts/${contact.id}` },
+              { label: 'Editar' },
+            ]}
+          />
+        </div>
         
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-4 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Editar Contato</h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Atualize as informações do contato</p>
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Editar Contato</h1>
+            <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">Atualize as informações do contato</p>
           </div>
           <Link
             href={`/contacts/${contact.id}`}
-            className="flex items-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] md:min-h-0 w-full sm:w-auto justify-center"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -56,8 +58,8 @@ export default async function EditContactPage({
 
         <form action={handleSubmit} className="space-y-6">
           {/* Informações Básicas */}
-          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow-sm border border-gray-200 dark:border-gray-800">
-            <div className="mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-4">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-800">
+            <div className="mb-4 md:mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 md:pb-4">
               <svg className="h-5 w-5 text-[#039155]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -74,7 +76,7 @@ export default async function EditContactPage({
                   name="name"
                   required
                   defaultValue={contact.name}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                   placeholder="Digite o nome completo"
                 />
               </div>
@@ -94,7 +96,7 @@ export default async function EditContactPage({
                     id="email"
                     name="email"
                     defaultValue={contact.email || ''}
-                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                     placeholder="contato@exemplo.com"
                   />
                 </div>
@@ -115,7 +117,7 @@ export default async function EditContactPage({
                     id="phone"
                     name="phone"
                     defaultValue={contact.phone || ''}
-                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                     placeholder="(11) 99999-9999"
                   />
                 </div>
@@ -137,7 +139,7 @@ export default async function EditContactPage({
                     name="whatsapp"
                     defaultValue={contact.whatsapp || ''}
                     placeholder="+55 11 99999-9999"
-                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                   />
                 </div>
               </div>
@@ -151,7 +153,7 @@ export default async function EditContactPage({
                   id="document"
                   name="document"
                   defaultValue={contact.document || ''}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                   placeholder="000.000.000-00"
                 />
               </div>
@@ -159,14 +161,14 @@ export default async function EditContactPage({
           </div>
 
           {/* Status e Classificação */}
-          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow-sm border border-gray-200 dark:border-gray-800">
-            <div className="mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-4">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-800">
+            <div className="mb-4 md:mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 md:pb-4">
               <svg className="h-5 w-5 text-[#039155]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Status e Classificação</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">Status e Classificação</h2>
             </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:gap-6 sm:grid-cols-2">
 
               <div>
                 <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -176,7 +178,7 @@ export default async function EditContactPage({
                   id="status"
                   name="status"
                   defaultValue={contact.status}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                 >
                   <option value={ContactStatus.LEAD}>Lead</option>
                   <option value={ContactStatus.PROSPECT}>Prospect</option>
@@ -195,7 +197,7 @@ export default async function EditContactPage({
                   name="source"
                   defaultValue={contact.source || ''}
                   placeholder="Ex: Site, indicação, redes sociais..."
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                 />
               </div>
 
@@ -211,7 +213,7 @@ export default async function EditContactPage({
                     min="0"
                     max="100"
                     defaultValue={contact.score}
-                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <span className="text-gray-400 dark:text-gray-500 text-sm">/100</span>
@@ -229,7 +231,7 @@ export default async function EditContactPage({
                   name="tags"
                   defaultValue={contact.tags?.join(', ') || ''}
                   placeholder="Ex: cliente-vip, interessado-em-x, seguimento-y"
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
                 />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Separe múltiplas tags por vírgula</p>
               </div>
@@ -237,12 +239,12 @@ export default async function EditContactPage({
           </div>
 
           {/* Observações e Configurações */}
-          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow-sm border border-gray-200 dark:border-gray-800">
-            <div className="mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-4">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-800">
+            <div className="mb-4 md:mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 md:pb-4">
               <svg className="h-5 w-5 text-[#039155]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Observações e Configurações</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">Observações e Configurações</h2>
             </div>
             <div className="space-y-6">
               <div>
@@ -254,7 +256,7 @@ export default async function EditContactPage({
                   name="notes"
                   rows={5}
                   defaultValue={contact.notes || ''}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 resize-none"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 resize-none min-h-[120px] md:min-h-0"
                   placeholder="Adicione observações importantes sobre este contato..."
                 />
               </div>
@@ -284,23 +286,23 @@ export default async function EditContactPage({
           <CustomFieldsForm contactCustomFields={(contact.custom_fields as Record<string, unknown>) || {}} />
 
           {/* Footer com botões de ação */}
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 px-6 py-4 -mx-6 -mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 px-4 md:px-6 py-3 md:py-4 -mx-4 md:-mx-6 -mb-4 md:-mb-6">
             <Link
               href={`/contacts/${contact.id}`}
-              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              className="text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors min-h-[44px] md:min-h-0 flex items-center"
             >
               ← Voltar para detalhes
             </Link>
-            <div className="flex gap-3">
+            <div className="flex gap-3 w-full sm:w-auto">
               <Link
                 href={`/contacts/${contact.id}`}
-                className="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                className="flex-1 sm:flex-initial rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 md:px-5 py-2.5 text-base md:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all min-h-[44px] md:min-h-0 flex items-center justify-center"
               >
                 Cancelar
               </Link>
               <button
                 type="submit"
-                className="rounded-lg bg-gradient-to-r from-[#039155] to-[#18B0BB] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                className="flex-1 sm:flex-initial rounded-lg bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 md:px-6 py-2.5 text-base md:text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 min-h-[44px] md:min-h-0"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

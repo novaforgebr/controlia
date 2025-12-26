@@ -42,41 +42,41 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-800">
-            <div className="absolute top-0 right-0 h-20 w-20 bg-gradient-to-br from-[#039155]/10 to-[#18B0BB]/10 rounded-bl-full"></div>
+          <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-800">
+            <div className="absolute top-0 right-0 h-16 w-16 md:h-20 md:w-20 bg-gradient-to-br from-[#039155]/10 to-[#18B0BB]/10 rounded-bl-full"></div>
             <div className="relative">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total de Contatos</h3>
-              <p className="mt-2 text-3xl font-bold bg-gradient-to-r from-[#039155] to-[#18B0BB] bg-clip-text text-transparent">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Total de Contatos</h3>
+              <p className="mt-1 md:mt-2 text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#039155] to-[#18B0BB] bg-clip-text text-transparent">
                 {contactsCount.count || 0}
               </p>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-800">
-            <div className="absolute top-0 right-0 h-20 w-20 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-bl-full"></div>
+          <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-800">
+            <div className="absolute top-0 right-0 h-16 w-16 md:h-20 md:w-20 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-bl-full"></div>
             <div className="relative">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Conversas Abertas</h3>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Conversas Abertas</h3>
+              <p className="mt-1 md:mt-2 text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {conversationsCount.count || 0}
               </p>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-800">
-            <div className="absolute top-0 right-0 h-20 w-20 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-bl-full"></div>
+          <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-800">
+            <div className="absolute top-0 right-0 h-16 w-16 md:h-20 md:w-20 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-bl-full"></div>
             <div className="relative">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Mensagens (24h)</h3>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Mensagens (24h)</h3>
+              <p className="mt-1 md:mt-2 text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {messagesCount.count || 0}
               </p>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-6 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-800">
-            <div className="absolute top-0 right-0 h-20 w-20 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-bl-full"></div>
+          <div className="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-900 p-4 md:p-6 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-800">
+            <div className="absolute top-0 right-0 h-16 w-16 md:h-20 md:w-20 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-bl-full"></div>
             <div className="relative">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Empresa</h3>
-              <p className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{company.name}</p>
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Empresa</h3>
+              <p className="mt-1 md:mt-2 text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{company.name}</p>
             </div>
           </div>
         </div>

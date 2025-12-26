@@ -153,9 +153,9 @@ export function ContactStatusEditor({
   }, [contactId, status, pipelineId, stageId, router, toast])
 
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-900 p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
-      <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Status e Pipeline</h2>
-      <div className="space-y-4">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-4 md:p-6 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+      <h2 className="mb-3 md:mb-4 text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Status e Pipeline</h2>
+      <div className="space-y-3 md:space-y-4">
         <div>
           <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Status
@@ -164,7 +164,7 @@ export function ContactStatusEditor({
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
+            className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
           >
             <option value={ContactStatus.LEAD}>Lead</option>
             <option value={ContactStatus.PROSPECT}>Prospect</option>
@@ -178,7 +178,7 @@ export function ContactStatusEditor({
             Pipeline
           </label>
           {loadingPipelines ? (
-            <div className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">
+            <div className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-500 dark:text-gray-400 min-h-[44px] md:min-h-0 flex items-center">
               Carregando pipelines...
             </div>
           ) : (
@@ -186,7 +186,7 @@ export function ContactStatusEditor({
               id="pipeline"
               value={pipelineId}
               onChange={(e) => setPipelineId(e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             >
               <option value="">Selecione um pipeline...</option>
               {pipelines.map((pipeline) => (
@@ -209,7 +209,7 @@ export function ContactStatusEditor({
               Etapa do Pipeline
             </label>
             {availableStages.length === 0 ? (
-              <div className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">
+              <div className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-500 dark:text-gray-400 min-h-[44px] md:min-h-0 flex items-center">
                 Nenhuma etapa disponível para este pipeline
               </div>
             ) : (
@@ -217,7 +217,7 @@ export function ContactStatusEditor({
                 id="stage"
                 value={stageId}
                 onChange={(e) => setStageId(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
+                className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
               >
                 <option value="">Selecione uma etapa...</option>
                 {availableStages.map((stage) => (
@@ -234,7 +234,7 @@ export function ContactStatusEditor({
           type="button"
           onClick={handleSave}
           disabled={loading || loadingPipelines}
-          className="w-full rounded-lg bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-lg bg-gradient-to-r from-[#039155] to-[#18B0BB] px-4 py-3 md:py-2.5 text-base md:text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
         >
           {loading ? 'Salvando...' : 'Salvar Alterações'}
         </button>
