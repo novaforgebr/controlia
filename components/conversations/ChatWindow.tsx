@@ -56,6 +56,9 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
   const channelRef = useRef<any>(null)
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const reconnectAttemptsRef = useRef(0)
+  const fallbackIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const router = useRouter()
   const toast = useToast()
 
@@ -142,13 +145,31 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
     loadMessages()
   }, [loadMessages])
 
+  // Scroll automático - definido antes do useEffect que o usa
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, scrollToBottom])
+
   // Configurar Realtime subscription
   useEffect(() => {
     if (!conversation.id) return
 
+    let subscriptionStatus: 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED' | null = null
+    const maxReconnectAttempts = 5
+
     // Buscar company_id da conversa primeiro e configurar subscription
     const setupSubscription = async () => {
       try {
+        // Limpar tentativa de reconexão anterior
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current)
+          reconnectTimeoutRef.current = null
+        }
+
         const { data: conversationData } = await supabase
           .from('conversations')
           .select('company_id')
@@ -156,13 +177,24 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
           .single()
 
         if (!conversationData) {
-          console.error('Erro: Conversa não encontrada para subscription')
+          console.error('❌ Erro: Conversa não encontrada para subscription')
           return
+        }
+
+        // Remover subscription anterior se existir
+        if (channelRef.current) {
+          await supabase.removeChannel(channelRef.current)
+          channelRef.current = null
         }
 
         // Configurar subscription com filtro por conversation_id
         const newChannel = supabase
-          .channel(subscriptionKey)
+          .channel(subscriptionKey, {
+            config: {
+              broadcast: { self: false },
+              presence: { key: '' },
+            },
+          })
           .on(
             'postgres_changes',
             {
@@ -181,74 +213,109 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               
               const newMessage = payload.new as any
               
-              // Buscar company_id da conversa para garantir RLS
-              const { data: convData } = await supabase
-                .from('conversations')
-                .select('company_id')
-                .eq('id', conversation.id)
-                .single()
-              
-              if (!convData) {
-                console.error('Erro: Conversa não encontrada para nova mensagem')
-                return
-              }
-              
-              // Buscar dados completos da mensagem com relacionamentos
-              const { data: fullMessage, error: messageError } = await supabase
-                .from('messages')
-                .select('*, user_profiles:sender_id(full_name)')
-                .eq('id', newMessage.id)
-                .eq('company_id', convData.company_id)
-                .single()
-
-              if (messageError) {
-                console.error('❌ Erro ao buscar mensagem completa:', messageError)
-                console.error('   - message_id:', newMessage.id)
-                console.error('   - company_id:', convData.company_id)
-                // Tentar recarregar todas as mensagens como fallback
-                setTimeout(() => loadMessages(), 500)
-                return
+              // Tentar usar os dados do payload diretamente primeiro
+              // O payload já contém todos os campos da mensagem
+              const messageFromPayload: Message = {
+                id: newMessage.id,
+                content: newMessage.content || '',
+                direction: newMessage.direction,
+                sender_type: newMessage.sender_type,
+                created_at: newMessage.created_at || new Date().toISOString(),
+                media_url: newMessage.media_url || null,
+                user_profiles: newMessage.sender_id ? {
+                  full_name: null, // Será buscado se necessário
+                } : null,
               }
 
-              if (fullMessage) {
-                console.log('✅ Realtime: Mensagem adicionada ao estado:', {
-                  id: fullMessage.id,
-                  direction: fullMessage.direction,
-                  sender_type: fullMessage.sender_type,
-                  content_preview: fullMessage.content?.substring(0, 50),
+              // Se temos sender_id, tentar buscar o nome do usuário
+              if (newMessage.sender_id && newMessage.sender_type === 'human') {
+                try {
+                  const { data: userProfile } = await supabase
+                    .from('user_profiles')
+                    .select('full_name')
+                    .eq('id', newMessage.sender_id)
+                    .single()
+                  
+                  if (userProfile) {
+                    messageFromPayload.user_profiles = {
+                      full_name: userProfile.full_name,
+                    }
+                  }
+                } catch (error) {
+                  console.warn('⚠️ Não foi possível buscar perfil do usuário:', error)
+                  // Continuar mesmo sem o nome do usuário
+                }
+              }
+
+              // Adicionar mensagem ao estado
+              setMessages((prev) => {
+                // Evitar duplicatas
+                if (prev.some((m) => m.id === messageFromPayload.id)) {
+                  console.log('⚠️ Realtime: Mensagem já existe, ignorando:', messageFromPayload.id)
+                  return prev
+                }
+                
+                // Adicionar mensagem e ordenar por created_at
+                const updated = [...prev, messageFromPayload].sort((a, b) => {
+                  return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
                 })
                 
-                setMessages((prev) => {
-                  // Evitar duplicatas
-                  if (prev.some((m) => m.id === fullMessage.id)) {
-                    console.log('⚠️ Realtime: Mensagem já existe, ignorando:', fullMessage.id)
-                    return prev
-                  }
-                  
-                  // Adicionar mensagem e ordenar por created_at
-                  const updated = [...prev, fullMessage as Message].sort((a, b) => {
-                    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-                  })
-                  
-                  console.log('✅ Realtime: Total de mensagens após adicionar:', updated.length)
-                  return updated
-                })
-                setTimeout(() => scrollToBottom(), 100)
-              } else {
-                console.warn('⚠️ Mensagem não encontrada após Realtime event:', newMessage.id)
-                // Tentar recarregar todas as mensagens como fallback
-                setTimeout(() => loadMessages(), 500)
-              }
+                console.log('✅ Realtime: Mensagem adicionada. Total:', updated.length)
+                return updated
+              })
+
+              // Scroll para a nova mensagem
+              setTimeout(() => scrollToBottom(), 150)
             }
           )
+          .subscribe((status) => {
+            subscriptionStatus = status
+            console.log('📡 Status da subscription Realtime:', status)
+            
+            if (status === 'SUBSCRIBED') {
+              reconnectAttemptsRef.current = 0 // Reset contador em caso de sucesso
+              // Limpar fallback interval se existir
+              if (fallbackIntervalRef.current) {
+                clearInterval(fallbackIntervalRef.current)
+                fallbackIntervalRef.current = null
+              }
+              console.log('✅ Realtime: Subscription ativa para conversa:', conversation.id)
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              console.error('❌ Erro na subscription Realtime:', status)
+              // Tentar reconectar após um delay
+              if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+                reconnectAttemptsRef.current++
+                const delay = Math.min(1000 * reconnectAttemptsRef.current, 5000) // Backoff exponencial até 5s
+                console.log(`🔄 Tentando reconectar em ${delay}ms (tentativa ${reconnectAttemptsRef.current}/${maxReconnectAttempts})...`)
+                reconnectTimeoutRef.current = setTimeout(() => {
+                  setupSubscription()
+                }, delay)
+              } else {
+                console.error('❌ Máximo de tentativas de reconexão atingido. Recarregando mensagens manualmente...')
+                // Fallback: recarregar mensagens periodicamente
+                if (!fallbackIntervalRef.current) {
+                  fallbackIntervalRef.current = setInterval(() => {
+                    loadMessages()
+                  }, 3000) // Recarregar a cada 3 segundos como fallback
+                }
+              }
+            } else if (status === 'CLOSED') {
+              console.log('🔌 Subscription Realtime fechada')
+            }
+          })
         
         // Armazenar channel antes de subscribe
         channelRef.current = newChannel
-        
-        // Subscribe retorna Promise, mas não precisamos aguardar
-        newChannel.subscribe()
       } catch (error) {
-        console.error('Erro ao configurar subscription:', error)
+        console.error('❌ Erro ao configurar subscription:', error)
+        // Tentar reconectar após erro
+        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+          reconnectAttemptsRef.current++
+          const delay = Math.min(1000 * reconnectAttemptsRef.current, 5000)
+          reconnectTimeoutRef.current = setTimeout(() => {
+            setupSubscription()
+          }, delay)
+        }
       }
     }
 
@@ -277,6 +344,14 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
 
     return () => {
       // Cleanup será feito quando o componente desmontar
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+        reconnectTimeoutRef.current = null
+      }
+      if (fallbackIntervalRef.current) {
+        clearInterval(fallbackIntervalRef.current)
+        fallbackIntervalRef.current = null
+      }
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
@@ -284,17 +359,9 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       if (conversationChannel) {
         supabase.removeChannel(conversationChannel)
       }
+      reconnectAttemptsRef.current = 0
     }
-  }, [conversation.id, subscriptionKey, supabase, aiEnabled])
-
-  // Scroll automático
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages, scrollToBottom])
+  }, [conversation.id, subscriptionKey, supabase, aiEnabled, loadMessages, scrollToBottom])
 
   const handleMessageSent = useCallback(() => {
     console.log('🔄 handleMessageSent chamado - recarregando mensagens...')

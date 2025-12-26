@@ -776,6 +776,13 @@ export async function POST(request: NextRequest) {
             console.error('💡 Ou adicione ?secret=xxx na URL do webhook do n8n')
           }
 
+          // Buscar dados completos do contato incluindo campos customizados
+          const { data: fullContact } = await serviceClient
+            .from('contacts')
+            .select('*')
+            .eq('id', contact.id)
+            .single()
+
           // Preparar payload para o n8n
           const n8nPayload = {
             // Formato compatível com seu Telegram Trigger
@@ -787,7 +794,7 @@ export async function POST(request: NextRequest) {
               date: date,
               text: text || content,
             },
-            // Dados adicionais do Controlia
+            // Dados adicionais do Controlia - INCLUINDO TODOS OS DADOS DO CONTATO
             controlia: {
               company_id: contact.company_id,
               contact_id: contact.id,
@@ -795,6 +802,26 @@ export async function POST(request: NextRequest) {
               message_id: newMessage?.id,
               channel: 'telegram',
               callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://controliaa.vercel.app'}/api/webhooks/n8n/channel-response`,
+              // Incluir TODOS os dados do contato
+              contact: fullContact ? {
+                id: fullContact.id,
+                name: fullContact.name,
+                email: fullContact.email,
+                phone: fullContact.phone,
+                whatsapp: fullContact.whatsapp,
+                document: fullContact.document,
+                status: fullContact.status,
+                source: fullContact.source,
+                score: fullContact.score,
+                notes: fullContact.notes,
+                tags: fullContact.tags,
+                ai_enabled: fullContact.ai_enabled,
+                // INCLUIR TODOS OS CAMPOS CUSTOMIZADOS
+                custom_fields: fullContact.custom_fields || {},
+                created_at: fullContact.created_at,
+                updated_at: fullContact.updated_at,
+                last_interaction_at: fullContact.last_interaction_at,
+              } : null,
             },
           }
 

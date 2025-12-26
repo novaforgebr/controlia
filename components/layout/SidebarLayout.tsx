@@ -11,68 +11,90 @@ interface SidebarLayoutProps {
 }
 
 export function SidebarLayout({ companyName, children }: SidebarLayoutProps) {
-  // Estado inicial: menu começa recolhido (64px) em desktop, fechado em mobile
-  const [sidebarWidth, setSidebarWidth] = useState(64)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(64) // 64px = w-16 (recolhido)
 
   useEffect(() => {
-    const sidebar = document.querySelector('aside')
-    if (!sidebar) return
+    let timeoutId: NodeJS.Timeout | null = null
+    let observer: MutationObserver | null = null
+    let sidebar: Element | null = null
 
-    const updateWidth = () => {
-      // Em mobile, sidebar não ocupa espaço (é overlay)
-      if (window.innerWidth < 768) {
-        setSidebarWidth(0)
+    // Aguardar sidebar ser renderizado
+    const initSidebar = () => {
+      sidebar = document.querySelector('aside')
+      if (!sidebar) {
+        // Tentar novamente após um pequeno delay se sidebar não estiver disponível
+        timeoutId = setTimeout(initSidebar, 100)
         return
       }
 
-      // Verificar a largura atual do sidebar através do CSS computado
-      // Isso captura tanto o estado permanente quanto o hover
-      const computedStyle = window.getComputedStyle(sidebar)
-      const width = parseInt(computedStyle.width, 10)
-      
-      // Usar a largura real do sidebar
-      // Se estiver recolhido (w-16 = 64px), usar 64px
-      // Se estiver expandido (w-64 = 256px) ou no hover, usar 256px
-      setSidebarWidth(width)
-    }
+      const updateWidth = () => {
+        if (window.innerWidth < 768) {
+          setSidebarWidth(0)
+          return
+        }
 
-    const handleResize = () => {
-      updateWidth()
-      // Fechar menu mobile ao redimensionar para desktop
+        const computedStyle = window.getComputedStyle(sidebar!)
+        const width = parseInt(computedStyle.width, 10)
+        setSidebarWidth(width || 64) // Fallback para 64px se não conseguir ler
+      }
+
+      // Observar mudanças de classe (expandir/recolher)
+      observer = new MutationObserver(updateWidth)
+      observer.observe(sidebar, {
+        attributes: true,
+        attributeFilter: ['class'],
+      })
+
+      // Observar hover (apenas desktop)
       if (window.innerWidth >= 768) {
-        setIsMobileMenuOpen(false)
+        sidebar.addEventListener('mouseenter', updateWidth)
+        sidebar.addEventListener('mouseleave', updateWidth)
+      }
+
+      // Observar transições
+      sidebar.addEventListener('transitionend', updateWidth)
+
+      // Inicializar
+      updateWidth()
+
+      // Fechar menu mobile ao redimensionar para desktop
+      const handleResize = () => {
+        if (window.innerWidth >= 768) {
+          setIsMobileMenuOpen(false)
+          // Reconfigurar eventos de hover se necessário
+          if (sidebar && !sidebar.hasAttribute('data-hover-listeners')) {
+            sidebar.setAttribute('data-hover-listeners', 'true')
+            sidebar.addEventListener('mouseenter', updateWidth)
+            sidebar.addEventListener('mouseleave', updateWidth)
+          }
+        } else {
+          // Remover listeners de hover em mobile
+          if (sidebar) {
+            sidebar.removeAttribute('data-hover-listeners')
+          }
+        }
+        updateWidth()
+      }
+
+      window.addEventListener('resize', handleResize)
+
+      return () => {
+        if (observer) observer.disconnect()
+        if (sidebar) {
+          sidebar.removeEventListener('mouseenter', updateWidth)
+          sidebar.removeEventListener('mouseleave', updateWidth)
+          sidebar.removeEventListener('transitionend', updateWidth)
+        }
+        window.removeEventListener('resize', handleResize)
       }
     }
 
-    const observer = new MutationObserver(updateWidth)
-    observer.observe(sidebar, { 
-      attributes: true, 
-      attributeFilter: ['class'],
-      subtree: false
-    })
-
-    // Verificar estado inicial
-    updateWidth()
-
-    // Atualizar quando o mouse entrar ou sair do sidebar (para capturar hover) - apenas desktop
-    if (window.innerWidth >= 768) {
-      sidebar.addEventListener('mouseenter', updateWidth)
-      sidebar.addEventListener('mouseleave', updateWidth)
-    }
-    
-    // Atualizar também quando a transição CSS terminar
-    sidebar.addEventListener('transitionend', updateWidth)
-    
-    // Atualizar ao redimensionar
-    window.addEventListener('resize', handleResize)
+    const cleanup = initSidebar()
 
     return () => {
-      observer.disconnect()
-      sidebar.removeEventListener('mouseenter', updateWidth)
-      sidebar.removeEventListener('mouseleave', updateWidth)
-      sidebar.removeEventListener('transitionend', updateWidth)
-      window.removeEventListener('resize', handleResize)
+      if (timeoutId) clearTimeout(timeoutId)
+      if (cleanup) cleanup()
     }
   }, [])
 
@@ -83,9 +105,12 @@ export function SidebarLayout({ companyName, children }: SidebarLayoutProps) {
         isMobileOpen={isMobileMenuOpen}
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
+      {/* Conteúdo principal - padding dinâmico baseado na largura do sidebar */}
       <div
-        className="flex-1 flex flex-col transition-all duration-300 w-full md:ml-0"
-        style={{ marginLeft: sidebarWidth > 0 ? `${sidebarWidth}px` : '0' }}
+        className="flex-1 flex flex-col w-full transition-all duration-300"
+        style={{
+          paddingLeft: sidebarWidth > 0 ? `${sidebarWidth}px` : '0',
+        }}
         id="main-content"
       >
         {/* Top Bar */}

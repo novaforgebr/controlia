@@ -175,10 +175,9 @@ export function Sidebar({ companyName, isMobileOpen = false, onMobileClose }: Si
         className={`
           fixed left-0 top-0 z-40 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300
           /* Mobile: drawer que abre/fecha */
-          md:translate-x-0
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
-          /* Desktop: comportamento atual */
-          md:static md:translate-x-0
+          /* Desktop: sempre visível, não empurra conteúdo */
+          md:translate-x-0
           ${shouldExpand ? 'md:w-64' : isCollapsed ? 'md:w-16' : 'md:w-64'}
           /* Mobile sempre full width quando aberto */
           ${isMobileOpen ? 'w-64' : 'w-64'}

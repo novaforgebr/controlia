@@ -137,6 +137,13 @@ export async function POST(request: NextRequest) {
       
       if (automation.n8n_webhook_url) {
         try {
+          // Buscar dados completos do contato incluindo campos customizados
+          const { data: fullContact } = await serviceClient
+            .from('contacts')
+            .select('*')
+            .eq('id', contact.id)
+            .single()
+
           // Enviar para o n8n no formato compatível
           const n8nResponse = await fetch(automation.n8n_webhook_url, {
             method: 'POST',
@@ -152,7 +159,7 @@ export async function POST(request: NextRequest) {
               timestamp: timestamp,
               type: type || 'text',
               mediaUrl: mediaUrl || null,
-              // Dados adicionais do Controlia
+              // Dados adicionais do Controlia - INCLUINDO TODOS OS DADOS DO CONTATO
               controlia: {
                 company_id: contact.company_id,
                 contact_id: contact.id,
@@ -160,6 +167,26 @@ export async function POST(request: NextRequest) {
                 message_id: newMessage?.id,
                 channel: 'whatsapp',
                 callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/webhooks/n8n/channel-response`,
+                // Incluir TODOS os dados do contato
+                contact: fullContact ? {
+                  id: fullContact.id,
+                  name: fullContact.name,
+                  email: fullContact.email,
+                  phone: fullContact.phone,
+                  whatsapp: fullContact.whatsapp,
+                  document: fullContact.document,
+                  status: fullContact.status,
+                  source: fullContact.source,
+                  score: fullContact.score,
+                  notes: fullContact.notes,
+                  tags: fullContact.tags,
+                  ai_enabled: fullContact.ai_enabled,
+                  // INCLUIR TODOS OS CAMPOS CUSTOMIZADOS
+                  custom_fields: fullContact.custom_fields || {},
+                  created_at: fullContact.created_at,
+                  updated_at: fullContact.updated_at,
+                  last_interaction_at: fullContact.last_interaction_at,
+                } : null,
               },
             }),
           })
