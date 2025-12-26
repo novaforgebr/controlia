@@ -511,9 +511,9 @@ export function ConversationsSplitView({
 
   // Desktop: split view
   return (
-    <div className="flex h-full gap-4 overflow-hidden">
+    <div className="flex h-full gap-2 md:gap-4 overflow-hidden">
       {/* Lista de conversas - lado esquerdo */}
-      <div className="flex w-96 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+      <div className="flex w-72 md:w-80 lg:w-96 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
         {/* Filtros */}
         <div className="border-b border-gray-200 dark:border-gray-800 p-4">
           <div className="space-y-3">

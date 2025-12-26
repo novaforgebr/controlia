@@ -445,9 +445,9 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
 
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-gray-900 overflow-hidden fixed inset-0 md:relative md:inset-auto">
+    <div className="flex h-full w-full flex-col bg-white dark:bg-gray-900 overflow-hidden fixed inset-0 md:relative md:inset-auto">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 md:px-6 py-3 md:py-4 flex-shrink-0 sticky top-0 z-10">
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 md:px-6 lg:px-8 py-3 md:py-4 flex-shrink-0 sticky top-0 z-10">
         <div className="flex items-center justify-between gap-2 md:gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -524,7 +524,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       {/* Mensagens */}
       <div 
         ref={messagesContainerRef} 
-        className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0 bg-gray-50 dark:bg-gray-950"
+        className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 min-h-0 bg-gray-50 dark:bg-gray-950"
         style={{ 
           paddingBottom: 'env(safe-area-inset-bottom, 0)',
           WebkitOverflowScrolling: 'touch'
@@ -569,7 +569,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
                       className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[85%] md:max-w-[75%] rounded-lg px-3 md:px-4 py-2 text-sm md:text-base ${
+                        className={`max-w-[90%] md:max-w-[70%] lg:max-w-[65%] xl:max-w-[60%] rounded-lg px-4 md:px-5 py-2.5 md:py-3 text-sm md:text-base ${
                           message.direction === 'outbound'
                             ? 'bg-gradient-to-r from-[#039155] to-[#18B0BB] text-white'
                             : message.sender_type === 'ai'
@@ -617,7 +617,7 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       {/* Formulário de mensagem - fixo no bottom em mobile */}
       {conversation.status !== 'closed' && (
         <div 
-          className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0"
+          className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 md:p-6 lg:p-8 flex-shrink-0"
           style={{ 
             paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0))'
           }}
