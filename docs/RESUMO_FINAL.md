@@ -106,3 +106,4 @@ npx tsx scripts/testar-fluxo-completo.ts
 Sistema totalmente funcional e otimizado. Pronto para uso em produção.
 
 
+

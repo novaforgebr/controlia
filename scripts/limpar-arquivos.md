@@ -144,3 +144,4 @@ Removendo (duplicados/obsoletos):
 - scripts/verify-setup.ts
 
 
+

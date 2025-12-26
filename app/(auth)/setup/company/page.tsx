@@ -39,22 +39,22 @@ export default function CompanySetupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 px-4 py-8 md:py-12">
       <div className="w-full max-w-md">
-        <div className="rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
-          <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#039155] to-[#18B0BB]">
-              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="rounded-2xl bg-white dark:bg-gray-900 p-6 md:p-8 shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
+          <div className="mb-6 md:mb-8 text-center">
+            <div className="mb-4 inline-flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#039155] to-[#18B0BB]">
+              <svg className="h-7 w-7 md:h-8 md:w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Configurar Empresa</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Configurar Empresa</h1>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               Crie ou configure sua empresa para começar a usar o Controlia CRM
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             {error && (
               <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 p-4">
                 <div className="flex">
@@ -88,7 +88,7 @@ export default function CompanySetupPage() {
                   setCompanyName(e.target.value)
                   setError(null) // Limpar erro ao digitar
                 }}
-                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400"
+                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-base md:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-colors focus:border-[#039155] focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#039155]/20 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400 min-h-[44px] md:min-h-0"
                 placeholder="Minha Empresa"
                 disabled={loading}
               />
@@ -100,7 +100,7 @@ export default function CompanySetupPage() {
             <button
               type="submit"
               disabled={loading || !companyName.trim()}
-              className="w-full rounded-lg bg-gradient-to-r from-[#039155] to-[#18B0BB] px-6 py-3 text-base font-semibold text-white shadow-lg shadow-[#039155]/25 transition-all hover:shadow-xl hover:shadow-[#039155]/30 focus:outline-none focus:ring-2 focus:ring-[#039155] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-lg bg-gradient-to-r from-[#039155] to-[#18B0BB] px-6 py-3.5 md:py-3 text-base font-semibold text-white shadow-lg shadow-[#039155]/25 transition-all hover:shadow-xl hover:shadow-[#039155]/30 focus:outline-none focus:ring-2 focus:ring-[#039155] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[44px] md:min-h-0"
             >
               {loading ? (
                 <span className="flex items-center justify-center">

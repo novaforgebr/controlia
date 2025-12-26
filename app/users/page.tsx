@@ -19,12 +19,14 @@ export default async function UsersPage() {
 
   return (
     <ProtectedLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Breadcrumb items={[{ label: 'Usuários' }]} />
-        <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:py-8 sm:px-6 lg:px-8">
+        <div className="hidden md:block">
+          <Breadcrumb items={[{ label: 'Usuários' }]} />
+        </div>
+        <div className="mb-4 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Usuários</h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Gerencie usuários e permissões da sua empresa</p>
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Usuários</h1>
+            <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">Gerencie usuários e permissões da sua empresa</p>
           </div>
           {canInvite && <InviteUserButton />}
         </div>
@@ -32,7 +34,7 @@ export default async function UsersPage() {
         {/* Lista de usuários */}
         <div className="rounded-lg bg-white dark:bg-gray-900 shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-800">
           {users.length === 0 ? (
-            <div className="p-12 text-center text-gray-500 dark:text-gray-400">
+            <div className="p-8 md:p-12 text-center text-gray-500 dark:text-gray-400">
               <svg
                 className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
                 fill="none"
@@ -54,21 +56,21 @@ export default async function UsersPage() {
               {users.map((companyUser: any) => (
                 <div
                   key={companyUser.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#039155] to-[#18B0BB] text-white font-semibold">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center space-x-3 md:space-x-4">
+                      <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#039155] to-[#18B0BB] text-white font-semibold text-sm md:text-base">
                         {companyUser.user_profiles?.full_name
                           ? companyUser.user_profiles.full_name.charAt(0).toUpperCase()
                           : companyUser.user_profiles?.email?.charAt(0).toUpperCase() || 'U'}
                       </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
                           {companyUser.user_profiles?.full_name || 'Sem nome'}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{companyUser.user_profiles?.email}</p>
-                        <div className="mt-2 flex items-center gap-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{companyUser.user_profiles?.email}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
                           <span
                             className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                               companyUser.role === 'admin'
@@ -98,8 +100,8 @@ export default async function UsersPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                      <div className="text-left sm:text-right text-xs md:text-sm text-gray-500 dark:text-gray-400">
                         <p>Adicionado em</p>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
                           {format(new Date(companyUser.created_at), 'dd/MM/yyyy')}

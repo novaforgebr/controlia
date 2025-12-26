@@ -46,11 +46,11 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
   const hasActiveFilters = Object.values(filters).some((v) => v)
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow">
-      <div className="flex items-center justify-between">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-3 md:p-4 shadow dark:shadow-gray-900/50">
+      <div className="flex items-center justify-between gap-3">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="flex items-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] md:min-h-0"
         >
           <svg
             className="h-5 w-5"
@@ -75,7 +75,7 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="text-sm text-gray-600 hover:text-[#039155]"
+            className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#039155] dark:hover:text-[#18B0BB] transition-colors min-h-[44px] md:min-h-0 px-2"
           >
             Limpar filtros
           </button>
@@ -83,9 +83,9 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
       </div>
 
       {showFilters && (
-        <div className="mt-4 grid grid-cols-1 gap-4 border-t border-gray-200 pt-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-4 grid grid-cols-1 gap-4 border-t border-gray-200 dark:border-gray-700 pt-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Data Início
             </label>
             <input
@@ -93,12 +93,12 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
               id="startDate"
               value={filters.startDate || ''}
               onChange={(e) => handleFilterChange('startDate', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             />
           </div>
 
           <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Data Fim
             </label>
             <input
@@ -106,19 +106,19 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
               id="endDate"
               value={filters.endDate || ''}
               onChange={(e) => handleFilterChange('endDate', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             />
           </div>
 
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Status
             </label>
             <select
               id="status"
               value={filters.status || ''}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             >
               <option value="">Todos</option>
               <option value="scheduled">Agendado</option>
@@ -129,14 +129,14 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
           </div>
 
           <div>
-            <label htmlFor="contactId" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="contactId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Contato
             </label>
             <select
               id="contactId"
               value={filters.contactId || ''}
               onChange={(e) => handleFilterChange('contactId', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             >
               <option value="">Todos</option>
               {contacts.map((contact) => (
@@ -148,14 +148,14 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
           </div>
 
           <div>
-            <label htmlFor="visibility" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="visibility" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Visibilidade
             </label>
             <select
               id="visibility"
               value={filters.visibility || ''}
               onChange={(e) => handleFilterChange('visibility', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
             >
               <option value="">Todas</option>
               <option value="private">Privado</option>
@@ -168,6 +168,7 @@ export function CalendarFilters({ onFilterChange, contacts }: CalendarFiltersPro
     </div>
   )
 }
+
 
 
 

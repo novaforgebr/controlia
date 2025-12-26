@@ -67,3 +67,4 @@ Os seguintes avisos foram encontrados, mas não impedem o build:
 - Os avisos sobre otimização de imagens podem ser corrigidos posteriormente usando o componente `Image` do Next.js
 
 
+

@@ -168,9 +168,9 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Seletor de Pipeline */}
-      <div className="rounded-lg bg-white dark:bg-gray-900 p-4 shadow dark:shadow-gray-900/50">
+      <div className="rounded-lg bg-white dark:bg-gray-900 p-3 md:p-4 shadow dark:shadow-gray-900/50">
         <label htmlFor="pipeline" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Pipeline
         </label>
@@ -181,7 +181,7 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
             setSelectedPipeline(e.target.value)
             router.push(`/crm/kanban?pipeline_id=${e.target.value}`)
           }}
-          className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
+          className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 md:py-2 text-base md:text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20 min-h-[44px] md:min-h-0"
         >
           <option value="">Selecione um pipeline...</option>
           {pipelines.map((pipeline) => (
@@ -205,10 +205,10 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
           <p className="text-gray-600 dark:text-gray-400">Selecione um pipeline para visualizar o Kanban</p>
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory">
           {/* Coluna: Sem estágio */}
           {getContactsWithoutStage().length > 0 && (
-            <div className="flex-shrink-0 w-80">
+            <div className="flex-shrink-0 w-[280px] md:w-80 snap-start">
               <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 p-4">
                 <h3 className="mb-4 font-semibold text-gray-900 dark:text-gray-100">Sem Estágio</h3>
                 <div className="space-y-3">
@@ -217,7 +217,7 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
                       key={contact.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, contact.id)}
-                      className="cursor-move rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm hover:shadow-md transition-shadow"
+                      className="cursor-move rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 md:p-4 shadow-sm hover:shadow-md transition-shadow touch-none"
                     >
                       <Link href={`/contacts/${contact.id}`}>
                         <h4 className="font-medium text-gray-900 dark:text-gray-100">{contact.name}</h4>
@@ -249,7 +249,7 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
             return (
               <div
                 key={stage.id}
-                className="flex-shrink-0 w-80"
+                className="flex-shrink-0 w-[280px] md:w-80 snap-start"
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, stage.id)}
               >
@@ -278,7 +278,7 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
                         key={contact.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, contact.id)}
-                        className="cursor-move rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm hover:shadow-md transition-shadow"
+                        className="cursor-move rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 md:p-4 shadow-sm hover:shadow-md transition-shadow touch-none"
                       >
                         <Link href={`/contacts/${contact.id}`}>
                           <h4 className="font-medium text-gray-900 dark:text-gray-100">{contact.name}</h4>
@@ -299,8 +299,8 @@ export function KanbanView({ pipelines, selectedPipelineId }: KanbanViewProps) {
                       </div>
                     ))}
                     {stageContacts.length === 0 && (
-                      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-                        <p className="text-sm text-gray-400 dark:text-gray-500">Arraste contatos aqui</p>
+                      <div className="flex h-[150px] md:h-[200px] items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                        <p className="text-xs md:text-sm text-gray-400 dark:text-gray-500 text-center px-2">Arraste contatos aqui</p>
                       </div>
                     )}
                   </div>
