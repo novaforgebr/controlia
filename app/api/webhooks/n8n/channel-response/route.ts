@@ -359,13 +359,20 @@ export async function POST(request: NextRequest) {
           })
           
           // Buscar definições dos campos para validar tipos e mapear field_id -> field_key
-          const { data: fieldDefinitions } = await serviceClient
+          const { data: fieldDefinitions, error: fieldDefError } = await serviceClient
             .from('contact_custom_fields')
             .select('id, field_key, field_type')
             .eq('company_id', company_id)
             .eq('is_active', true)
           
+          if (fieldDefError) {
+            console.error('❌ Erro ao buscar definições de campos:', fieldDefError)
+          }
+          
           console.log('📋 Definições de campos encontradas:', fieldDefinitions?.length || 0)
+          if (fieldDefinitions && fieldDefinitions.length > 0) {
+            console.log('   - Campos definidos:', fieldDefinitions.map(f => `${f.field_key} (${f.field_type})`).join(', '))
+          }
           
           // ✅ CORREÇÃO: Mapear field_id (UUID) para field_key antes de processar
           // O n8n pode enviar tanto field_key quanto field_id como chave
@@ -402,6 +409,8 @@ export async function POST(request: NextRequest) {
             const fieldDef = fieldDefinitions?.find(f => f.field_key === key)
             
             if (fieldDef) {
+              console.log(`   🔄 Processando campo: ${key} (tipo: ${fieldDef.field_type}, valor: ${value})`)
+              
               // Converter valor baseado no tipo do campo
               if (fieldDef.field_type === 'number') {
                 validatedCustomFields[key] = value !== null && value !== undefined && value !== '' 
@@ -409,16 +418,32 @@ export async function POST(request: NextRequest) {
                   : null
               } else if (fieldDef.field_type === 'boolean') {
                 validatedCustomFields[key] = value === true || value === 'true' || value === 1 || value === '1'
-              } else if (fieldDef.field_type === 'date' && value) {
-                validatedCustomFields[key] = new Date(value as string).toISOString()
+              } else if (fieldDef.field_type === 'date') {
+                // ✅ CORREÇÃO: Aceitar null para campos de data
+                if (value === null || value === undefined || value === '') {
+                  validatedCustomFields[key] = null
+                } else {
+                  try {
+                    validatedCustomFields[key] = new Date(value as string).toISOString()
+                  } catch (e) {
+                    console.warn(`⚠️ Erro ao converter data para ${key}:`, value, e)
+                    validatedCustomFields[key] = null
+                  }
+                }
               } else {
-                validatedCustomFields[key] = value || null
+                // Para text, textarea, select: aceitar string ou null
+                validatedCustomFields[key] = value !== null && value !== undefined && value !== '' 
+                  ? String(value) 
+                  : null
               }
             } else {
               // Se não encontrar definição, manter como está (pode ser campo dinâmico)
+              console.warn(`⚠️ Campo ${key} não encontrado nas definições, mantendo valor original`)
               validatedCustomFields[key] = value
             }
           }
+          
+          console.log('📋 Campos após validação:', JSON.stringify(validatedCustomFields, null, 2))
           
           console.log('✅ Campos validados:', Object.keys(validatedCustomFields))
           
