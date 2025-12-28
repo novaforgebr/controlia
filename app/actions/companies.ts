@@ -403,25 +403,48 @@ export async function updateCompanySettings(formData: FormData) {
       }
     } else if (newTelegramBotToken && newTelegramWebhookUrl && newTelegramWebhookUrl !== currentTelegramWebhookUrl) {
       // Apenas a URL foi atualizada, reconfigurar webhook
-      // ✅ IMPORTANTE: Garantir que a URL inclua company_id
+      // ✅ IMPORTANTE: Garantir que a URL inclua company_id e seja HTTPS
       let finalWebhookUrl = newTelegramWebhookUrl
-      if (!finalWebhookUrl.includes('company_id=')) {
-        // Adicionar company_id se não estiver presente
-        const urlObj = new URL(finalWebhookUrl)
-        urlObj.searchParams.set('company_id', companyUser.company_id)
-        finalWebhookUrl = urlObj.toString()
-        // Atualizar nas settings também
-        newSettings.telegram_webhook_url = finalWebhookUrl
-        await supabase
-          .from('companies')
-          .update({ settings: newSettings })
-          .eq('id', companyUser.company_id)
-      } else if (!finalWebhookUrl.includes(`company_id=${companyUser.company_id}`)) {
-        // URL tem company_id mas não é o correto, atualizar
-        const urlObj = new URL(finalWebhookUrl)
-        urlObj.searchParams.set('company_id', companyUser.company_id)
-        finalWebhookUrl = urlObj.toString()
-        // Atualizar nas settings também
+      
+      // Definir appUrl para uso no catch
+      let appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://controliaa.vercel.app'
+      if (appUrl.startsWith('http://')) {
+        appUrl = appUrl.replace('http://', 'https://')
+      }
+      
+      try {
+        // Garantir HTTPS
+        if (finalWebhookUrl.startsWith('http://')) {
+          finalWebhookUrl = finalWebhookUrl.replace('http://', 'https://')
+        }
+        
+        if (!finalWebhookUrl.includes('company_id=')) {
+          // Adicionar company_id se não estiver presente
+          const urlObj = new URL(finalWebhookUrl)
+          urlObj.searchParams.set('company_id', companyUser.company_id)
+          finalWebhookUrl = urlObj.toString()
+          // Atualizar nas settings também
+          newSettings.telegram_webhook_url = finalWebhookUrl
+          await supabase
+            .from('companies')
+            .update({ settings: newSettings })
+            .eq('id', companyUser.company_id)
+        } else if (!finalWebhookUrl.includes(`company_id=${companyUser.company_id}`)) {
+          // URL tem company_id mas não é o correto, atualizar
+          const urlObj = new URL(finalWebhookUrl)
+          urlObj.searchParams.set('company_id', companyUser.company_id)
+          finalWebhookUrl = urlObj.toString()
+          // Atualizar nas settings também
+          newSettings.telegram_webhook_url = finalWebhookUrl
+          await supabase
+            .from('companies')
+            .update({ settings: newSettings })
+            .eq('id', companyUser.company_id)
+        }
+      } catch (urlError) {
+        console.error('Erro ao processar URL do webhook:', urlError)
+        // Se a URL for inválida, usar a URL padrão
+        finalWebhookUrl = `${appUrl}/api/webhooks/telegram?company_id=${companyUser.company_id}`
         newSettings.telegram_webhook_url = finalWebhookUrl
         await supabase
           .from('companies')

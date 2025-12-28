@@ -60,16 +60,18 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
             webhookUrl === expectedUrl
           )
           
-          setTelegramWebhookStatus({
+          const newStatus = {
             configured: !!webhookUrl && isUrlCorrect,
             url: webhookUrl,
             pendingUpdates: result.data.pending_update_count || null,
             lastErrorDate: result.data.last_error_date || null,
             lastErrorMessage: result.data.last_error_message || (isUrlCorrect ? null : `Webhook configurado com URL incorreta. URL esperada deve incluir company_id=${companyId}`),
-          })
+          }
+          
+          setTelegramWebhookStatus(newStatus)
           
           // Se webhook está configurado mas com URL incorreta, avisar o usuário (apenas uma vez)
-          if (webhookUrl && !isUrlCorrect && !telegramWebhookStatus?.lastErrorMessage?.includes('URL incorreta')) {
+          if (webhookUrl && !isUrlCorrect && !result.data.last_error_message) {
             console.warn('⚠️ Webhook configurado com URL incorreta:', webhookUrl)
             console.warn('   URL esperada:', expectedUrl)
             toast.warning(
@@ -96,7 +98,7 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
 
     checkWebhookStatus()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.telegram_bot_token, companyId])
+  }, [settings.telegram_bot_token, companyId, defaultWebhookUrl])
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true)
