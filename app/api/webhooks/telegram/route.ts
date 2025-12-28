@@ -176,21 +176,53 @@ export async function POST(request: NextRequest) {
     const telegramUserId = from.id.toString()
     const telegramUsername = from.username || null
 
-    // Buscar contato que tenha telegram_id ou username no custom_fields
+    console.log('🔍 Buscando contato pelo Telegram:', {
+      telegram_id: telegramUserId,
+      telegram_username: telegramUsername,
+      company_id: targetCompany.id
+    })
+
+    // ✅ CORREÇÃO: Buscar contato PRIMEIRO por telegram_id (único e obrigatório)
+    // Só usar telegram_username como fallback se telegram_id não existir
     let contact = null
-    const { data: contacts } = await supabase
+    
+    // Primeira tentativa: buscar por telegram_id (mais confiável)
+    const { data: contactsById } = await supabase
       .from('contacts')
-      .select('id, company_id, custom_fields, ai_enabled')
+      .select('id, company_id, custom_fields, ai_enabled, name')
       .eq('company_id', targetCompany.id)
       .limit(1000)
 
-    if (contacts) {
-      contact = contacts.find((c) => {
+    if (contactsById) {
+      contact = contactsById.find((c) => {
         const customFields = c.custom_fields as Record<string, unknown> || {}
-        return (
-          customFields.telegram_id === telegramUserId ||
-          customFields.telegram_username === telegramUsername
-        )
+        // ✅ PRIORIDADE 1: Buscar por telegram_id (único e obrigatório)
+        return customFields.telegram_id === telegramUserId
+      })
+    }
+
+    // ✅ Se não encontrou por telegram_id E temos username, tentar por username
+    // Mas apenas se telegram_id não existir em nenhum contato
+    if (!contact && telegramUsername) {
+      console.log('⚠️ Contato não encontrado por telegram_id, tentando por username...')
+      if (contactsById) {
+        contact = contactsById.find((c) => {
+          const customFields = c.custom_fields as Record<string, unknown> || {}
+          // ✅ PRIORIDADE 2: Buscar por username apenas se telegram_id não existir
+          return (
+            !customFields.telegram_id && // Não tem telegram_id
+            customFields.telegram_username === telegramUsername
+          )
+        })
+      }
+    }
+
+    if (contact) {
+      console.log('✅ Contato encontrado:', {
+        contact_id: contact.id,
+        name: contact.name,
+        telegram_id: (contact.custom_fields as Record<string, unknown>)?.telegram_id,
+        telegram_username: (contact.custom_fields as Record<string, unknown>)?.telegram_username
       })
     }
 
@@ -238,41 +270,106 @@ export async function POST(request: NextRequest) {
     console.log('✅ Contato encontrado/criado:', contact.id, 'Company:', contact.company_id)
 
     // Buscar ou criar conversa
-    // IMPORTANTE: Buscar por channel_thread_id para garantir que reutilizamos a mesma conversa
+    // ✅ IMPORTANTE: channel_thread_id é o chat.id do Telegram (único por usuário)
+    // Cada usuário do Telegram tem um chat.id único, então devemos buscar por:
+    // 1. company_id (empresa)
+    // 2. contact_id (contato específico)
+    // 3. channel_thread_id (chat.id do Telegram - único por usuário)
     const channelThreadId = chat.id.toString()
+    
+    console.log('🔍 Buscando conversa:', {
+      company_id: contact.company_id,
+      contact_id: contact.id,
+      channel: 'telegram',
+      channel_thread_id: channelThreadId
+    })
     
     let { data: conversation } = await supabase
       .from('conversations')
-      .select('id, ai_assistant_enabled')
+      .select('id, ai_assistant_enabled, contact_id, channel_thread_id')
       .eq('company_id', contact.company_id)
-      .eq('contact_id', contact.id)
+      .eq('contact_id', contact.id) // ✅ CRÍTICO: Garantir que a conversa pertence ao contato correto
       .eq('channel', 'telegram')
-      .eq('channel_thread_id', channelThreadId)
+      .eq('channel_thread_id', channelThreadId) // ✅ CRÍTICO: Garantir que é o chat correto do Telegram
       .eq('status', 'open')
       .order('opened_at', { ascending: false })
       .limit(1)
       .maybeSingle()
+    
+    if (conversation) {
+      console.log('✅ Conversa encontrada:', {
+        conversation_id: conversation.id,
+        contact_id: conversation.contact_id,
+        channel_thread_id: conversation.channel_thread_id
+      })
+      
+      // ✅ VALIDAÇÃO CRÍTICA: Verificar se a conversa realmente pertence ao contato correto
+      if (conversation.contact_id !== contact.id) {
+        console.error('❌ ERRO CRÍTICO: Conversa encontrada pertence a outro contato!', {
+          conversa_contact_id: conversation.contact_id,
+          contato_atual_id: contact.id,
+          channel_thread_id: channelThreadId
+        })
+        // Não usar esta conversa, criar uma nova
+        conversation = null
+      }
+    }
 
     if (!conversation) {
+      // ✅ VALIDAÇÃO ANTES DE CRIAR: Verificar se já existe conversa com este channel_thread_id
+      // mas com outro contact_id (isso indicaria um problema de dados)
+      const { data: existingConversationWithDifferentContact } = await supabase
+        .from('conversations')
+        .select('id, contact_id, channel_thread_id')
+        .eq('company_id', contact.company_id)
+        .eq('channel', 'telegram')
+        .eq('channel_thread_id', channelThreadId)
+        .neq('contact_id', contact.id)
+        .maybeSingle()
+      
+      if (existingConversationWithDifferentContact) {
+        console.error('❌ ERRO CRÍTICO: Já existe conversa com este channel_thread_id mas com outro contato!', {
+          conversa_existente_id: existingConversationWithDifferentContact.id,
+          conversa_contact_id: existingConversationWithDifferentContact.contact_id,
+          contato_atual_id: contact.id,
+          channel_thread_id: channelThreadId
+        })
+        // Fechar a conversa antiga e criar uma nova com o contato correto
+        await supabase
+          .from('conversations')
+          .update({ status: 'closed' })
+          .eq('id', existingConversationWithDifferentContact.id)
+        console.log('✅ Conversa antiga fechada, criando nova com contato correto')
+      }
+      
+      console.log('📝 Criando nova conversa:', {
+        company_id: contact.company_id,
+        contact_id: contact.id,
+        contact_name: contact.name || 'Sem nome',
+        channel: 'telegram',
+        channel_thread_id: channelThreadId,
+        telegram_user_id: telegramUserId
+      })
+      
       // Criar nova conversa apenas se não existir uma aberta com o mesmo channel_thread_id
       const { data: newConversation, error: convError } = await supabase
         .from('conversations')
         .insert({
           company_id: contact.company_id,
-          contact_id: contact.id,
+          contact_id: contact.id, // ✅ CRÍTICO: Garantir que usa o contact_id correto
           channel: 'telegram',
           channel_thread_id: channelThreadId,
           status: 'open',
           priority: 'normal',
           ai_assistant_enabled: true,
         })
-        .select('id, company_id, ai_assistant_enabled') // IMPORTANTE: Selecionar ai_assistant_enabled também
+        .select('id, company_id, contact_id, ai_assistant_enabled, channel_thread_id')
         .single()
 
       if (convError) {
         console.error('Erro ao criar conversa:', convError)
         return NextResponse.json(
-          { error: 'Erro ao criar conversa' },
+          { error: 'Erro ao criar conversa', details: convError.message },
           { status: 500 }
         )
       }
@@ -285,7 +382,24 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // ✅ VALIDAÇÃO PÓS-CRIAÇÃO: Verificar se a conversa foi criada com o contato correto
+      if (newConversation.contact_id !== contact.id) {
+        console.error('❌ ERRO CRÍTICO: Conversa criada com contact_id incorreto!', {
+          conversa_criada_contact_id: newConversation.contact_id,
+          contato_esperado_id: contact.id
+        })
+        return NextResponse.json(
+          { error: 'Erro ao criar conversa: contact_id incorreto' },
+          { status: 500 }
+        )
+      }
+
       conversation = newConversation
+      console.log('✅ Conversa criada com sucesso:', {
+        conversation_id: conversation.id,
+        contact_id: conversation.contact_id,
+        channel_thread_id: conversation.channel_thread_id
+      })
     }
 
     // Verificar se conversation existe antes de continuar
@@ -356,13 +470,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ✅ VALIDAÇÃO FINAL: Verificar se contact e conversation estão corretos antes de criar mensagem
+    console.log('📨 Criando mensagem:', {
+      company_id: contact.company_id,
+      contact_id: contact.id,
+      contact_name: contact.name || 'Sem nome',
+      conversation_id: conversation.id,
+      conversation_contact_id: conversation.contact_id,
+      channel_thread_id: channelThreadId,
+      telegram_user_id: telegramUserId
+    })
+    
+    // ✅ VALIDAÇÃO CRÍTICA: Garantir que conversation.contact_id === contact.id
+    if (conversation.contact_id !== contact.id) {
+      console.error('❌ ERRO CRÍTICO: Tentativa de criar mensagem com contato/conversa incorretos!', {
+        conversation_contact_id: conversation.contact_id,
+        contact_atual_id: contact.id,
+        conversation_id: conversation.id
+      })
+      return NextResponse.json(
+        { error: 'Erro: conversa não pertence ao contato correto' },
+        { status: 500 }
+      )
+    }
+    
     // Criar mensagem (usando service client para bypass RLS)
     // IMPORTANTE: Garantir que company_id seja o mesmo da conversa para consistência
     // Usar contact.company_id como fallback (conversation já tem o mesmo company_id)
     const messageData = {
       company_id: contact.company_id, // Usar company_id do contato (conversation tem o mesmo)
       conversation_id: conversation.id,
-      contact_id: contact.id,
+      contact_id: contact.id, // ✅ CRÍTICO: Garantir que usa o contact_id correto
       content: content,
       content_type: contentType,
       direction: 'inbound',

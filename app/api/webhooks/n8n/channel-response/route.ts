@@ -309,6 +309,132 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ============================================
+    // 2.5. Atualizar custom_fields do contato (se fornecido)
+    // ============================================
+    if (contact_id_final && body.custom_fields) {
+      try {
+        console.log('📝 Atualizando custom_fields do contato...')
+        
+        // Buscar contato atual para mesclar campos
+        const { data: currentContact } = await serviceClient
+          .from('contacts')
+          .select('custom_fields')
+          .eq('id', contact_id_final)
+          .eq('company_id', company_id)
+          .single()
+        
+        if (currentContact) {
+          const existingCustomFields = (currentContact.custom_fields as Record<string, unknown>) || {}
+          const newCustomFields = body.custom_fields as Record<string, unknown>
+          
+          console.log('📝 Processando custom_fields:', {
+            campos_recebidos: Object.keys(newCustomFields),
+            valores: newCustomFields
+          })
+          
+          // Buscar definições dos campos para validar tipos e mapear field_id -> field_key
+          const { data: fieldDefinitions } = await serviceClient
+            .from('contact_custom_fields')
+            .select('id, field_key, field_type')
+            .eq('company_id', company_id)
+            .eq('is_active', true)
+          
+          console.log('📋 Definições de campos encontradas:', fieldDefinitions?.length || 0)
+          
+          // ✅ CORREÇÃO: Mapear field_id (UUID) para field_key antes de processar
+          // O n8n pode enviar tanto field_key quanto field_id como chave
+          const mappedCustomFields: Record<string, unknown> = {}
+          for (const [key, value] of Object.entries(newCustomFields)) {
+            // Verificar se a chave é um UUID (field_id) ou field_key
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key)
+            
+            if (isUUID) {
+              // É um field_id, buscar o field_key correspondente
+              const fieldDef = fieldDefinitions?.find(f => f.id === key)
+              if (fieldDef) {
+                console.log(`✅ Mapeando field_id ${key} -> field_key ${fieldDef.field_key}`)
+                mappedCustomFields[fieldDef.field_key] = value
+              } else {
+                console.warn(`⚠️ Campo com field_id ${key} não encontrado nas definições`)
+                // Manter como está caso seja um campo dinâmico
+                mappedCustomFields[key] = value
+              }
+            } else {
+              // É um field_key, usar diretamente
+              mappedCustomFields[key] = value
+            }
+          }
+          
+          console.log('📝 Campos mapeados:', Object.keys(mappedCustomFields))
+          
+          // Mesclar campos existentes com novos (novos sobrescrevem existentes)
+          const mergedCustomFields = { ...existingCustomFields, ...mappedCustomFields }
+          
+          // Validar e converter tipos dos campos customizados
+          const validatedCustomFields: Record<string, unknown> = {}
+          for (const [key, value] of Object.entries(mergedCustomFields)) {
+            const fieldDef = fieldDefinitions?.find(f => f.field_key === key)
+            
+            if (fieldDef) {
+              // Converter valor baseado no tipo do campo
+              if (fieldDef.field_type === 'number') {
+                validatedCustomFields[key] = value !== null && value !== undefined && value !== '' 
+                  ? Number(value) 
+                  : null
+              } else if (fieldDef.field_type === 'boolean') {
+                validatedCustomFields[key] = value === true || value === 'true' || value === 1 || value === '1'
+              } else if (fieldDef.field_type === 'date' && value) {
+                validatedCustomFields[key] = new Date(value as string).toISOString()
+              } else {
+                validatedCustomFields[key] = value || null
+              }
+            } else {
+              // Se não encontrar definição, manter como está (pode ser campo dinâmico)
+              validatedCustomFields[key] = value
+            }
+          }
+          
+          console.log('✅ Campos validados:', Object.keys(validatedCustomFields))
+          
+          // Atualizar contato
+          console.log('💾 Atualizando contato com custom_fields:', {
+            contact_id: contact_id_final,
+            company_id: company_id,
+            campos_para_atualizar: Object.keys(validatedCustomFields),
+            valores: validatedCustomFields
+          })
+          
+          const { error: updateError, data: updatedContact } = await serviceClient
+            .from('contacts')
+            .update({ 
+              custom_fields: validatedCustomFields,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', contact_id_final)
+            .eq('company_id', company_id)
+            .select('id, custom_fields')
+            .single()
+          
+          if (updateError) {
+            console.error('⚠️ Erro ao atualizar custom_fields:', updateError)
+            console.error('   Detalhes:', JSON.stringify(updateError, null, 2))
+            // Não falhar o processo, apenas logar o erro
+          } else {
+            console.log('✅ Custom_fields atualizados com sucesso!')
+            console.log('   - Total de campos:', Object.keys(validatedCustomFields).length)
+            console.log('   - Campos atualizados:', Object.keys(validatedCustomFields))
+            if (updatedContact) {
+              console.log('   - Campos no contato após atualização:', Object.keys((updatedContact.custom_fields as Record<string, unknown>) || {}))
+            }
+          }
+        }
+      } catch (customFieldsError) {
+        console.error('⚠️ Erro ao processar custom_fields:', customFieldsError)
+        // Não falhar o processo, apenas logar o erro
+      }
+    }
+
     // ✅ PASSO 2: Enviar resposta ao canal apropriado
     let channelMessageId: string | null = null
 

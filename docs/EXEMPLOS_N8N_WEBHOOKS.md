@@ -4,7 +4,7 @@ Este documento contém exemplos práticos de código JavaScript para usar nos wo
 
 ---
 
-## Exemplo 1: Processar Resposta da IA e Enviar ao Controlia
+## Exemplo 1: Processar Resposta da IA e Enviar ao Controlia (COM Atualização de Campos Customizados)
 
 ### Node: HTTP Request (Enviar Resposta)
 
@@ -28,8 +28,39 @@ const aiResponse = $('Agent').first().json.output ||
                    $('Agent').first().json.response ||
                    'Resposta padrão';
 
+// ✅ NOVO: Extrair análise da IA para atualizar campos customizados
+const aiAnalysis = $('Agent').first().json.analysis || {};
+const aiMetadata = $('Agent').first().json.metadata || {};
+
+// Preparar campos customizados para atualização
+const customFields = {
+  // Exemplo: atualizar data da última interação
+  ultima_interacao_ia: new Date().toISOString(),
+  
+  // Exemplo: salvar sentimento detectado pela IA
+  sentimento_detectado: aiAnalysis.sentiment || 'neutral',
+  
+  // Exemplo: salvar confiança da resposta da IA
+  confianca_resposta: aiAnalysis.confidence || 0,
+  
+  // Exemplo: salvar intenção detectada
+  intencao_detectada: aiAnalysis.intent || null,
+  
+  // Exemplo: salvar entidades extraídas (como JSON string)
+  entidades_extraidas: aiAnalysis.entities ? JSON.stringify(aiAnalysis.entities) : null,
+  
+  // Exemplo: contador de interações com IA
+  total_interacoes_ia: (aiMetadata.interaction_count || 0) + 1,
+  
+  // Exemplo: última resposta da IA (resumo)
+  ultima_resposta_ia: aiResponse.substring(0, 200) // Primeiros 200 caracteres
+};
+
 return {
+  // Resposta da IA que será enviada ao canal
   output: aiResponse,
+  
+  // Dados do Controlia (obrigatórios)
   controlia: {
     company_id: controlia.company_id,
     contact_id: controlia.contact_id,
@@ -38,16 +69,118 @@ return {
     channel: controlia.channel || 'telegram',
     channel_id: controlia.channel_id || message.chat?.id?.toString()
   },
+  
+  // Dados da mensagem original (opcional, mas recomendado)
   message: {
     from: message.from || controlia.message?.from,
     chat: message.chat || controlia.message?.chat
+  },
+  
+  // ✅ NOVO: Campos customizados para atualizar no contato
+  custom_fields: customFields
+};
+```
+
+### Exemplo Simplificado (Apenas Resposta + Campos Básicos)
+
+```javascript
+return {
+  output: $('Agent').first().json.output,
+  controlia: $json.controlia,
+  message: $json.message,
+  custom_fields: {
+    ultima_interacao: new Date().toISOString(),
+    sentimento: 'positive',
+    score_ia: 85
   }
 };
 ```
 
 ---
 
-## Exemplo 2: Atualizar Contato Após Processamento
+## Exemplo 1.1: Atualizar Campos Customizados do Contato (RECOMENDADO)
+
+### ✅ Método Simplificado: Usar o Webhook de Resposta
+
+Agora você pode atualizar `custom_fields` diretamente no webhook de resposta! Basta incluir o campo `custom_fields` no payload:
+
+```javascript
+// No seu nó HTTP Request que envia para /api/webhooks/n8n/channel-response
+return {
+  output: $('Agent').first().json.output, // Resposta da IA
+  controlia: $json.controlia, // Dados do Controlia (já vêm do webhook)
+  message: $json.message, // Dados da mensagem original
+  custom_fields: {
+    // ✅ Campos customizados serão atualizados automaticamente no contato
+    ultima_interacao_ia: new Date().toISOString(),
+    sentimento_detectado: $('Agent').first().json.sentiment || 'neutral',
+    confianca_ia: $('Agent').first().json.confidence || 0,
+    intencao: $('Agent').first().json.intent || null,
+    total_interacoes: ($json.controlia?.custom_fields?.total_interacoes || 0) + 1
+  }
+};
+```
+
+### Como Funciona
+
+1. O webhook recebe o payload com `custom_fields`
+2. Busca o contato pelo `contact_id` fornecido
+3. Mescla os novos campos com os existentes (novos sobrescrevem existentes)
+4. Valida os tipos dos campos baseado nas definições em `contact_custom_fields`
+5. Atualiza o contato no banco de dados
+6. Envia a resposta da IA ao canal (Telegram, WhatsApp, etc.)
+
+### Tipos de Campos Suportados
+
+Os campos são automaticamente convertidos baseado no tipo definido em `contact_custom_fields`:
+
+- **text**: String (padrão)
+- **number**: Convertido para número
+- **boolean**: Convertido para true/false
+- **date**: Convertido para ISO string
+
+### Exemplo Completo com Análise de IA
+
+```javascript
+const agentResponse = $('Agent').first().json;
+const webhookData = $('Webhook').first().json.body || $('Webhook').first().json;
+
+// Extrair análise da IA
+const analysis = agentResponse.analysis || {};
+const metadata = agentResponse.metadata || {};
+
+return {
+  output: agentResponse.output || agentResponse.text,
+  controlia: webhookData.controlia,
+  message: webhookData.message,
+  custom_fields: {
+    // Campos de data/hora
+    ultima_interacao_ia: new Date().toISOString(),
+    data_ultima_resposta: new Date().toISOString(),
+    
+    // Campos de análise
+    sentimento: analysis.sentiment || 'neutral',
+    confianca: analysis.confidence || 0,
+    intencao: analysis.intent || null,
+    
+    // Campos numéricos
+    total_interacoes: (metadata.interaction_count || 0) + 1,
+    score_satisfacao: analysis.satisfaction_score || null,
+    
+    // Campos de texto
+    topico_principal: analysis.main_topic || null,
+    resumo_conversa: analysis.summary?.substring(0, 500) || null,
+    
+    // Campos booleanos
+    precisa_atencao_humana: analysis.needs_human_attention || false,
+    resolvido: analysis.resolved || false
+  }
+};
+```
+
+---
+
+## Exemplo 2: Atualizar Contato Após Processamento (Método Alternativo)
 
 ### Node: HTTP Request (Atualizar Contato no Supabase)
 
