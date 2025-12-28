@@ -312,12 +312,17 @@ export async function POST(request: NextRequest) {
     // ============================================
     // 2.5. Atualizar custom_fields do contato (se fornecido)
     // ============================================
+    console.log('🔍 Verificando se deve atualizar custom_fields...')
+    console.log('   - contact_id_final:', contact_id_final)
+    console.log('   - body.custom_fields existe?', !!body.custom_fields)
+    console.log('   - body.custom_fields:', body.custom_fields)
+    
     if (contact_id_final && body.custom_fields) {
       try {
         console.log('📝 Atualizando custom_fields do contato...')
         console.log('   - contact_id:', contact_id_final)
         console.log('   - company_id:', company_id)
-        console.log('   - custom_fields recebidos:', body.custom_fields)
+        console.log('   - custom_fields recebidos:', JSON.stringify(body.custom_fields, null, 2))
         
         // Buscar contato atual para mesclar campos
         const { data: currentContact, error: fetchError } = await serviceClient
@@ -330,6 +335,13 @@ export async function POST(request: NextRequest) {
         if (fetchError) {
           console.error('❌ Erro ao buscar contato:', fetchError)
           console.error('   Detalhes:', JSON.stringify(fetchError, null, 2))
+        }
+        
+        if (!currentContact) {
+          console.error('❌ Contato não encontrado!', {
+            contact_id: contact_id_final,
+            company_id: company_id
+          })
         }
         
         if (currentContact) {
@@ -439,13 +451,24 @@ export async function POST(request: NextRequest) {
             console.log('   - Campos atualizados:', Object.keys(validatedCustomFields))
             if (updatedContact) {
               console.log('   - Campos no contato após atualização:', Object.keys((updatedContact.custom_fields as Record<string, unknown>) || {}))
+              console.log('   - Valores completos:', JSON.stringify(updatedContact.custom_fields, null, 2))
             }
           }
+        } else {
+          console.error('❌ Contato não encontrado para atualizar custom_fields')
         }
       } catch (customFieldsError) {
         console.error('⚠️ Erro ao processar custom_fields:', customFieldsError)
+        console.error('   Stack:', customFieldsError instanceof Error ? customFieldsError.stack : 'N/A')
         // Não falhar o processo, apenas logar o erro
       }
+    } else {
+      console.warn('⚠️ Custom_fields não serão atualizados:', {
+        tem_contact_id: !!contact_id_final,
+        tem_custom_fields: !!body.custom_fields,
+        contact_id_final,
+        custom_fields_keys: body.custom_fields ? Object.keys(body.custom_fields as Record<string, unknown>) : []
+      })
     }
 
     // ✅ PASSO 2: Enviar resposta ao canal apropriado
