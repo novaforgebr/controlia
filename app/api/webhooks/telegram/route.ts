@@ -144,7 +144,33 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`✅ Empresa identificada: ${targetCompany.name || targetCompany.id}`)
+    console.log(`   - Company ID: ${targetCompany.id}`)
     console.log(`   - Token configurado: ${companyBotToken.substring(0, 10)}...`)
+    console.log(`   - URL do webhook recebida: ${request.nextUrl.toString()}`)
+
+    // ✅ VALIDAÇÃO ADICIONAL: Verificar se há outras empresas com o mesmo bot token
+    // Isso ajuda a identificar conflitos de configuração
+    const { data: companiesWithSameToken } = await supabase
+      .from('companies')
+      .select('id, name, settings')
+      .neq('id', targetCompany.id)
+      .limit(100)
+
+    if (companiesWithSameToken) {
+      const conflictingCompanies = companiesWithSameToken.filter((c) => {
+        const cSettings = (c.settings as Record<string, unknown>) || {}
+        const cToken = (cSettings.telegram_bot_token as string) || ''
+        return cToken && cToken.trim() === companyBotToken.trim()
+      })
+
+      if (conflictingCompanies.length > 0) {
+        console.error('⚠️ AVISO: Outras empresas encontradas com o mesmo bot token:')
+        conflictingCompanies.forEach((c) => {
+          console.error(`   - ${c.name || c.id} (ID: ${c.id})`)
+        })
+        console.error('   Isso pode causar conflitos! Cada empresa deve ter seu próprio bot token único.')
+      }
+    }
 
     // Dados do usuário Telegram
     const telegramUserId = from.id.toString()

@@ -363,7 +363,6 @@ export async function updateCompanySettings(formData: FormData) {
     )
 
     // ✅ CONFIGURAÇÃO AUTOMÁTICA: Configurar webhook do Telegram automaticamente se bot token foi atualizado
-    const newTelegramBotToken = (newSettings.telegram_bot_token as string) || ''
     const newTelegramWebhookUrl = (newSettings.telegram_webhook_url as string) || ''
     
     if (newTelegramBotToken && newTelegramBotToken !== currentTelegramBotToken) {
@@ -399,9 +398,36 @@ export async function updateCompanySettings(formData: FormData) {
       }
     } else if (newTelegramBotToken && newTelegramWebhookUrl && newTelegramWebhookUrl !== currentTelegramWebhookUrl) {
       // Apenas a URL foi atualizada, reconfigurar webhook
-      console.log('🔧 Reconfigurando webhook do Telegram (URL atualizada)...')
+      // ✅ IMPORTANTE: Garantir que a URL inclua company_id
+      let finalWebhookUrl = newTelegramWebhookUrl
+      if (!finalWebhookUrl.includes('company_id=')) {
+        // Adicionar company_id se não estiver presente
+        const urlObj = new URL(finalWebhookUrl)
+        urlObj.searchParams.set('company_id', companyUser.company_id)
+        finalWebhookUrl = urlObj.toString()
+        // Atualizar nas settings também
+        newSettings.telegram_webhook_url = finalWebhookUrl
+        await supabase
+          .from('companies')
+          .update({ settings: newSettings })
+          .eq('id', companyUser.company_id)
+      } else if (!finalWebhookUrl.includes(`company_id=${companyUser.company_id}`)) {
+        // URL tem company_id mas não é o correto, atualizar
+        const urlObj = new URL(finalWebhookUrl)
+        urlObj.searchParams.set('company_id', companyUser.company_id)
+        finalWebhookUrl = urlObj.toString()
+        // Atualizar nas settings também
+        newSettings.telegram_webhook_url = finalWebhookUrl
+        await supabase
+          .from('companies')
+          .update({ settings: newSettings })
+          .eq('id', companyUser.company_id)
+      }
       
-      const webhookResult = await configureTelegramWebhook(newTelegramBotToken, newTelegramWebhookUrl)
+      console.log('🔧 Reconfigurando webhook do Telegram (URL atualizada)...')
+      console.log('   URL final:', finalWebhookUrl)
+      
+      const webhookResult = await configureTelegramWebhook(newTelegramBotToken, finalWebhookUrl)
       
       if (!webhookResult.success) {
         console.error('⚠️ Erro ao reconfigurar webhook do Telegram:', webhookResult.error)

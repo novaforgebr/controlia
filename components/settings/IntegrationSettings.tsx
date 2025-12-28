@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { updateCompanySettings } from '@/app/actions/companies'
-import { getTelegramWebhookInfo, testTelegramConnection, reconfigureAllTelegramWebhooks, validateAllWebhookConfigurations } from '@/app/actions/telegram'
+import { getTelegramWebhookInfo, testTelegramConnection, reconfigureAllTelegramWebhooks, validateAllWebhookConfigurations, configureTelegramWebhook } from '@/app/actions/telegram'
 import { useToast } from '@/lib/hooks/use-toast'
 import { IntegrationTutorialModal } from './IntegrationTutorialModal'
 
@@ -26,6 +26,7 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
   const [checkingWebhook, setCheckingWebhook] = useState(false)
   const [testingConnection, setTestingConnection] = useState(false)
   const [reconfiguringAll, setReconfiguringAll] = useState(false)
+  const [reconfiguringCurrent, setReconfiguringCurrent] = useState(false)
   const [validatingAll, setValidatingAll] = useState(false)
   const [validationReport, setValidationReport] = useState<any>(null)
   const toast = useToast()
@@ -49,13 +50,32 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
       try {
         const result = await getTelegramWebhookInfo(botToken)
         if (result.success && result.data) {
+          const webhookUrl = result.data.url || null
+          const expectedUrl = defaultWebhookUrl
+          
+          // ✅ Verificar se o webhook está configurado com a URL correta incluindo company_id
+          const isUrlCorrect = webhookUrl && (
+            webhookUrl.includes(`company_id=${companyId}`) || 
+            webhookUrl === expectedUrl
+          )
+          
           setTelegramWebhookStatus({
-            configured: !!result.data.url,
-            url: result.data.url || null,
+            configured: !!webhookUrl && isUrlCorrect,
+            url: webhookUrl,
             pendingUpdates: result.data.pending_update_count || null,
             lastErrorDate: result.data.last_error_date || null,
-            lastErrorMessage: result.data.last_error_message || null,
+            lastErrorMessage: result.data.last_error_message || (isUrlCorrect ? null : `Webhook configurado com URL incorreta. URL esperada deve incluir company_id=${companyId}`),
           })
+          
+          // Se webhook está configurado mas com URL incorreta, avisar o usuário
+          if (webhookUrl && !isUrlCorrect) {
+            console.warn('⚠️ Webhook configurado com URL incorreta:', webhookUrl)
+            console.warn('   URL esperada:', expectedUrl)
+            toast.warning(
+              `Webhook configurado com URL incorreta. Clique em "Reconfigurar Webhook" para corrigir automaticamente.`,
+              { duration: 10000 }
+            )
+          }
         } else {
           setTelegramWebhookStatus({
             configured: false,
@@ -74,7 +94,7 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
     }
 
     checkWebhookStatus()
-  }, [settings.telegram_bot_token])
+  }, [settings.telegram_bot_token, companyId, defaultWebhookUrl, toast])
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true)
@@ -193,6 +213,46 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
       alert('Erro ao reconfigurar webhooks. Tente novamente.')
     } finally {
       setReconfiguringAll(false)
+    }
+  }
+
+  const handleReconfigureCurrent = async () => {
+    const botToken = (settings.telegram_bot_token as string) || ''
+    if (!botToken) {
+      toast.error('Por favor, configure o Bot Token primeiro')
+      return
+    }
+
+    setReconfiguringCurrent(true)
+    const loadingToast = toast.loading('Reconfigurando webhook...')
+    
+    try {
+      const result = await configureTelegramWebhook(botToken, defaultWebhookUrl)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        toast.success('Webhook reconfigurado com sucesso!')
+        
+        // Recarregar status do webhook
+        const webhookResult = await getTelegramWebhookInfo(botToken)
+        if (webhookResult.success && webhookResult.data) {
+          setTelegramWebhookStatus({
+            configured: !!webhookResult.data.url,
+            url: webhookResult.data.url || null,
+            pendingUpdates: webhookResult.data.pending_update_count || null,
+            lastErrorDate: webhookResult.data.last_error_date || null,
+            lastErrorMessage: webhookResult.data.last_error_message || null,
+          })
+        }
+      } else {
+        toast.error(`Erro ao reconfigurar webhook: ${result.error || 'Erro desconhecido'}`)
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      console.error('Erro ao reconfigurar webhook:', error)
+      toast.error('Erro ao reconfigurar webhook. Tente novamente.')
+    } finally {
+      setReconfiguringCurrent(false)
     }
   }
 
@@ -404,6 +464,26 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
                     </span>
                   )}
                 </div>
+                <button
+                  type="button"
+                  onClick={handleReconfigureCurrent}
+                  disabled={reconfiguringCurrent || !settings.telegram_bot_token}
+                  className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {reconfiguringCurrent ? (
+                    <>
+                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                      Reconfigurando...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Reconfigurar Webhook
+                    </>
+                  )}
+                </button>
               </div>
               {telegramWebhookStatus?.configured && telegramWebhookStatus.url && (
                 <div className="mt-2 text-xs text-gray-600">

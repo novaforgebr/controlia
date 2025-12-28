@@ -211,8 +211,18 @@ export async function reconfigureAllTelegramWebhooks(): Promise<{
         continue
       }
 
-      // Usar URL customizada se disponível, senão usar a padrão
-      const finalWebhookUrl = customWebhookUrl || webhookUrl
+      // ✅ IMPORTANTE: Sempre incluir company_id na URL do webhook
+      // Se houver URL customizada, verificar se já inclui company_id
+      let finalWebhookUrl = customWebhookUrl
+      if (!finalWebhookUrl || !finalWebhookUrl.includes('company_id=')) {
+        // Construir URL padrão com company_id
+        finalWebhookUrl = `${webhookUrl}?company_id=${company.id}`
+      } else if (finalWebhookUrl && !finalWebhookUrl.includes(`company_id=${company.id}`)) {
+        // URL customizada existe mas não tem o company_id correto, atualizar
+        const urlObj = new URL(finalWebhookUrl)
+        urlObj.searchParams.set('company_id', company.id)
+        finalWebhookUrl = urlObj.toString()
+      }
 
       console.log(`🔧 Reconfigurando webhook para empresa: ${company.name}`)
       console.log(`   Bot Token: ${botToken.substring(0, 10)}...`)
