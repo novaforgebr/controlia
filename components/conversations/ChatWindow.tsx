@@ -282,6 +282,9 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               console.log('✅ Realtime: Subscription ativa para conversa:', conversation.id)
             } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
               console.error('❌ Erro na subscription Realtime:', status)
+              console.warn('⚠️ Isso pode indicar que o Realtime não está habilitado para a tabela messages.')
+              console.warn('   Execute o script: supabase/enable-realtime-all.sql')
+              
               // Tentar reconectar após um delay
               if (reconnectAttemptsRef.current < maxReconnectAttempts) {
                 reconnectAttemptsRef.current++

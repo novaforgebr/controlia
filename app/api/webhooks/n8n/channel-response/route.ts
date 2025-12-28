@@ -315,16 +315,29 @@ export async function POST(request: NextRequest) {
     if (contact_id_final && body.custom_fields) {
       try {
         console.log('📝 Atualizando custom_fields do contato...')
+        console.log('   - contact_id:', contact_id_final)
+        console.log('   - company_id:', company_id)
+        console.log('   - custom_fields recebidos:', body.custom_fields)
         
         // Buscar contato atual para mesclar campos
-        const { data: currentContact } = await serviceClient
+        const { data: currentContact, error: fetchError } = await serviceClient
           .from('contacts')
-          .select('custom_fields')
+          .select('id, custom_fields, company_id')
           .eq('id', contact_id_final)
           .eq('company_id', company_id)
           .single()
         
+        if (fetchError) {
+          console.error('❌ Erro ao buscar contato:', fetchError)
+          console.error('   Detalhes:', JSON.stringify(fetchError, null, 2))
+        }
+        
         if (currentContact) {
+          console.log('✅ Contato encontrado:', {
+            id: currentContact.id,
+            company_id: currentContact.company_id,
+            custom_fields_atual: Object.keys((currentContact.custom_fields as Record<string, unknown>) || {})
+          })
           const existingCustomFields = (currentContact.custom_fields as Record<string, unknown>) || {}
           const newCustomFields = body.custom_fields as Record<string, unknown>
           

@@ -55,9 +55,33 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
   useEffect(() => {
     if (isOpen && contactId) {
       loadContact()
+      
+      // ✅ Adicionar subscription Realtime para escutar mudanças no contato
+      const channel = supabase
+        .channel(`contact-updates-${contactId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'contacts',
+            filter: `id=eq.${contactId}`,
+          },
+          (payload) => {
+            console.log('🔄 Realtime: Contato atualizado:', payload.new)
+            // Recarregar contato quando houver atualização
+            loadContact()
+          }
+        )
+        .subscribe()
+      
+      return () => {
+        supabase.removeChannel(channel)
+      }
     } else {
       setShowFieldInfo(null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, contactId])
 
   // Carregar campos customizados após o contato ser carregado
