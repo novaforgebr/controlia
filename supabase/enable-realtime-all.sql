@@ -6,17 +6,49 @@
 -- - conversations (conversas)
 -- - contacts (contatos - para atualizar custom_fields)
 -- ============================================
+-- NOTA: Este script é idempotente - pode ser executado múltiplas vezes sem erro
+-- ============================================
 
--- 1. Habilitar Realtime na tabela messages
-ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+-- 1. Habilitar Realtime na tabela messages (se ainda não estiver)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+  END IF;
+END $$;
+
+-- Configurar REPLICA IDENTITY FULL para messages
 ALTER TABLE messages REPLICA IDENTITY FULL;
 
--- 2. Habilitar Realtime na tabela conversations
-ALTER PUBLICATION supabase_realtime ADD TABLE conversations;
+-- 2. Habilitar Realtime na tabela conversations (se ainda não estiver)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'conversations'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE conversations;
+  END IF;
+END $$;
+
+-- Configurar REPLICA IDENTITY FULL para conversations
 ALTER TABLE conversations REPLICA IDENTITY FULL;
 
--- 3. Habilitar Realtime na tabela contacts (para atualizar custom_fields em tempo real)
-ALTER PUBLICATION supabase_realtime ADD TABLE contacts;
+-- 3. Habilitar Realtime na tabela contacts (se ainda não estiver)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'contacts'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE contacts;
+  END IF;
+END $$;
+
+-- Configurar REPLICA IDENTITY FULL para contacts
 ALTER TABLE contacts REPLICA IDENTITY FULL;
 
 -- ============================================

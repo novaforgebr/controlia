@@ -184,12 +184,12 @@ export async function POST(request: NextRequest) {
 
     // ✅ CORREÇÃO: Buscar contato PRIMEIRO por telegram_id (único e obrigatório)
     // Só usar telegram_username como fallback se telegram_id não existir
-    let contact = null
+    let contact: { id: string; company_id: string; name?: string; custom_fields: unknown; ai_enabled: boolean } | null | undefined = null
     
     // Primeira tentativa: buscar por telegram_id (mais confiável)
     const { data: contactsById } = await supabase
       .from('contacts')
-      .select('id, company_id, custom_fields, ai_enabled, name')
+      .select('id, company_id, name, custom_fields, ai_enabled')
       .eq('company_id', targetCompany.id)
       .limit(1000)
 
@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
           source: 'telegram',
           ai_enabled: true, // Habilitar IA por padrão para novos contatos
         })
-        .select('id, company_id, custom_fields, ai_enabled')
+        .select('id, company_id, name, custom_fields, ai_enabled')
         .single()
 
       if (contactError) {
