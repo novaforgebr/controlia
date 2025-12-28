@@ -44,3 +44,4 @@ ALTER TABLE messages REPLICA IDENTITY FULL;
 -- Se retornar uma linha, o Realtime está habilitado.
 -- Se não retornar nada, execute este script novamente.
 
+

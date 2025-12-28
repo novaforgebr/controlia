@@ -116,3 +116,4 @@ Após executar o script:
 - `supabase/enable-realtime-messages.sql` - Script SQL para habilitar Realtime
 - `components/conversations/ChatWindow.tsx` - Melhorias na subscription Realtime
 
+
