@@ -80,53 +80,75 @@ export async function POST(request: NextRequest) {
 
     // IMPORTANTE: Usar service role client para bypass RLS (webhooks não têm usuário autenticado)
     const serviceClient = createServiceRoleClient()
-    const supabase = serviceClient // Usar service role para todas as operações (bypass RLS) // Usar service client para todas as operações
+    const supabase = serviceClient
 
-    // Buscar empresa pela configuração do bot token
-    const telegramUserId = from.id.toString()
-    const telegramUsername = from.username || null
+    // ✅ NOVA ABORDAGEM: Extrair company_id da URL (query parameter)
+    const companyId = request.nextUrl.searchParams.get('company_id')
     
-    // Obter bot token da variável de ambiente ou buscar nas empresas
-    const botTokenFromEnv = process.env.TELEGRAM_BOT_TOKEN as string | undefined
-    console.log('🔍 Bot token da env:', botTokenFromEnv ? 'Configurado' : 'Não configurado')
-
-    // Buscar todas as empresas e verificar configurações
-    const { data: companies } = await supabase
-      .from('companies')
-      .select('id, name, settings')
-      .limit(100) // Limitar para performance
-
-    if (!companies || companies.length === 0) {
-      console.error('❌ Nenhuma empresa encontrada no banco')
+    if (!companyId) {
+      console.error('❌ ERRO: company_id não fornecido na URL do webhook')
       return NextResponse.json(
-        { error: 'Nenhuma empresa encontrada' },
+        { 
+          error: 'company_id obrigatório',
+          message: 'O webhook do Telegram requer o parâmetro company_id na URL. Exemplo: /api/webhooks/telegram?company_id=xxx'
+        },
+        { status: 400 }
+      )
+    }
+
+    console.log('🔍 Company ID da URL:', companyId)
+
+    // Buscar empresa diretamente pelo ID
+    const { data: targetCompany, error: companyError } = await supabase
+      .from('companies')
+      .select('id, name, settings, is_active')
+      .eq('id', companyId)
+      .single()
+
+    if (companyError || !targetCompany) {
+      console.error('❌ Erro ao buscar empresa:', companyError)
+      return NextResponse.json(
+        { 
+          error: 'Empresa não encontrada',
+          message: `Empresa com ID ${companyId} não foi encontrada no banco de dados.`
+        },
         { status: 404 }
       )
     }
 
-    console.log(`🔍 Encontradas ${companies.length} empresa(s) no banco`)
-
-    // Tentar identificar empresa pelo bot token (prioridade)
-    let targetCompany = null
-    if (botTokenFromEnv) {
-      // Buscar empresa que tenha o mesmo bot token configurado
-      for (const company of companies) {
-        const settings = (company.settings as Record<string, unknown>) || {}
-        const companyBotToken = settings.telegram_bot_token as string | undefined
-        
-        if (companyBotToken && companyBotToken.trim() === botTokenFromEnv.trim()) {
-          targetCompany = company
-          console.log(`✅ Empresa identificada pelo bot token: ${company.name || company.id}`)
-          break
-        }
-      }
+    // Validar que empresa está ativa
+    if (!targetCompany.is_active) {
+      console.error('❌ Empresa inativa:', targetCompany.name || targetCompany.id)
+      return NextResponse.json(
+        { 
+          error: 'Empresa inativa',
+          message: 'A empresa está inativa e não pode receber mensagens.'
+        },
+        { status: 403 }
+      )
     }
 
-    // Se não encontrou pelo token, usar a primeira empresa (fallback)
-    if (!targetCompany) {
-      targetCompany = companies[0]
-      console.log(`⚠️ Usando primeira empresa como fallback: ${targetCompany.name || targetCompany.id}`)
+    // Validar que empresa tem token configurado
+    const settings = (targetCompany.settings as Record<string, unknown>) || {}
+    const companyBotToken = settings.telegram_bot_token as string | undefined
+
+    if (!companyBotToken || !companyBotToken.trim()) {
+      console.error('❌ Empresa sem token configurado:', targetCompany.name || targetCompany.id)
+      return NextResponse.json(
+        { 
+          error: 'Token não configurado',
+          message: `A empresa ${targetCompany.name || targetCompany.id} não possui bot token configurado nas settings. Configure o token em Configurações > Integrações > Telegram.`
+        },
+        { status: 400 }
+      )
     }
+
+    console.log(`✅ Empresa identificada: ${targetCompany.name || targetCompany.id}`)
+    console.log(`   - Token configurado: ${companyBotToken.substring(0, 10)}...`)
+
+    // Dados do usuário Telegram
+    const telegramUserId = from.id.toString()
+    const telegramUsername = from.username || null
 
     // Buscar contato que tenha telegram_id ou username no custom_fields
     let contact = null
@@ -264,23 +286,23 @@ export async function POST(request: NextRequest) {
     if (photo && photo.length > 0) {
       // Pegar a foto de maior resolução
       const largestPhoto = photo[photo.length - 1]
-      mediaUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${largestPhoto.file_id}`
+      mediaUrl = `https://api.telegram.org/file/bot${companyBotToken}/${largestPhoto.file_id}`
       contentType = 'image'
       content = text || '[Foto]'
     } else if (document) {
-      mediaUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${document.file_id}`
+      mediaUrl = `https://api.telegram.org/file/bot${companyBotToken}/${document.file_id}`
       contentType = 'document'
       content = document.file_name || '[Documento]'
     } else if (audio) {
-      mediaUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${audio.file_id}`
+      mediaUrl = `https://api.telegram.org/file/bot${companyBotToken}/${audio.file_id}`
       contentType = 'audio'
       content = '[Áudio]'
     } else if (video) {
-      mediaUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${video.file_id}`
+      mediaUrl = `https://api.telegram.org/file/bot${companyBotToken}/${video.file_id}`
       contentType = 'video'
       content = text || '[Vídeo]'
     } else if (voice) {
-      mediaUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${voice.file_id}`
+      mediaUrl = `https://api.telegram.org/file/bot${companyBotToken}/${voice.file_id}`
       contentType = 'audio'
       content = '[Mensagem de voz]'
     }

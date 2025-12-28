@@ -4,7 +4,7 @@
  * Server Actions para gerenciamento de empresas
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { getUser } from '@/lib/auth/get-session'
 import { logHumanAction } from '@/lib/utils/audit'
 import { configureTelegramWebhook } from './telegram'
@@ -208,6 +208,48 @@ export async function updateCompany(companyId: string, formData: FormData) {
 }
 
 /**
+ * Validar se o token do Telegram já está em uso por outra empresa
+ */
+async function validateTelegramTokenUniqueness(
+  companyId: string,
+  token: string
+): Promise<{ isValid: boolean; error?: string; existingCompanyName?: string }> {
+  if (!token || !token.trim()) {
+    return { isValid: true } // Token vazio é válido (remoção)
+  }
+
+  const serviceClient = createServiceRoleClient()
+  
+  // Buscar todas as empresas com o mesmo token configurado
+  const { data: companies, error } = await serviceClient
+    .from('companies')
+    .select('id, name, settings')
+    .neq('id', companyId) // Excluir a empresa atual
+    .limit(1000)
+
+  if (error) {
+    console.error('Erro ao buscar empresas para validação:', error)
+    return { isValid: false, error: 'Erro ao validar token' }
+  }
+
+  // Verificar se alguma empresa tem o mesmo token
+  for (const company of companies || []) {
+    const settings = (company.settings as Record<string, unknown>) || {}
+    const companyToken = (settings.telegram_bot_token as string) || ''
+    
+    if (companyToken && companyToken.trim() === token.trim()) {
+      return {
+        isValid: false,
+        error: `Este token já está em uso pela empresa "${company.name || company.id}"`,
+        existingCompanyName: company.name || company.id
+      }
+    }
+  }
+
+  return { isValid: true }
+}
+
+/**
  * Atualizar configurações da empresa
  */
 export async function updateCompanySettings(formData: FormData) {
@@ -282,6 +324,25 @@ export async function updateCompanySettings(formData: FormData) {
       }
     })
 
+    // ✅ VALIDAÇÃO: Verificar se o token do Telegram já está em uso por outra empresa
+    const newTelegramBotToken = (newSettings.telegram_bot_token as string) || ''
+    if (newTelegramBotToken && newTelegramBotToken !== currentTelegramBotToken) {
+      // Token foi alterado, validar unicidade
+      const validation = await validateTelegramTokenUniqueness(
+        companyUser.company_id,
+        newTelegramBotToken
+      )
+
+      if (!validation.isValid) {
+        return {
+          error: validation.error || 'Token já está em uso por outra empresa',
+          details: {
+            existingCompanyName: validation.existingCompanyName
+          }
+        }
+      }
+    }
+
     const { error } = await supabase
       .from('companies')
       .update({ settings: newSettings })
@@ -301,27 +362,40 @@ export async function updateCompanySettings(formData: FormData) {
       { settings: newSettings }
     )
 
-    // Configurar webhook do Telegram automaticamente se bot token foi atualizado
+    // ✅ CONFIGURAÇÃO AUTOMÁTICA: Configurar webhook do Telegram automaticamente se bot token foi atualizado
     const newTelegramBotToken = (newSettings.telegram_bot_token as string) || ''
     const newTelegramWebhookUrl = (newSettings.telegram_webhook_url as string) || ''
     
     if (newTelegramBotToken && newTelegramBotToken !== currentTelegramBotToken) {
-      // Token foi atualizado, configurar webhook
+      // Token foi atualizado, configurar webhook automaticamente
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://controliaa.vercel.app'
+      // ✅ IMPORTANTE: Incluir company_id como parâmetro na URL do webhook
       const webhookUrl = newTelegramWebhookUrl || 
-        `${process.env.NEXT_PUBLIC_APP_URL || 'https://controliaa.vercel.app'}/api/webhooks/telegram`
+        `${appUrl}/api/webhooks/telegram?company_id=${companyUser.company_id}`
       
       console.log('🔧 Configurando webhook do Telegram automaticamente...')
       console.log('   Token:', newTelegramBotToken.substring(0, 10) + '...')
       console.log('   URL:', webhookUrl)
+      console.log('   Company ID:', companyUser.company_id)
       
       const webhookResult = await configureTelegramWebhook(newTelegramBotToken, webhookUrl)
       
       if (!webhookResult.success) {
         console.error('⚠️ Erro ao configurar webhook do Telegram:', webhookResult.error)
-        // Não falhar a operação, apenas logar o erro
-        // O usuário pode configurar manualmente se necessário
+        // Retornar erro mas manter o token salvo (usuário pode reconfigurar depois)
+        return {
+          success: true,
+          warning: `Token salvo com sucesso, mas houve erro ao configurar webhook: ${webhookResult.error}`,
+          webhookUrl: webhookUrl
+        }
       } else {
         console.log('✅ Webhook do Telegram configurado com sucesso')
+        // Atualizar a URL do webhook nas settings para refletir a URL real configurada
+        newSettings.telegram_webhook_url = webhookUrl
+        await supabase
+          .from('companies')
+          .update({ settings: newSettings })
+          .eq('id', companyUser.company_id)
       }
     } else if (newTelegramBotToken && newTelegramWebhookUrl && newTelegramWebhookUrl !== currentTelegramWebhookUrl) {
       // Apenas a URL foi atualizada, reconfigurar webhook
@@ -331,6 +405,10 @@ export async function updateCompanySettings(formData: FormData) {
       
       if (!webhookResult.success) {
         console.error('⚠️ Erro ao reconfigurar webhook do Telegram:', webhookResult.error)
+        return {
+          success: true,
+          warning: `Configurações salvas, mas houve erro ao reconfigurar webhook: ${webhookResult.error}`
+        }
       } else {
         console.log('✅ Webhook do Telegram reconfigurado com sucesso')
       }

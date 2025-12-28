@@ -61,7 +61,7 @@ export function SettingsTabs({ company, settings, automations }: SettingsTabsPro
         {activeTab === 'general' && <GeneralSettings settings={settings} />}
         {activeTab === 'company' && <CompanySettings company={company} />}
         {activeTab === 'n8n' && <N8nSettings automations={automations} />}
-        {activeTab === 'integrations' && <IntegrationSettings settings={settings} />}
+        {activeTab === 'integrations' && <IntegrationSettings settings={settings} companyId={company.id} />}
       </div>
     </div>
   )

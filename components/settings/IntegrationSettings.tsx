@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 import { updateCompanySettings } from '@/app/actions/companies'
 import { getTelegramWebhookInfo, testTelegramConnection, reconfigureAllTelegramWebhooks, validateAllWebhookConfigurations } from '@/app/actions/telegram'
+import { useToast } from '@/lib/hooks/use-toast'
 import { IntegrationTutorialModal } from './IntegrationTutorialModal'
 
 interface IntegrationSettingsProps {
   settings: Record<string, unknown>
+  companyId: string
 }
 
 interface TelegramWebhookStatus {
@@ -17,7 +19,7 @@ interface TelegramWebhookStatus {
   lastErrorMessage: string | null
 }
 
-export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
+export function IntegrationSettings({ settings, companyId }: IntegrationSettingsProps) {
   const [loading, setLoading] = useState(false)
   const [tutorialOpen, setTutorialOpen] = useState<'whatsapp' | 'telegram' | 'email' | null>(null)
   const [telegramWebhookStatus, setTelegramWebhookStatus] = useState<TelegramWebhookStatus | null>(null)
@@ -26,6 +28,13 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
   const [reconfiguringAll, setReconfiguringAll] = useState(false)
   const [validatingAll, setValidatingAll] = useState(false)
   const [validationReport, setValidationReport] = useState<any>(null)
+  const toast = useToast()
+  
+  // Obter URL base da aplicação
+  const appUrl = typeof window !== 'undefined' 
+    ? window.location.origin 
+    : 'https://controliaa.vercel.app'
+  const defaultWebhookUrl = `${appUrl}/api/webhooks/telegram?company_id=${companyId}`
 
   // Verificar status do webhook quando componente carrega ou quando token muda
   useEffect(() => {
@@ -69,27 +78,59 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true)
-    const result = await updateCompanySettings(formData)
-    setLoading(false)
-    if (result.success) {
-      alert('Configurações de integração salvas com sucesso!')
-      // Recarregar status do webhook após salvar
-      const botToken = formData.get('telegram_bot_token') as string
-      if (botToken) {
-        const webhookResult = await getTelegramWebhookInfo(botToken)
-        if (webhookResult.success && webhookResult.data) {
-          setTelegramWebhookStatus({
-            configured: !!webhookResult.data.url,
-            url: webhookResult.data.url || null,
-            pendingUpdates: webhookResult.data.pending_update_count || null,
-            lastErrorDate: webhookResult.data.last_error_date || null,
-            lastErrorMessage: webhookResult.data.last_error_message || null,
-          })
+    const loadingToast = toast.loading('Salvando configurações...')
+    
+    try {
+      const result = await updateCompanySettings(formData)
+      toast.dismiss(loadingToast)
+      
+      if (result.success) {
+        // Verificar se há aviso sobre webhook
+        if (result.warning) {
+          toast.warning(result.warning)
+        } else {
+          toast.success('Configurações salvas com sucesso!')
+        }
+        
+        // Se webhook foi configurado, mostrar confirmação
+        if (result.webhookUrl) {
+          toast.success(`Webhook configurado automaticamente: ${result.webhookUrl}`)
+        }
+        
+        // Recarregar status do webhook após salvar
+        const botToken = formData.get('telegram_bot_token') as string
+        if (botToken) {
+          const webhookResult = await getTelegramWebhookInfo(botToken)
+          if (webhookResult.success && webhookResult.data) {
+            setTelegramWebhookStatus({
+              configured: !!webhookResult.data.url,
+              url: webhookResult.data.url || null,
+              pendingUpdates: webhookResult.data.pending_update_count || null,
+              lastErrorDate: webhookResult.data.last_error_date || null,
+              lastErrorMessage: webhookResult.data.last_error_message || null,
+            })
+          }
+        }
+        
+        // Aguardar um pouco antes de recarregar para mostrar as mensagens
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
+      } else {
+        // ✅ Tratamento específico para erro de token duplicado
+        if (result.details?.existingCompanyName) {
+          toast.error(
+            `Token já está em uso pela empresa "${result.details.existingCompanyName}". Use um token diferente.`
+          )
+        } else {
+          toast.error(result.error || 'Erro ao salvar configurações')
         }
       }
-      window.location.reload()
-    } else {
-      alert(result.error || 'Erro ao salvar configurações')
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao salvar configurações. Tente novamente.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -413,11 +454,14 @@ export function IntegrationSettings({ settings }: IntegrationSettingsProps) {
                 id="telegram_webhook_url"
                 name="telegram_webhook_url"
                 defaultValue={(settings.telegram_webhook_url as string) || ''}
-                placeholder="https://seu-dominio.com/api/webhooks/telegram"
+                placeholder={defaultWebhookUrl}
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 shadow-sm transition-colors focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 font-mono"
               />
               <p className="mt-1 text-xs text-gray-500">
-                URL pública onde o Telegram enviará as mensagens recebidas
+                URL pública onde o Telegram enviará as mensagens recebidas. Se deixar em branco, será gerada automaticamente com o company_id.
+              </p>
+              <p className="mt-1 text-xs text-blue-600 font-mono break-all">
+                URL padrão: {defaultWebhookUrl}
               </p>
             </div>
             <div>
