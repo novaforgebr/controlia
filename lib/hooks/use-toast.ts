@@ -51,9 +51,9 @@ export function useToast() {
     })
   }
 
-  const showWarning = (message: string) => {
+  const showWarning = (message: string, options?: { duration?: number }) => {
     toast(message, {
-      duration: 3500,
+      duration: options?.duration || 3500,
       position: 'top-right',
       icon: '⚠️',
       style: {
