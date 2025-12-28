@@ -489,14 +489,32 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
                 <div className="mt-2 text-xs text-gray-600">
                   <p className="font-mono break-all">{telegramWebhookStatus.url}</p>
                   {telegramWebhookStatus.pendingUpdates !== null && telegramWebhookStatus.pendingUpdates > 0 && (
-                    <p className="mt-1 text-yellow-600">
-                      ⚠️ {telegramWebhookStatus.pendingUpdates} atualizações pendentes
-                    </p>
+                    <div className="mt-2 rounded-md bg-yellow-50 border border-yellow-200 p-2">
+                      <p className="text-yellow-800 font-medium">
+                        ⚠️ {telegramWebhookStatus.pendingUpdates} atualização(ões) pendente(s)
+                      </p>
+                      <p className="mt-1 text-yellow-700 text-xs">
+                        O Telegram tem {telegramWebhookStatus.pendingUpdates} mensagem(ns) que tentou enviar mas não conseguiu processar. 
+                        Isso geralmente acontece quando o webhook estava offline ou houve um erro temporário.
+                      </p>
+                      <p className="mt-1 text-yellow-700 text-xs font-medium">
+                        ✅ <strong>Solução:</strong> O Telegram processará automaticamente essas atualizações quando o webhook estiver funcionando corretamente. 
+                        Se o problema persistir, verifique se o webhook está acessível publicamente.
+                      </p>
+                    </div>
                   )}
                   {telegramWebhookStatus.lastErrorMessage && (
-                    <p className="mt-1 text-red-600">
-                      ❌ Último erro: {telegramWebhookStatus.lastErrorMessage}
-                    </p>
+                    <div className="mt-2 rounded-md bg-red-50 border border-red-200 p-2">
+                      <p className="text-red-800 font-medium">
+                        ❌ Último erro do webhook:
+                      </p>
+                      <p className="mt-1 text-red-700 text-xs">
+                        {telegramWebhookStatus.lastErrorMessage}
+                      </p>
+                      <p className="mt-1 text-red-700 text-xs">
+                        Se este erro persistir, verifique se a URL do webhook está acessível publicamente e se o servidor está respondendo corretamente.
+                      </p>
+                    </div>
                   )}
                 </div>
               )}
