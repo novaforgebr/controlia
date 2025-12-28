@@ -32,8 +32,9 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
   const toast = useToast()
   
   // Obter URL base da aplicação
+  // ✅ IMPORTANTE: Sempre usar HTTPS para webhooks do Telegram
   const appUrl = typeof window !== 'undefined' 
-    ? window.location.origin 
+    ? (window.location.protocol === 'https:' ? window.location.origin : 'https://controliaa.vercel.app')
     : 'https://controliaa.vercel.app'
   const defaultWebhookUrl = `${appUrl}/api/webhooks/telegram?company_id=${companyId}`
 
@@ -67,8 +68,8 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
             lastErrorMessage: result.data.last_error_message || (isUrlCorrect ? null : `Webhook configurado com URL incorreta. URL esperada deve incluir company_id=${companyId}`),
           })
           
-          // Se webhook está configurado mas com URL incorreta, avisar o usuário
-          if (webhookUrl && !isUrlCorrect) {
+          // Se webhook está configurado mas com URL incorreta, avisar o usuário (apenas uma vez)
+          if (webhookUrl && !isUrlCorrect && !telegramWebhookStatus?.lastErrorMessage?.includes('URL incorreta')) {
             console.warn('⚠️ Webhook configurado com URL incorreta:', webhookUrl)
             console.warn('   URL esperada:', expectedUrl)
             toast.warning(
@@ -94,7 +95,8 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
     }
 
     checkWebhookStatus()
-  }, [settings.telegram_bot_token, companyId, defaultWebhookUrl, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.telegram_bot_token, companyId])
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true)
@@ -132,10 +134,8 @@ export function IntegrationSettings({ settings, companyId }: IntegrationSettings
           }
         }
         
-        // Aguardar um pouco antes de recarregar para mostrar as mensagens
-        setTimeout(() => {
-          window.location.reload()
-        }, 1500)
+        // Não recarregar a página automaticamente - apenas atualizar o estado
+        // O useEffect já vai verificar o status do webhook quando o token mudar
       } else {
         // ✅ Tratamento específico para erro de token duplicado
         if (result.details?.existingCompanyName) {

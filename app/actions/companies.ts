@@ -367,7 +367,12 @@ export async function updateCompanySettings(formData: FormData) {
     
     if (newTelegramBotToken && newTelegramBotToken !== currentTelegramBotToken) {
       // Token foi atualizado, configurar webhook automaticamente
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://controliaa.vercel.app'
+      // ✅ IMPORTANTE: Sempre usar HTTPS para webhooks do Telegram
+      let appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://controliaa.vercel.app'
+      // Garantir que a URL seja HTTPS
+      if (appUrl.startsWith('http://')) {
+        appUrl = appUrl.replace('http://', 'https://')
+      }
       // ✅ IMPORTANTE: Incluir company_id como parâmetro na URL do webhook
       const webhookUrl = newTelegramWebhookUrl || 
         `${appUrl}/api/webhooks/telegram?company_id=${companyUser.company_id}`

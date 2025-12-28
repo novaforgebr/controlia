@@ -18,13 +18,15 @@ ON companies ((settings->>'telegram_bot_token'))
 WHERE settings->>'telegram_bot_token' IS NOT NULL;
 
 -- Criar índice para buscar contatos por telegram_id no custom_fields
+-- Usando expressão ao invés de GIN direto em text
 CREATE INDEX IF NOT EXISTS idx_contacts_telegram_id 
-ON contacts USING GIN ((custom_fields->>'telegram_id'))
+ON contacts ((custom_fields->>'telegram_id'))
 WHERE custom_fields->>'telegram_id' IS NOT NULL;
 
 -- Criar índice para buscar contatos por telegram_username no custom_fields
+-- Usando expressão ao invés de GIN direto em text
 CREATE INDEX IF NOT EXISTS idx_contacts_telegram_username 
-ON contacts USING GIN ((custom_fields->>'telegram_username'))
+ON contacts ((custom_fields->>'telegram_username'))
 WHERE custom_fields->>'telegram_username' IS NOT NULL;
 
 -- ============================================
