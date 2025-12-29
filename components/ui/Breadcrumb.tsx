@@ -16,7 +16,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
   const hasPrevious = items.length > 1
   
   return (
-    <nav className="flex items-center mb-4" aria-label="Breadcrumb">
+    <nav className="flex items-center mb-4" aria-label="Breadcrumb" style={{ width: '200px' }}>
       {/* Mobile: mostrar apenas último item ou botão voltar */}
       <div className="md:hidden flex items-center gap-2 w-full">
         {hasPrevious && items.length > 0 && items[0].href && (

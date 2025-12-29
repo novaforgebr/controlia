@@ -40,9 +40,12 @@ export function CloseConversationButton({ conversationId }: CloseConversationBut
     <button
       onClick={handleClose}
       disabled={loading}
-      className="rounded-md bg-gray-600 px-4 py-2 text-white hover:bg-gray-700 disabled:opacity-50"
+      className="rounded-[30px] bg-gray-600 dark:bg-gray-700 px-3 md:px-4 py-2 text-sm md:text-base text-white hover:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center"
+      title="Fechar conversa"
+      aria-label="Fechar conversa"
     >
-      {loading ? 'Fechando...' : 'Fechar Conversa'}
+      <span className="hidden md:inline" style={{ fontSize: '14px' }}>{loading ? 'Fechando...' : 'Fechar Conversa'}</span>
+      <span className="md:hidden">{loading ? 'Fechando...' : 'Fechar'}</span>
     </button>
   )
 }

@@ -69,6 +69,9 @@ export async function createContact(formData: FormData) {
             customFields[fieldKey] = value === 'true'
           } else if (fieldDef.field_type === 'date' && value) {
             customFields[fieldKey] = new Date(value as string).toISOString()
+          } else if (fieldDef.field_type === 'datetime' && value) {
+            // datetime-local vem no formato YYYY-MM-DDTHH:mm, converter para ISO
+            customFields[fieldKey] = new Date(value as string).toISOString()
           } else {
             customFields[fieldKey] = value || null
           }

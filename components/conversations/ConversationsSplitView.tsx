@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { format } from 'date-fns'
 import { ConversationStatus } from '@/lib/types/database'
 import { ConversationDetailView } from './ConversationDetailView'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 interface Conversation {
   id: string
@@ -26,6 +27,7 @@ interface Conversation {
   user_profiles: {
     full_name: string
   } | null
+  unread_count?: number // Contagem de mensagens não lidas
 }
 
 interface ConversationsSplitViewProps {
@@ -113,9 +115,27 @@ export function ConversationsSplitView({
           ...conv,
           contacts: Array.isArray(conv.contacts) ? (conv.contacts[0] || null) : conv.contacts,
           user_profiles: Array.isArray(conv.user_profiles) ? (conv.user_profiles[0] || null) : conv.user_profiles,
+          unread_count: 0, // Será atualizado abaixo
         }))
 
-        setConversations(transformedConversations)
+        // Buscar contagem de mensagens não lidas para cada conversa
+        const conversationsWithUnread = await Promise.all(
+          transformedConversations.map(async (conv) => {
+            const { count } = await supabase
+              .from('messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('conversation_id', conv.id)
+              .eq('direction', 'incoming')
+              .is('read_at', null)
+
+            return {
+              ...conv,
+              unread_count: count || 0,
+            }
+          })
+        )
+
+        setConversations(conversationsWithUnread)
         setLoading(false)
       } catch (error) {
         console.error('Erro:', error)
@@ -178,6 +198,7 @@ export function ConversationsSplitView({
                   : updatedConversation.user_profiles,
               }
 
+              // Buscar contagem de não lidas antes de atualizar o estado
               setConversations((prev) => {
                 const filtered = prev.filter((c) => {
                   if (statusFilter !== 'all' && transformedConversation.status !== statusFilter) {
@@ -190,9 +211,48 @@ export function ConversationsSplitView({
                 })
 
                 const existingIndex = filtered.findIndex((c) => c.id === transformedConversation.id)
+                
+                // Manter contagem existente ou buscar se necessário
+                let unreadCount = 0
+                if (existingIndex >= 0) {
+                  unreadCount = filtered[existingIndex].unread_count || 0
+                } else {
+                  // Para novas conversas, buscar contagem de forma assíncrona
+                  supabase
+                    .from('messages')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('conversation_id', transformedConversation.id)
+                    .eq('direction', 'incoming')
+                    .is('read_at', null)
+                    .then(({ count }) => {
+                      setConversations((currentPrev) => {
+                        const currentFiltered = currentPrev.filter((c) => {
+                          if (statusFilter !== 'all' && transformedConversation.status !== statusFilter) {
+                            return c.id !== transformedConversation.id
+                          }
+                          if (channelFilter !== 'all' && transformedConversation.channel !== channelFilter) {
+                            return c.id !== transformedConversation.id
+                          }
+                          return true
+                        })
+                        const currentExistingIndex = currentFiltered.findIndex((c) => c.id === transformedConversation.id)
+                        if (currentExistingIndex >= 0) {
+                          const newList = [...currentFiltered]
+                          newList[currentExistingIndex] = { ...transformedConversation, unread_count: count || 0 }
+                          return newList.sort(
+                            (a, b) =>
+                              new Date(b.last_message_at).getTime() -
+                              new Date(a.last_message_at).getTime()
+                          )
+                        }
+                        return currentPrev
+                      })
+                    })
+                }
+
                 if (existingIndex >= 0) {
                   const newList = [...filtered]
-                  newList[existingIndex] = transformedConversation
+                  newList[existingIndex] = { ...transformedConversation, unread_count: unreadCount }
                   return newList.sort(
                     (a, b) =>
                       new Date(b.last_message_at).getTime() -
@@ -203,7 +263,8 @@ export function ConversationsSplitView({
                     (statusFilter === 'all' || transformedConversation.status === statusFilter) &&
                     (channelFilter === 'all' || transformedConversation.channel === channelFilter)
                   ) {
-                    return [transformedConversation, ...filtered].sort(
+                    // Para novas conversas, adicionar temporariamente com 0 e atualizar depois
+                    return [{ ...transformedConversation, unread_count: 0 }, ...filtered].sort(
                       (a, b) =>
                         new Date(b.last_message_at).getTime() -
                         new Date(a.last_message_at).getTime()
@@ -230,7 +291,14 @@ export function ConversationsSplitView({
           filter: `company_id=eq.${companyId}`,
         },
         async (payload) => {
-          const conversationId = payload.new.conversation_id
+          const newMessage = payload.new
+          const conversationId = newMessage.conversation_id
+          const isIncoming = newMessage.direction === 'incoming'
+          const isUnread = !newMessage.read_at
+          
+          // Se a conversa não está selecionada e a mensagem é incoming e não lida, incrementar contador
+          const shouldIncrementUnread = isIncoming && isUnread && conversationId !== selectedId
+
           const { data: conversation } = await supabase
             .from('conversations')
             .select(`
@@ -276,14 +344,23 @@ export function ConversationsSplitView({
                 const existingIndex = prev.findIndex((c) => c.id === transformedConversation.id)
                 if (existingIndex >= 0) {
                   const newList = [...prev]
-                  newList[existingIndex] = transformedConversation
+                  const existingConv = newList[existingIndex]
+                  newList[existingIndex] = {
+                    ...transformedConversation,
+                    unread_count: shouldIncrementUnread 
+                      ? (existingConv.unread_count || 0) + 1 
+                      : existingConv.unread_count || 0
+                  }
                   return newList.sort(
                     (a, b) =>
                       new Date(b.last_message_at).getTime() -
                       new Date(a.last_message_at).getTime()
                   )
                 } else {
-                  return [transformedConversation, ...prev].sort(
+                  return [{
+                    ...transformedConversation,
+                    unread_count: shouldIncrementUnread ? 1 : 0
+                  }, ...prev].sort(
                     (a, b) =>
                       new Date(b.last_message_at).getTime() -
                       new Date(a.last_message_at).getTime()
@@ -301,11 +378,30 @@ export function ConversationsSplitView({
     }
   }, [companyId, supabase, statusFilter, channelFilter, selectedId])
 
-  const handleSelectConversation = (id: string) => {
+  const handleSelectConversation = async (id: string) => {
     setSelectedId(id)
     const params = new URLSearchParams(searchParams.toString())
     params.set('id', id)
     router.push(`/conversations?${params.toString()}`)
+
+    // Marcar todas as mensagens não lidas desta conversa como lidas
+    const { error } = await supabase
+      .from('messages')
+      .update({ read_at: new Date().toISOString() })
+      .eq('conversation_id', id)
+      .eq('direction', 'incoming')
+      .is('read_at', null)
+
+    if (error) {
+      console.error('Erro ao marcar mensagens como lidas:', error)
+    } else {
+      // Atualizar contador de não lidas para 0
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === id ? { ...conv, unread_count: 0 } : conv
+        )
+      )
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -479,6 +575,12 @@ export function ConversationsSplitView({
                               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400"></span>
                             </span>
                           )}
+                          {/* Badge de mensagens não lidas */}
+                          {conversation.unread_count && conversation.unread_count > 0 && (
+                            <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold text-white bg-red-500 dark:bg-red-600 shadow-sm">
+                              {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
+                            </span>
+                          )}
                         </div>
                         {conversation.subject && (
                           <p className="text-xs text-gray-600 dark:text-gray-400 truncate mb-2">{conversation.subject}</p>
@@ -513,7 +615,23 @@ export function ConversationsSplitView({
   return (
     <div className="flex h-full gap-2 md:gap-4 overflow-hidden">
       {/* Lista de conversas - lado esquerdo */}
-      <div className="flex w-72 md:w-80 lg:w-96 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
+      <div className="flex w-72 md:w-80 lg:w-[250px] flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
+        {/* Header com Breadcrumb, Título e Descrição */}
+        <div className="border-b border-gray-200 dark:border-gray-800 p-4">
+          <Breadcrumb items={[{ label: 'Conversas' }]} />
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 md:gap-3 flex-wrap" style={{ width: '200px' }}>
+              <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Conversas</h1>
+              <span className="inline-flex items-center gap-2 rounded-full bg-green-100 dark:bg-green-900/30 px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-green-800 dark:text-green-400">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
+                </span>
+                <span className="hidden sm:inline">Tempo Real</span>
+              </span>
+            </div>
+          </div>
+        </div>
         {/* Filtros */}
         <div className="border-b border-gray-200 dark:border-gray-800 p-4">
           <div className="space-y-3">

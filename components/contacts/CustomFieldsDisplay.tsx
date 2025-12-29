@@ -36,6 +36,19 @@ export async function CustomFieldsDisplay({ customFields }: CustomFieldsDisplayP
             } catch {
               displayValue = String(value)
             }
+          } else if (field.field_type === 'datetime' && value) {
+            try {
+              const date = new Date(value as string)
+              displayValue = date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            } catch {
+              displayValue = String(value)
+            }
           } else {
             displayValue = String(value)
           }

@@ -86,6 +86,7 @@ export default async function EditCustomFieldPage({
                 <option value="textarea">Texto Longo</option>
                 <option value="number">Número</option>
                 <option value="date">Data</option>
+                <option value="datetime">Data e Hora</option>
                 <option value="select">Seleção</option>
                 <option value="boolean">Sim/Não</option>
               </select>

@@ -448,54 +448,82 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
 
 
   return (
-    <div className="flex h-full w-full flex-col bg-white dark:bg-gray-900 overflow-hidden fixed inset-0 md:relative md:inset-auto">
+    <div className="flex h-full w-full flex-col bg-white dark:bg-gray-900 overflow-hidden fixed inset-x-0 md:relative md:inset-x-auto md:pt-0 z-20 md:z-auto" style={{ top: '4rem', bottom: '0', maxHeight: 'calc(100vh - 4rem)' }}>
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 md:px-6 lg:px-8 py-3 md:py-4 flex-shrink-0 sticky top-0 z-10">
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 md:px-6 lg:px-8 py-3 md:py-4 flex-shrink-0 z-20 md:z-10 relative">
         <div className="flex items-center justify-between gap-2 md:gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-                {conversation.contacts?.name || 'Contato sem nome'}
-              </h2>
-              {conversation.status === 'open' && (
-                <span className="relative flex h-2 w-2 flex-shrink-0">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
-                </span>
-              )}
-            </div>
-            {conversation.subject && (
-              <p className="mt-1 text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate">{conversation.subject}</p>
+          <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+            {/* Botão Voltar - Mobile */}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="md:hidden rounded-md p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0"
+                aria-label="Voltar"
+                title="Voltar"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
             )}
-            <div className="mt-1 md:mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <span className="capitalize">{conversation.channel}</span>
-              <span>•</span>
-              <span className="capitalize">{conversation.status}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+                  {conversation.contacts?.name || 'Contato sem nome'}
+                </h2>
+                {conversation.status === 'open' && (
+                  <span className="relative flex h-2 w-2 flex-shrink-0">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
+                  </span>
+                )}
+              </div>
+              {conversation.subject && (
+                <p className="mt-1 text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate">{conversation.subject}</p>
+              )}
+              <div className="mt-1 md:mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <span className="capitalize">{conversation.channel}</span>
+                <span>•</span>
+                <span className="capitalize">{conversation.status}</span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-            {/* Toggle IA com Switch - ocultar label em mobile */}
+            {/* Toggle IA com Switch */}
             <div className="hidden md:block">
               <Switch
                 checked={optimisticAiEnabled}
                 onCheckedChange={handleToggleAI}
                 disabled={togglingAI}
-                label="IA Ativa"
-                description={optimisticAiEnabled ? 'IA responderá automaticamente' : 'Apenas respostas manuais'}
+                label={optimisticAiEnabled ? 'IA Ativa' : 'IA Desativada'}
+                description={optimisticAiEnabled ? 'IA Ativa' : 'IA Desativada'}
               />
             </div>
-            <div className="md:hidden">
-              <Switch
-                checked={optimisticAiEnabled}
-                onCheckedChange={handleToggleAI}
+            {/* Toggle IA Mobile - com tooltip */}
+            <div className="md:hidden relative group">
+              <button
+                onClick={handleToggleAI}
                 disabled={togglingAI}
-              />
+                className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                title={optimisticAiEnabled ? 'IA Ativa - Clique para desativar' : 'IA Inativa - Clique para ativar'}
+                aria-label={optimisticAiEnabled ? 'Desativar IA' : 'Ativar IA'}
+              >
+                {optimisticAiEnabled ? (
+                  <svg className="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </button>
             </div>
 
             {/* Botão Ver Detalhes do Contato */}
             <button
               onClick={() => setShowContactModal(true)}
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 md:px-3 md:py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 flex items-center justify-center"
+              className="rounded-[10px] border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 md:px-3 md:py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 flex items-center justify-center"
               title="Ver detalhes do contato"
               aria-label="Ver detalhes do contato"
             >
@@ -504,20 +532,25 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               </svg>
             </button>
             
+            {/* Botão Fechar Conversa - Desktop */}
             {conversation.status !== 'closed' && (
               <div className="hidden md:block">
                 <CloseConversationButton conversationId={conversation.id} />
               </div>
             )}
-            {onClose && (
+            {/* Botão Fechar Conversa - Mobile */}
+            {conversation.status !== 'closed' && (
+              <div className="md:hidden">
+                <CloseConversationButton conversationId={conversation.id} />
+              </div>
+            )}
+            {/* Botão Fechar - Desktop (quando não há onClose) */}
+            {!onClose && (
               <button
-                onClick={onClose}
-                className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 md:py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] md:min-h-0"
+                onClick={() => window.history.back()}
+                className="hidden md:flex rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                <span className="hidden md:inline">Fechar</span>
-                <svg className="md:hidden h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                Fechar
               </button>
             )}
           </div>
@@ -530,7 +563,8 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
         className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 min-h-0 bg-gray-50 dark:bg-gray-950"
         style={{ 
           paddingBottom: 'env(safe-area-inset-bottom, 0)',
-          WebkitOverflowScrolling: 'touch'
+          WebkitOverflowScrolling: 'touch',
+          marginTop: '0'
         }}
       >
         {loading ? (
@@ -620,9 +654,10 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       {/* Formulário de mensagem - fixo no bottom em mobile */}
       {conversation.status !== 'closed' && (
         <div 
-          className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 md:p-6 lg:p-8 flex-shrink-0"
+          className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0 md:p-6 lg:p-8"
           style={{ 
-            paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0))'
+            padding: '1rem',
+            paddingBottom: `max(1.5rem, calc(1rem + env(safe-area-inset-bottom, 0.5rem)))`
           }}
         >
           <MessageForm

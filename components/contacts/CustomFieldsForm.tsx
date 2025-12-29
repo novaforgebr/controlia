@@ -113,6 +113,37 @@ export async function CustomFieldsForm({ contactCustomFields = {} }: CustomField
               </div>
             )
 
+          case 'datetime':
+            return (
+              <div key={field.id}>
+                <label htmlFor={`custom_${field.field_key}`} className="block text-sm font-medium text-gray-700 mb-2">
+                  {field.field_label}
+                  {field.is_required && <span className="text-red-500 ml-1">*</span>}
+                </label>
+                <input
+                  type="datetime-local"
+                  id={`custom_${field.field_key}`}
+                  name={`custom_${field.field_key}`}
+                  defaultValue={fieldValue ? (() => {
+                    try {
+                      const date = new Date(fieldValue as string)
+                      // Formato datetime-local: YYYY-MM-DDTHH:mm
+                      const year = date.getFullYear()
+                      const month = String(date.getMonth() + 1).padStart(2, '0')
+                      const day = String(date.getDate()).padStart(2, '0')
+                      const hours = String(date.getHours()).padStart(2, '0')
+                      const minutes = String(date.getMinutes()).padStart(2, '0')
+                      return `${year}-${month}-${day}T${hours}:${minutes}`
+                    } catch {
+                      return ''
+                    }
+                  })() : ''}
+                  required={field.is_required}
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20"
+                />
+              </div>
+            )
+
           case 'select':
             return (
               <div key={field.id}>

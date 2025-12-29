@@ -14,7 +14,7 @@ import { z } from 'zod'
 const customFieldSchema = z.object({
   field_key: z.string().min(1).max(100).regex(/^[a-z0-9_]+$/, 'Apenas letras minúsculas, números e underscore'),
   field_label: z.string().min(1).max(255),
-  field_type: z.enum(['text', 'number', 'date', 'select', 'textarea', 'boolean']),
+  field_type: z.enum(['text', 'number', 'date', 'datetime', 'select', 'textarea', 'boolean']),
   field_options: z.array(z.string()).optional(),
   is_required: z.boolean().default(false),
   is_active: z.boolean().default(true),

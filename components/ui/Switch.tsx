@@ -53,22 +53,9 @@ export function Switch({
           )}
         />
       </button>
-      {(label || description) && (
+      {description && (
         <div className="flex flex-col">
-          {label && (
-            <label
-              className={cn(
-                'text-sm font-medium cursor-pointer',
-                disabled ? 'text-gray-400' : 'text-gray-900'
-              )}
-              onClick={!disabled ? handleToggle : undefined}
-            >
-              {label}
-            </label>
-          )}
-          {description && (
-            <p className="text-xs text-gray-500 mt-0.5">{description}</p>
-          )}
+          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
         </div>
       )}
     </div>

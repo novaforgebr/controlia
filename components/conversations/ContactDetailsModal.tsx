@@ -176,6 +176,19 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
               } catch {
                 updatedFormData[key] = String(value || '')
               }
+            } else if (field.field_type === 'datetime' && value) {
+              // Converter data ISO para formato datetime-local (YYYY-MM-DDTHH:mm)
+              try {
+                const date = new Date(value as string)
+                const year = date.getFullYear()
+                const month = String(date.getMonth() + 1).padStart(2, '0')
+                const day = String(date.getDate()).padStart(2, '0')
+                const hours = String(date.getHours()).padStart(2, '0')
+                const minutes = String(date.getMinutes()).padStart(2, '0')
+                updatedFormData[key] = `${year}-${month}-${day}T${hours}:${minutes}`
+              } catch {
+                updatedFormData[key] = String(value || '')
+              }
             } else {
               updatedFormData[key] = value ? String(value) : ''
             }
@@ -594,6 +607,17 @@ export function ContactDetailsModal({ contactId, isOpen, onClose, onUpdate }: Co
                                 return (
                                   <input
                                     type="date"
+                                    id={fieldKey}
+                                    value={currentValue}
+                                    onChange={(e) => setFormData({ ...formData, [fieldKey]: e.target.value })}
+                                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm transition-all focus:border-[#039155] focus:outline-none focus:ring-2 focus:ring-[#039155]/20 dark:focus:ring-[#039155]/20"
+                                  />
+                                )
+                              
+                              case 'datetime':
+                                return (
+                                  <input
+                                    type="datetime-local"
                                     id={fieldKey}
                                     value={currentValue}
                                     onChange={(e) => setFormData({ ...formData, [fieldKey]: e.target.value })}

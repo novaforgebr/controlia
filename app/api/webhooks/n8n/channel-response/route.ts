@@ -430,6 +430,18 @@ export async function POST(request: NextRequest) {
                     validatedCustomFields[key] = null
                   }
                 }
+              } else if (fieldDef.field_type === 'datetime') {
+                // ✅ Suporte para datetime (data e hora)
+                if (value === null || value === undefined || value === '') {
+                  validatedCustomFields[key] = null
+                } else {
+                  try {
+                    validatedCustomFields[key] = new Date(value as string).toISOString()
+                  } catch (e) {
+                    console.warn(`⚠️ Erro ao converter datetime para ${key}:`, value, e)
+                    validatedCustomFields[key] = null
+                  }
+                }
               } else {
                 // Para text, textarea, select: aceitar string ou null
                 validatedCustomFields[key] = value !== null && value !== undefined && value !== '' 
