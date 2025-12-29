@@ -3,6 +3,8 @@ import ProtectedLayout from '@/app/layout-protected'
 import Link from 'next/link'
 import { PipelineList } from '@/components/crm/PipelineList'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PipelinesPage() {
   const { data: pipelines } = await listPipelines()
 

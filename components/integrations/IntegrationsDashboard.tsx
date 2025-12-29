@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { IntegrationCard } from './IntegrationCard'
 
@@ -23,31 +23,7 @@ export function IntegrationsDashboard() {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  useEffect(() => {
-    loadIntegrations()
-
-    // Escutar mudanças em tempo real
-    const channel = supabase
-      .channel('integrations-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'channel_integrations',
-        },
-        () => {
-          loadIntegrations()
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [supabase])
-
-  const loadIntegrations = async () => {
+  const loadIntegrations = useCallback(async () => {
     try {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
@@ -80,7 +56,31 @@ export function IntegrationsDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    loadIntegrations()
+
+    // Escutar mudanças em tempo real
+    const channel = supabase
+      .channel('integrations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'channel_integrations',
+        },
+        () => {
+          loadIntegrations()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, loadIntegrations])
 
   if (loading) {
     return (

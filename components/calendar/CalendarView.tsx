@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfDay, endOfDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ export function CalendarView({ initialEvents = [], contacts = [] }: CalendarView
     visibility?: string
   }>({})
 
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     setLoading(true)
     try {
       const monthStart = startOfMonth(currentDate)
@@ -49,11 +49,11 @@ export function CalendarView({ initialEvents = [], contacts = [] }: CalendarView
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentDate, filters])
 
   useEffect(() => {
     loadEvents()
-  }, [currentDate, filters])
+  }, [loadEvents])
 
   const getEventsForDate = (date: Date) => {
     return events.filter((event) => {

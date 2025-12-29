@@ -82,6 +82,7 @@ export function ContactStatusEditor({
     return () => {
       mounted = false
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Sem dependências para carregar apenas uma vez
 
   // Atualizar stages quando pipeline mudar
@@ -107,6 +108,7 @@ export function ContactStatusEditor({
         setStageId('')
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pipelineId, pipelines]) // Removido stageId das dependências para evitar loop
 
   const handleSave = useCallback(async () => {
