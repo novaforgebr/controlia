@@ -700,7 +700,7 @@ export function ConversationsSplitView({
 
   // Desktop: split view
   return (
-    <div className="flex h-full gap-2 md:gap-4 overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       {/* Lista de conversas - lado esquerdo */}
       <div className="flex w-72 md:w-80 lg:w-[250px] flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
         {/* Header com Breadcrumb, Título e Descrição */}

@@ -156,7 +156,7 @@ export function SidebarLayout({ companyName, children }: SidebarLayoutProps) {
             </form>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto py-4 md:py-8 px-4 md:px-6 bg-gray-50 dark:bg-gray-950">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950">{children}</main>
       </div>
     </div>
   )
