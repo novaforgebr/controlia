@@ -125,7 +125,7 @@ export function ConversationsSplitView({
               .from('messages')
               .select('*', { count: 'exact', head: true })
               .eq('conversation_id', conv.id)
-              .eq('direction', 'incoming')
+              .in('direction', ['incoming', 'inbound'])
               .is('read_at', null)
 
             return {
@@ -222,7 +222,7 @@ export function ConversationsSplitView({
                     .from('messages')
                     .select('*', { count: 'exact', head: true })
                     .eq('conversation_id', transformedConversation.id)
-                    .eq('direction', 'incoming')
+                    .in('direction', ['incoming', 'inbound'])
                     .is('read_at', null)
                     .then(({ count }) => {
                       setConversations((currentPrev) => {
@@ -293,81 +293,142 @@ export function ConversationsSplitView({
         async (payload) => {
           const newMessage = payload.new
           const conversationId = newMessage.conversation_id
-          const isIncoming = newMessage.direction === 'incoming'
+          // Verificar tanto 'incoming' quanto 'inbound' para compatibilidade
+          const isIncoming = newMessage.direction === 'incoming' || newMessage.direction === 'inbound'
           const isUnread = !newMessage.read_at
           
-          // Se a conversa não está selecionada e a mensagem é incoming e não lida, incrementar contador
-          const shouldIncrementUnread = isIncoming && isUnread && conversationId !== selectedId
+          console.log('📨 Nova mensagem recebida via Realtime:', {
+            conversationId,
+            isIncoming,
+            isUnread,
+            selectedId,
+            direction: newMessage.direction
+          })
+          
+          // Se a conversa não está selecionada e a mensagem é incoming e não lida, recalcular contador
+          const shouldRecalculate = isIncoming && isUnread && conversationId !== selectedId
 
-          const { data: conversation } = await supabase
-            .from('conversations')
-            .select(`
-              id,
-              subject,
-              status,
-              channel,
-              priority,
-              ai_assistant_enabled,
-              last_message_at,
-              created_at,
-              contact_id,
-              assigned_to,
-              contacts:contact_id (
-                name,
-                whatsapp,
-                email
-              ),
-              user_profiles:assigned_to (
-                full_name
-              )
-            `)
-            .eq('id', conversationId)
-            .single()
+          if (shouldRecalculate) {
+            console.log('🔄 Recalculando contador de não lidas para conversa:', conversationId)
+            // Sempre recalcular o contador real quando uma nova mensagem não lida chega
+            const { count, error: countError } = await supabase
+              .from('messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('conversation_id', conversationId)
+              .in('direction', ['incoming', 'inbound'])
+              .is('read_at', null)
 
-          if (conversation) {
-            // Transformar arrays de relacionamentos em objetos únicos
-            const transformedConversation = {
-              ...conversation,
-              contacts: Array.isArray(conversation.contacts) 
-                ? (conversation.contacts[0] || null) 
-                : conversation.contacts,
-              user_profiles: Array.isArray(conversation.user_profiles) 
-                ? (conversation.user_profiles[0] || null) 
-                : conversation.user_profiles,
+            if (countError) {
+              console.error('❌ Erro ao contar mensagens não lidas:', countError)
+            } else {
+              console.log('✅ Contador de não lidas:', count)
             }
 
-            if (
-              (statusFilter === 'all' || transformedConversation.status === statusFilter) &&
-              (channelFilter === 'all' || transformedConversation.channel === channelFilter)
-            ) {
-              setConversations((prev) => {
-                const existingIndex = prev.findIndex((c) => c.id === transformedConversation.id)
-                if (existingIndex >= 0) {
-                  const newList = [...prev]
-                  const existingConv = newList[existingIndex]
-                  newList[existingIndex] = {
-                    ...transformedConversation,
-                    unread_count: shouldIncrementUnread 
-                      ? (existingConv.unread_count || 0) + 1 
-                      : existingConv.unread_count || 0
+            const { data: conversation } = await supabase
+              .from('conversations')
+              .select(`
+                id,
+                subject,
+                status,
+                channel,
+                priority,
+                ai_assistant_enabled,
+                last_message_at,
+                created_at,
+                contact_id,
+                assigned_to,
+                contacts:contact_id (
+                  name,
+                  whatsapp,
+                  email
+                ),
+                user_profiles:assigned_to (
+                  full_name
+                )
+              `)
+              .eq('id', conversationId)
+              .single()
+
+            if (conversation) {
+              // Transformar arrays de relacionamentos em objetos únicos
+              const transformedConversation = {
+                ...conversation,
+                contacts: Array.isArray(conversation.contacts) 
+                  ? (conversation.contacts[0] || null) 
+                  : conversation.contacts,
+                user_profiles: Array.isArray(conversation.user_profiles) 
+                  ? (conversation.user_profiles[0] || null) 
+                  : conversation.user_profiles,
+              }
+
+              if (
+                (statusFilter === 'all' || transformedConversation.status === statusFilter) &&
+                (channelFilter === 'all' || transformedConversation.channel === channelFilter)
+              ) {
+                setConversations((prev) => {
+                  const existingIndex = prev.findIndex((c) => c.id === transformedConversation.id)
+                  if (existingIndex >= 0) {
+                    const newList = [...prev]
+                    newList[existingIndex] = {
+                      ...transformedConversation,
+                      unread_count: count || 0
+                    }
+                    return newList.sort(
+                      (a, b) =>
+                        new Date(b.last_message_at).getTime() -
+                        new Date(a.last_message_at).getTime()
+                    )
+                  } else {
+                    // Se a conversa não está na lista, adicionar com contador correto
+                    return [{
+                      ...transformedConversation,
+                      unread_count: count || 0
+                    }, ...prev].sort(
+                      (a, b) =>
+                        new Date(b.last_message_at).getTime() -
+                        new Date(a.last_message_at).getTime()
+                    )
                   }
-                  return newList.sort(
-                    (a, b) =>
-                      new Date(b.last_message_at).getTime() -
-                      new Date(a.last_message_at).getTime()
-                  )
-                } else {
-                  return [{
-                    ...transformedConversation,
-                    unread_count: shouldIncrementUnread ? 1 : 0
-                  }, ...prev].sort(
-                    (a, b) =>
-                      new Date(b.last_message_at).getTime() -
-                      new Date(a.last_message_at).getTime()
-                  )
-                }
-              })
+                })
+              }
             }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `company_id=eq.${companyId}`,
+        },
+        async (payload) => {
+          const updatedMessage = payload.new
+          const conversationId = updatedMessage.conversation_id
+          
+          // Se uma mensagem foi marcada como lida, recalcular contador
+          if (updatedMessage.read_at && !payload.old.read_at) {
+            // Recalcular contador para esta conversa
+            const { count } = await supabase
+              .from('messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('conversation_id', conversationId)
+              .in('direction', ['incoming', 'inbound'])
+              .is('read_at', null)
+
+            setConversations((prev) => {
+              const existingIndex = prev.findIndex((c) => c.id === conversationId)
+              if (existingIndex >= 0) {
+                const newList = [...prev]
+                newList[existingIndex] = {
+                  ...newList[existingIndex],
+                  unread_count: count || 0
+                }
+                return newList
+              }
+              return prev
+            })
           }
         }
       )
@@ -377,6 +438,22 @@ export function ConversationsSplitView({
       supabase.removeChannel(channel)
     }
   }, [companyId, supabase, statusFilter, channelFilter, selectedId])
+
+  // Função para recalcular contador de mensagens não lidas
+  const recalculateUnreadCount = async (conversationId: string) => {
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('conversation_id', conversationId)
+      .in('direction', ['incoming', 'inbound'])
+      .is('read_at', null)
+
+    setConversations((prev) =>
+      prev.map((conv) =>
+        conv.id === conversationId ? { ...conv, unread_count: count || 0 } : conv
+      )
+    )
+  }
 
   const handleSelectConversation = async (id: string) => {
     setSelectedId(id)
@@ -389,7 +466,7 @@ export function ConversationsSplitView({
       .from('messages')
       .update({ read_at: new Date().toISOString() })
       .eq('conversation_id', id)
-      .eq('direction', 'incoming')
+      .in('direction', ['incoming', 'inbound'])
       .is('read_at', null)
 
     if (error) {
@@ -472,12 +549,18 @@ export function ConversationsSplitView({
         <div className="flex h-full flex-col overflow-hidden">
           <ConversationDetailView
             conversation={selectedConversation}
-            onClose={() => {
+            onClose={async () => {
+              const closedId = selectedId
               setShowChat(false)
               setSelectedId(undefined)
               const params = new URLSearchParams(searchParams.toString())
               params.delete('id')
               router.push(`/conversations?${params.toString()}`)
+              
+              // Recalcular contador de mensagens não lidas quando fechar a conversa
+              if (closedId) {
+                await recalculateUnreadCount(closedId)
+              }
             }}
           />
         </div>
@@ -575,10 +658,14 @@ export function ConversationsSplitView({
                               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400"></span>
                             </span>
                           )}
-                          {/* Badge de mensagens não lidas */}
-                          {conversation.unread_count && conversation.unread_count > 0 && (
-                            <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold text-white bg-red-500 dark:bg-red-600 shadow-sm">
-                              {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
+                          {/* Badge de mensagens não lidas - só exibe se > 0 */}
+                          {(conversation.unread_count ?? 0) > 0 && (
+                            <span className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-400">
+                              <span className="relative flex h-2 w-2">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
+                              </span>
+                              <span>{(conversation.unread_count ?? 0) > 99 ? '99+' : conversation.unread_count}</span>
                             </span>
                           )}
                         </div>
@@ -713,6 +800,16 @@ export function ConversationsSplitView({
                             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400"></span>
                           </span>
                         )}
+                        {/* Badge de mensagens não lidas - só exibe se > 0 */}
+                        {(conversation.unread_count ?? 0) > 0 && (
+                          <span className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-400">
+                            <span className="relative flex h-2 w-2">
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 dark:bg-green-500 opacity-75"></span>
+                              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
+                            </span>
+                            <span>{(conversation.unread_count ?? 0) > 99 ? '99+' : conversation.unread_count}</span>
+                          </span>
+                        )}
                       </div>
                       {conversation.subject && (
                         <p className="text-xs text-gray-600 dark:text-gray-400 truncate mb-2">{conversation.subject}</p>
@@ -745,11 +842,17 @@ export function ConversationsSplitView({
         {selectedConversation ? (
           <ConversationDetailView
             conversation={selectedConversation}
-            onClose={() => {
+            onClose={async () => {
+              const closedId = selectedId
               setSelectedId(undefined)
               const params = new URLSearchParams(searchParams.toString())
               params.delete('id')
               router.push(`/conversations?${params.toString()}`)
+              
+              // Recalcular contador de mensagens não lidas quando fechar a conversa
+              if (closedId) {
+                await recalculateUnreadCount(closedId)
+              }
             }}
           />
         ) : (
