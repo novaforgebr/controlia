@@ -57,11 +57,11 @@ ALTER TABLE contacts REPLICA IDENTITY FULL;
 -- Para verificar se o Realtime está habilitado, execute:
 -- 
 -- SELECT 
---   schemaname,
---   tablename,
---   pubname
+--   pubname,
+--   tablename
 -- FROM pg_publication_tables
--- WHERE tablename IN ('messages', 'conversations', 'contacts')
+-- WHERE pubname = 'supabase_realtime'
+--   AND tablename IN ('messages', 'conversations', 'contacts')
 -- ORDER BY tablename;
 --
 -- Se retornar 3 linhas (uma para cada tabela), o Realtime está habilitado.

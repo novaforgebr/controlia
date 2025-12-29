@@ -282,8 +282,28 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
               console.log('✅ Realtime: Subscription ativa para conversa:', conversation.id)
             } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
               console.error('❌ Erro na subscription Realtime:', status)
-              console.warn('⚠️ Isso pode indicar que o Realtime não está habilitado para a tabela messages.')
+              console.warn('⚠️ Possíveis causas:')
+              console.warn('   1. Realtime não habilitado para a tabela messages')
+              console.warn('   2. Problemas de RLS (Row Level Security)')
+              console.warn('   3. Problemas de conexão com Supabase Realtime')
+              console.warn('   4. Publicação supabase_realtime não configurada')
               console.warn('   Execute o script: supabase/enable-realtime-all.sql')
+              console.warn('   Verifique com: supabase/diagnose-realtime.sql')
+              console.warn('   Documentação: docs/TROUBLESHOOTING_REALTIME.md')
+              
+              // Verificar se o Realtime está habilitado (diagnóstico)
+              supabase
+                .from('messages')
+                .select('id')
+                .limit(1)
+                .then(({ error }) => {
+                  if (error) {
+                    console.error('❌ Erro ao acessar tabela messages:', error)
+                    console.warn('   Isso pode indicar problemas de RLS ou permissões')
+                  } else {
+                    console.log('✅ Acesso à tabela messages OK - problema pode ser com Realtime')
+                  }
+                })
               
               // Tentar reconectar após um delay
               if (reconnectAttemptsRef.current < maxReconnectAttempts) {
@@ -294,9 +314,10 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
                   setupSubscription()
                 }, delay)
               } else {
-                console.error('❌ Máximo de tentativas de reconexão atingido. Recarregando mensagens manualmente...')
+                console.error('❌ Máximo de tentativas de reconexão atingido. Usando fallback de polling...')
                 // Fallback: recarregar mensagens periodicamente
                 if (!fallbackIntervalRef.current) {
+                  console.log('📡 Ativando fallback: recarregando mensagens a cada 3 segundos')
                   fallbackIntervalRef.current = setInterval(() => {
                     loadMessages()
                   }, 3000) // Recarregar a cada 3 segundos como fallback
