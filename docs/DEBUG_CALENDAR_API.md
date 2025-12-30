@@ -115,6 +115,14 @@ O service role client deve bypassar RLS automaticamente. Se não estiver funcion
 2. Verifique se não há espaços extras na variável de ambiente
 3. Faça redeploy após alterar variáveis de ambiente
 
+## Problema resolvido: Filtro de data muito restritivo
+
+**Correção aplicada:** O filtro de data estava muito restritivo, exigindo que eventos estivessem COMPLETAMENTE dentro do período. Foi corrigido para buscar eventos que SE SOBREPÕEM ao período, que é o comportamento correto para calendários.
+
+**Lógica corrigida:**
+- Antes: `start_at >= startDate AND end_at <= endDate` (evento completamente dentro)
+- Depois: `start_at <= endDate AND end_at >= startDate` (evento se sobrepõe ao período)
+
 ## Solução para "Empresa não encontrada" mesmo existindo no banco
 
 Se você confirmou que a empresa existe no banco (através do script `test-company-exists.sql`), mas ainda recebe "empresa não encontrada", o problema provavelmente é que o **service role client não está bypassando o RLS corretamente**.

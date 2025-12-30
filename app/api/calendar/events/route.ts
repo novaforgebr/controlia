@@ -56,6 +56,24 @@ export async function GET(request: NextRequest) {
     let start: Date | undefined
     let end: Date | undefined
 
+    // Verificar se os parâmetros existem mas estão vazios (problema comum no n8n)
+    const hasStartParam = searchParams.has('start')
+    const hasEndParam = searchParams.has('end')
+    
+    if (hasStartParam && (!startDateParam || startDateParam.trim() === '')) {
+      return NextResponse.json(
+        { error: 'Parâmetro start fornecido mas está vazio. Verifique se a expressão do n8n está sendo resolvida corretamente.' },
+        { status: 400 }
+      )
+    }
+    
+    if (hasEndParam && (!endDateParam || endDateParam.trim() === '')) {
+      return NextResponse.json(
+        { error: 'Parâmetro end fornecido mas está vazio. Verifique se a expressão do n8n está sendo resolvida corretamente. Dica: Use "Send Query Parameters" no n8n ao invés de colocar expressões na URL.' },
+        { status: 400 }
+      )
+    }
+
     if (startDateParam) {
       try {
         // Tentar parse direto
@@ -63,13 +81,13 @@ export async function GET(request: NextRequest) {
         // Verificar se a data é válida
         if (isNaN(start.getTime())) {
           return NextResponse.json(
-            { error: 'Formato de data de início inválido. Use ISO 8601 (ex: 2025-01-15T10:00:00Z)' },
+            { error: 'Formato de data de início inválido. Use ISO 8601 (ex: 2025-01-15T10:00:00Z). Recebido: ' + startDateParam },
             { status: 400 }
           )
         }
       } catch (error) {
         return NextResponse.json(
-          { error: 'Formato de data de início inválido. Use ISO 8601 (ex: 2025-01-15T10:00:00Z)' },
+          { error: 'Formato de data de início inválido. Use ISO 8601 (ex: 2025-01-15T10:00:00Z). Recebido: ' + startDateParam },
           { status: 400 }
         )
       }
@@ -80,13 +98,13 @@ export async function GET(request: NextRequest) {
         end = new Date(endDateParam)
         if (isNaN(end.getTime())) {
           return NextResponse.json(
-            { error: 'Formato de data de fim inválido. Use ISO 8601 (ex: 2025-01-15T11:00:00Z)' },
+            { error: 'Formato de data de fim inválido. Use ISO 8601 (ex: 2025-01-15T11:00:00Z). Recebido: ' + endDateParam },
             { status: 400 }
           )
         }
       } catch (error) {
         return NextResponse.json(
-          { error: 'Formato de data de fim inválido. Use ISO 8601 (ex: 2025-01-15T11:00:00Z)' },
+          { error: 'Formato de data de fim inválido. Use ISO 8601 (ex: 2025-01-15T11:00:00Z). Recebido: ' + endDateParam },
           { status: 400 }
         )
       }
@@ -95,7 +113,7 @@ export async function GET(request: NextRequest) {
     // Validar que ambas as datas foram fornecidas se uma foi fornecida
     if ((start && !end) || (!start && end)) {
       return NextResponse.json(
-        { error: 'Ambos os parâmetros start e end devem ser fornecidos juntos' },
+        { error: 'Ambos os parâmetros start e end devem ser fornecidos juntos. Start: ' + (startDateParam || 'não fornecido') + ', End: ' + (endDateParam || 'não fornecido') },
         { status: 400 }
       )
     }

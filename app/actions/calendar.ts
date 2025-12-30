@@ -235,6 +235,13 @@ export async function listCalendarEvents(startDate?: Date, endDate?: Date, compa
       supabase = await createClient()
     }
 
+    console.log('🔍 Buscando eventos para empresa:', company.id)
+    console.log('🔍 Filtros:', { 
+      startDate: startDate?.toISOString(), 
+      endDate: endDate?.toISOString(),
+      status: 'scheduled'
+    })
+    
     let query = supabase
       .from('calendar_events')
       .select('*, contacts:contact_id(name, email), user_profiles:organizer_id(full_name)')
@@ -243,18 +250,34 @@ export async function listCalendarEvents(startDate?: Date, endDate?: Date, compa
       .order('start_at', { ascending: true })
 
     if (startDate && endDate) {
+      // Para eventos de calendário, um evento deve ser retornado se ele SE SOBREPÕE ao período
+      // Um evento se sobrepõe se: start_at <= endDate AND end_at >= startDate
+      // Isso garante que eventos que começam antes mas terminam no período, ou começam no período mas terminam depois, também são incluídos
       query = query
-        .gte('start_at', startDate.toISOString())
-        .lte('end_at', endDate.toISOString())
+        .lte('start_at', endDate.toISOString())  // Evento começa antes ou no fim do período
+        .gte('end_at', startDate.toISOString())   // Evento termina depois ou no início do período
+      console.log('🔍 Filtro de data aplicado (sobreposição):', {
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+        filter: 'start_at <= endDate AND end_at >= startDate'
+      })
     }
 
     const { data, error } = await query
 
+    console.log('🔍 Resultado da query de eventos:', {
+      hasData: !!data,
+      dataLength: data?.length || 0,
+      error: error?.message,
+      errorCode: error?.code
+    })
+
     if (error) {
-      console.error('Erro ao listar eventos:', error)
-      return { error: 'Erro ao listar eventos', data: [] }
+      console.error('❌ Erro ao listar eventos:', error)
+      return { error: `Erro ao listar eventos: ${error.message} (código: ${error.code})`, data: [] }
     }
 
+    console.log(`✅ Encontrados ${data?.length || 0} eventos de calendário`)
     return { data: data || [] }
   } catch (error) {
     console.error('Erro:', error)

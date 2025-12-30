@@ -121,12 +121,33 @@ O `company_id` geralmente está disponível no contexto da conversa. Exemplos de
 
 **Método**: `GET`
 
-**URL**: 
-```
-https://controliaa.vercel.app/api/calendar/events?start={{ $('AtualizaVariaveisExtrator').first().json.data_agendamento }}&end={{ DateTime.fromISO($('AtualizaVariaveisExtrator').first().json.data_agendamento).plus({ hours: 360 }).toUTC().toISO() }}&status=scheduled&company_id={{ $('AtualizaVariaveisExtrator').first().json.company_id }}
-```
+**⚠️ IMPORTANTE - Configuração de Query Parameters no n8n:**
 
-**Exemplo de URL com datas formatadas corretamente**:
+**NÃO coloque expressões diretamente na URL!** Use "Send Query Parameters" ao invés disso para garantir que as expressões sejam resolvidas corretamente.
+
+**Configuração Correta:**
+
+1. **URL Base** (sem query parameters):
+   ```
+   https://controliaa.vercel.app/api/calendar/events
+   ```
+
+2. **Ative "Send Query Parameters"** (toggle ON no n8n)
+
+3. **Adicione os parâmetros separadamente** na seção "Query Parameters":
+
+   | Name | Value |
+   |------|-------|
+   | `start` | `{{ DateTime.fromISO($('AtualizaVariaveisExtrator').first().json.data_agendamento).toUTC().toISO() }}` |
+   | `end` | `{{ DateTime.fromISO($('AtualizaVariaveisExtrator').first().json.data_agendamento).plus({ hours: 360 }).toUTC().toISO() }}` |
+   | `status` | `scheduled` |
+   | `company_id` | `{{ $('AtualizaVariaveisExtrator').first().json.company_id }}` |
+
+**Por que usar Query Parameters ao invés da URL?**
+
+Quando você coloca expressões complexas diretamente na URL do n8n (especialmente expressões com `DateTime.plus()`), elas podem não ser resolvidas corretamente no momento da execução, resultando em parâmetros vazios. Usando "Send Query Parameters", o n8n resolve cada expressão separadamente antes de montar a URL, garantindo que todos os valores sejam preenchidos corretamente.
+
+**Exemplo de URL final gerada**:
 ```
 https://controliaa.vercel.app/api/calendar/events?start=2025-01-15T00:00:00Z&end=2025-01-15T23:59:59Z&status=scheduled&company_id=uuid-da-empresa
 ```
