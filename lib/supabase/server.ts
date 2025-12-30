@@ -32,21 +32,44 @@ export async function createClient() {
 /**
  * Cria cliente Supabase com service role (bypass RLS)
  * Use apenas para operações internas como webhooks
+ * 
+ * IMPORTANTE: O service role client DEVE bypassar RLS automaticamente.
+ * Se não estiver funcionando, verifique:
+ * 1. Se a SUPABASE_SERVICE_ROLE_KEY está configurada corretamente
+ * 2. Se é a service_role key (não a anon key)
+ * 3. Se não há espaços extras na variável de ambiente
  */
 export function createServiceRoleClient() {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error('SUPABASE_SERVICE_ROLE_KEY não configurada')
   }
 
-  return createSupabaseClient(
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY.trim()
+  
+  // Validar que é uma service role key (começa com eyJ e é um JWT válido)
+  if (!serviceRoleKey.startsWith('eyJ')) {
+    console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY pode não ser válida (deve ser um JWT começando com eyJ)')
+  }
+
+  const client = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    serviceRoleKey,
     {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
+      db: {
+        schema: 'public',
+      },
+      global: {
+        headers: {
+          'x-client-info': 'controlia-service-role',
+        },
+      },
     }
   )
+
+  return client
 }
 

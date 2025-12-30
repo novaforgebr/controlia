@@ -45,6 +45,51 @@ Ou via header customizado (se configurado):
 x-api-key: {SUPABASE_ANON_KEY}
 ```
 
+### Obtendo o company_id no n8n
+
+O `company_id` geralmente está disponível no contexto da conversa. Exemplos de como acessá-lo:
+
+1. **Do nó que recebe dados do Controlia**:
+   ```
+   {{ $('AtualizaVariaveisExtrator').first().json.company_id }}
+   ```
+
+2. **Do webhook do Controlia**:
+   ```
+   {{ $json.company_id }}
+   ```
+
+3. **De uma variável de ambiente ou configuração**:
+   ```
+   {{ $env.COMPANY_ID }}
+   ```
+
+**IMPORTANTE**: O `company_id` é obrigatório para todas as requisições do n8n. Sem ele, a API retornará erro "Empresa não encontrada".
+
+### Formatação de Datas
+
+**CRÍTICO**: Todas as datas devem estar no formato ISO 8601 (ex: `2025-01-15T10:00:00Z`).
+
+**Exemplos de formatação no n8n**:
+
+1. **Converter data para ISO 8601**:
+   ```
+   {{ DateTime.fromISO($json.data_agendamento).toUTC().toISO() }}
+   ```
+
+2. **Adicionar horas a uma data**:
+   ```
+   {{ DateTime.fromISO($json.data_agendamento).plus({ hours: 1 }).toUTC().toISO() }}
+   ```
+
+3. **Criar data de início e fim do dia**:
+   ```
+   Início: {{ DateTime.fromISO($json.data_agendamento).startOf('day').toUTC().toISO() }}
+   Fim: {{ DateTime.fromISO($json.data_agendamento).endOf('day').toUTC().toISO() }}
+   ```
+
+**ERRO COMUM**: Não use strings de data formatadas como `"Tue Dec 30 2025 05:00:00 GMT+0000"`. Sempre converta para ISO 8601 antes de enviar.
+
 ### Estrutura de Evento
 
 ```json
@@ -78,22 +123,31 @@ x-api-key: {SUPABASE_ANON_KEY}
 
 **URL**: 
 ```
-https://controliaa.vercel.app/api/calendar/events?start={start_date}&end={end_date}&status=scheduled
+https://controliaa.vercel.app/api/calendar/events?start={{ $('AtualizaVariaveisExtrator').first().json.data_agendamento }}&end={{ DateTime.fromISO($('AtualizaVariaveisExtrator').first().json.data_agendamento).plus({ hours: 360 }).toUTC().toISO() }}&status=scheduled&company_id={{ $('AtualizaVariaveisExtrator').first().json.company_id }}
+```
+
+**Exemplo de URL com datas formatadas corretamente**:
+```
+https://controliaa.vercel.app/api/calendar/events?start=2025-01-15T00:00:00Z&end=2025-01-15T23:59:59Z&status=scheduled&company_id=uuid-da-empresa
 ```
 
 **Parâmetros de Query**:
-- `start` (obrigatório): Data/hora de início no formato ISO 8601 (ex: `2025-01-15T00:00:00Z`)
-- `end` (obrigatório): Data/hora de fim no formato ISO 8601 (ex: `2025-01-15T23:59:59Z`)
+- `start` (obrigatório se `end` for fornecido): Data/hora de início no formato ISO 8601 (ex: `2025-01-15T00:00:00Z`)
+- `end` (obrigatório se `start` for fornecido): Data/hora de fim no formato ISO 8601 (ex: `2025-01-15T23:59:59Z`)
 - `status` (opcional): Status dos eventos (padrão: `scheduled`)
 - `contact_id` (opcional): Filtrar por contato específico
+- `company_id` (obrigatório para requisições do n8n): ID da empresa. Pode ser enviado via query parameter ou header `x-company-id`
 
 **Headers**:
 ```json
 {
   "Content-Type": "application/json",
-  "Authorization": "Bearer {{ $env.SUPABASE_ANON_KEY }}"
+  "Authorization": "Bearer {{ $env.SUPABASE_ANON_KEY }}",
+  "x-company-id": "{{ $('AtualizaVariaveisExtrator').first().json.company_id }}"
 }
 ```
+
+**IMPORTANTE**: Para requisições do n8n, você DEVE fornecer o `company_id` via query parameter ou header `x-company-id`. O `company_id` geralmente está disponível no contexto da conversa (ex: `{{ $('AtualizaVariaveisExtrator').first().json.company_id }}`).
 
 **Resposta de Sucesso** (200):
 ```json
@@ -135,13 +189,15 @@ https://controliaa.vercel.app/api/calendar/events
 ```json
 {
   "Content-Type": "application/json",
-  "Authorization": "Bearer {{ $env.SUPABASE_ANON_KEY }}"
+  "Authorization": "Bearer {{ $env.SUPABASE_ANON_KEY }}",
+  "x-company-id": "{{ $('AtualizaVariaveisExtrator').first().json.company_id }}"
 }
 ```
 
 **Body** (JSON):
 ```json
 {
+  "company_id": "{{ $('AtualizaVariaveisExtrator').first().json.company_id }}",
   "title": "Consulta com {{ nome_contato }}",
   "description": "{{ descricao_opcional }}",
   "start_at": "2025-01-15T10:00:00Z",
@@ -149,11 +205,13 @@ https://controliaa.vercel.app/api/calendar/events
   "is_all_day": false,
   "location": "{{ localizacao_opcional }}",
   "contact_id": "{{ contact_id }}",
-  "visibility": "company"
+  "visibility": "company",
+  "organizer_id": "{{ organizer_id_opcional }}"
 }
 ```
 
 **Campos Obrigatórios**:
+- `company_id`: ID da empresa (pode ser enviado via body ou header `x-company-id`)
 - `title`: Título do evento
 - `start_at`: Data/hora de início (ISO 8601)
 - `end_at`: Data/hora de fim (ISO 8601)
@@ -164,6 +222,7 @@ https://controliaa.vercel.app/api/calendar/events
 - `location`: Local do evento
 - `contact_id`: ID do contato relacionado
 - `visibility`: "company" ou "private" (padrão: "company")
+- `organizer_id`: ID do organizador do evento (opcional para requisições externas)
 
 **Resposta de Sucesso** (200):
 ```json
@@ -213,13 +272,15 @@ https://controliaa.vercel.app/api/calendar/events/{{ event_id }}
 ```json
 {
   "Content-Type": "application/json",
-  "Authorization": "Bearer {{ $env.SUPABASE_ANON_KEY }}"
+  "Authorization": "Bearer {{ $env.SUPABASE_ANON_KEY }}",
+  "x-company-id": "{{ $('AtualizaVariaveisExtrator').first().json.company_id }}"
 }
 ```
 
 **Body** (JSON) - Apenas campos que deseja atualizar:
 ```json
 {
+  "company_id": "{{ $('AtualizaVariaveisExtrator').first().json.company_id }}",
   "title": "{{ novo_titulo }}",
   "start_at": "2025-01-15T14:00:00Z",
   "end_at": "2025-01-15T15:00:00Z",
@@ -262,16 +323,18 @@ IMPORTANTE:
 
 **URL**: 
 ```
-https://controliaa.vercel.app/api/calendar/events/{{ event_id }}
+https://controliaa.vercel.app/api/calendar/events/{{ event_id }}?company_id={{ $('AtualizaVariaveisExtrator').first().json.company_id }}
 ```
 
 **Parâmetros de URL**:
-- `event_id` (obrigatório): ID do evento a ser atualizado (UUID). Use o valor do campo `agendamento_id` da DataTable.
+- `event_id` (obrigatório): ID do evento a ser deletado (UUID). Use o valor do campo `agendamento_id` da DataTable.
+- `company_id` (obrigatório): ID da empresa. Pode ser enviado via query parameter ou header `x-company-id`
 
 **Headers**:
 ```json
 {
-  "Authorization": "Bearer {{ $env.SUPABASE_ANON_KEY }}"
+  "Authorization": "Bearer {{ $env.SUPABASE_ANON_KEY }}",
+  "x-company-id": "{{ $('AtualizaVariaveisExtrator').first().json.company_id }}"
 }
 ```
 

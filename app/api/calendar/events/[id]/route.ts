@@ -8,6 +8,15 @@ export async function PATCH(
   try {
     const { id } = await params
     const body = await request.json()
+    const companyId = body.company_id || request.headers.get('x-company-id')
+
+    // Para requisições do n8n, company_id é obrigatório
+    if (!companyId) {
+      return NextResponse.json(
+        { error: 'company_id é obrigatório para requisições externas. Forneça via body ou header x-company-id' },
+        { status: 400 }
+      )
+    }
 
     // Validar que end_at é posterior a start_at se ambos forem fornecidos
     if (body.start_at && body.end_at) {
@@ -31,7 +40,7 @@ export async function PATCH(
     if (body.visibility !== undefined) formData.append('visibility', body.visibility)
     if (body.status !== undefined) formData.append('status', body.status)
 
-    const result = await updateCalendarEvent(id, formData)
+    const result = await updateCalendarEvent(id, formData, companyId || undefined)
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 })
@@ -50,8 +59,18 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+    const searchParams = request.nextUrl.searchParams
+    const companyId = searchParams.get('company_id') || request.headers.get('x-company-id')
 
-    const result = await deleteCalendarEvent(id)
+    // Para requisições do n8n, company_id é obrigatório
+    if (!companyId) {
+      return NextResponse.json(
+        { error: 'company_id é obrigatório para requisições externas. Forneça via query parameter ou header x-company-id' },
+        { status: 400 }
+      )
+    }
+
+    const result = await deleteCalendarEvent(id, companyId || undefined)
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 })
