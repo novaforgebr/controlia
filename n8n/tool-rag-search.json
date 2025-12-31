@@ -1,0 +1,38 @@
+{
+  "parameters": {
+    "toolDescription": "Busca informações na base de conhecimento da empresa usando busca semântica (RAG).\n\nUse esta ferramenta quando:\n- O cliente fizer perguntas sobre produtos, serviços, políticas, procedimentos da empresa\n- Você precisar de informações específicas que não estão no seu conhecimento base\n- O cliente perguntar sobre documentação, termos, condições, prazos, métodos de pagamento, etc.\n- Qualquer pergunta que requer informações específicas da empresa\n\nParâmetros:\n- query (obrigatório): A pergunta ou termo de busca do cliente, reformulado de forma clara\n- limit (opcional): Número de resultados (padrão: 5, máximo: 10)\n- similarity_threshold (opcional): Threshold de similaridade (padrão: 0.7, range: 0.0-1.0)\n\nRetorna:\n- Array de chunks de documentos relevantes\n- Cada chunk contém: content (texto), file_name, similarity (score 0.0-1.0), metadata\n- Respostas agrupadas por arquivo para facilitar uso\n\nIMPORTANTE:\n- Use os resultados para enriquecer sua resposta, mas sempre cite a fonte quando possível\n- Se não encontrar resultados relevantes, informe ao cliente que não há informações disponíveis\n- Combine múltiplos chunks se necessário para dar uma resposta completa\n- Não invente informações - se não encontrar, seja honesto",
+    "method": "POST",
+    "url": "https://controliaa.vercel.app/api/rag/search",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ $('Webhook').first().json.body.controlia.token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoY3N5cHVkcHd3Zmxjb3J5Zm1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MjIzMTMsImV4cCI6MjA4MTk5ODMxM30.rguJ34eShUCSKKBWuy8bBS7bSxuC5mCeRnXych0LGKM' }}"
+        },
+        {
+          "name": "x-company-id",
+          "value": "={{ $('Webhook').first().json.body.controlia.company_id }}"
+        }
+      ]
+    },
+    "sendBody": true,
+    "specifyBody": "json",
+    "jsonBody": "={\n  \"query\": \"{{ $json.query }}\",\n  \"company_id\": \"{{ $('Webhook').first().json.body.controlia.company_id }}\",\n  \"limit\": {{ $json.limit || 5 }},\n  \"similarity_threshold\": {{ $json.similarity_threshold || 0.7 }}\n}",
+    "options": {}
+  },
+  "type": "n8n-nodes-base.httpRequestTool",
+  "typeVersion": 4.3,
+  "position": [
+    4400,
+    384
+  ],
+  "id": "rag-search-tool-uuid-placeholder",
+  "name": "Busca Base de Conhecimento",
+  "rewireOutputLogTo": "ai_tool"
+}
+

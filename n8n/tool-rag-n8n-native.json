@@ -1,0 +1,82 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "credential": {
+          "__rl": true,
+          "value": "your-supabase-credential-id",
+          "mode": "list"
+        },
+        "tableName": "document_chunks",
+        "similarityThreshold": 0.7,
+        "topK": 5,
+        "returnSourceDocuments": true,
+        "filter": {
+          "conditions": [
+            {
+              "key": "company_id",
+              "value": "={{ $('Webhook').first().json.body.controlia.company_id }}",
+              "operator": "equals"
+            },
+            {
+              "key": "is_indexed",
+              "value": true,
+              "operator": "equals"
+            }
+          ]
+        },
+        "options": {
+          "queryName": "query",
+          "vectorFieldName": "content_embedding",
+          "metadataFields": "file_name,file_type,file_category,file_tags"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        4400,
+        384
+      ],
+      "id": "supabase-vector-store-rag",
+      "name": "Busca Base de Conhecimento",
+      "rewireOutputLogTo": "ai_tool"
+    },
+    {
+      "parameters": {
+        "credential": {
+          "__rl": true,
+          "value": "your-openai-credential-id",
+          "mode": "list"
+        },
+        "model": "text-embedding-3-small",
+        "dimensions": 1536,
+        "inputType": "text",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        384
+      ],
+      "id": "embeddings-openai-rag",
+      "name": "Embeddings OpenAI",
+      "rewireOutputLogTo": "ai_tool"
+    }
+  ],
+  "connections": {
+    "Embeddings OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Busca Base de Conhecimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "toolDescription": "Busca informações na base de conhecimento da empresa usando busca semântica (RAG).\n\nUse esta ferramenta quando:\n- O cliente fizer perguntas sobre produtos, serviços, políticas, procedimentos da empresa\n- Você precisar de informações específicas que não estão no seu conhecimento base\n- O cliente perguntar sobre documentação, termos, condições, prazos, métodos de pagamento, etc.\n\nA ferramenta automaticamente:\n1. Gera um embedding da pergunta do cliente usando OpenAI\n2. Busca os documentos mais similares na base de conhecimento usando Supabase Vector Store\n3. Retorna os trechos (chunks) mais relevantes com suas fontes\n\nParâmetros:\n- query (obrigatório): A pergunta ou termo de busca do cliente\n\nRetorna:\n- Array de documentos relevantes da base de conhecimento\n- Cada documento contém: pageContent (texto do chunk), metadata (nome do arquivo, categoria, tags, similarity)\n\nIMPORTANTE:\n- Use os resultados para enriquecer sua resposta, mas sempre cite a fonte quando possível\n- Se não encontrar resultados relevantes, informe ao cliente que não há informações disponíveis\n- Combine múltiplos documentos se necessário para dar uma resposta completa\n- Não invente informações - se não encontrar, seja honesto"
+}
+
