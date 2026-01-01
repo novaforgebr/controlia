@@ -168,12 +168,29 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('📥 POST /api/calendar/events - Body recebido:', JSON.stringify(body, null, 2))
+    
     const { title, description, start_at, end_at, is_all_day, location, contact_id, visibility, organizer_id } = body
     const companyId = body.company_id || request.headers.get('x-company-id')
 
-    if (!title || !start_at || !end_at) {
+    // Validações detalhadas com mensagens específicas
+    if (!title || title.trim() === '') {
       return NextResponse.json(
-        { error: 'Título, data de início e fim são obrigatórios' },
+        { error: 'Título é obrigatório e não pode estar vazio' },
+        { status: 400 }
+      )
+    }
+
+    if (!start_at || start_at.trim() === '') {
+      return NextResponse.json(
+        { error: 'Data de início (start_at) é obrigatória e não pode estar vazia. Forneça no formato ISO 8601 (ex: 2026-01-15T10:00:00Z)' },
+        { status: 400 }
+      )
+    }
+
+    if (!end_at || end_at.trim() === '') {
+      return NextResponse.json(
+        { error: 'Data de fim (end_at) é obrigatória e não pode estar vazia. Forneça no formato ISO 8601 (ex: 2026-01-15T11:00:00Z)' },
         { status: 400 }
       )
     }
@@ -209,13 +226,21 @@ export async function POST(request: NextRequest) {
     const result = await createCalendarEvent(formData, companyId || undefined)
 
     if (result.error) {
+      console.error('❌ Erro na server action createCalendarEvent:', result.error)
       return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
+    console.log('✅ Evento criado com sucesso:', result.data?.id)
     return NextResponse.json({ success: true, data: result.data })
   } catch (error) {
-    console.error('Erro:', error)
-    return NextResponse.json({ error: 'Erro ao criar evento' }, { status: 500 })
+    console.error('❌ Erro ao processar POST /api/calendar/events:', error)
+    console.error('   - Tipo:', error instanceof Error ? error.constructor.name : typeof error)
+    console.error('   - Mensagem:', error instanceof Error ? error.message : String(error))
+    console.error('   - Stack:', error instanceof Error ? error.stack : 'N/A')
+    return NextResponse.json({ 
+      error: 'Erro ao criar evento', 
+      details: error instanceof Error ? error.message : 'Erro desconhecido' 
+    }, { status: 500 })
   }
 }
 
