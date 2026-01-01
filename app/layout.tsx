@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ToastProvider } from '@/components/providers/ToastProvider'
@@ -13,16 +13,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Controlia CRM - Centro de Comando Inteligente',
   description: 'Plataforma SaaS de CRM com automação, IA e controle total de dados',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
-  ],
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -31,6 +21,17 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
 }
 
 export default function RootLayout({

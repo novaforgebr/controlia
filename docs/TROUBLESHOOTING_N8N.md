@@ -273,6 +273,51 @@ Ao fazer requisições à API, aparece "empresa não encontrada" mesmo que a emp
 
 ---
 
+## IA não está usando as ferramentas de agendamento
+
+### Problema
+
+A IA não está usando as ferramentas "Busca Disponibilidades" ou "Cria Evento" quando o cliente pede horários disponíveis ou confirma uma data de agendamento.
+
+### Causa
+
+1. O prompt do AI Agent pode não ter instruções suficientemente explícitas sobre quando usar as ferramentas
+2. As instruções podem estar muito genéricas e não imperativas o suficiente
+3. O AI Agent pode não entender claramente quando deve usar cada ferramenta
+
+### Solução
+
+1. **Adicione regras obrigatórias explícitas no systemMessage do AI Agent**:
+   - Sempre usar "Busca Disponibilidades" quando o cliente perguntar sobre horários
+   - Sempre usar "Cria Evento" quando o cliente confirmar uma data
+   - Inclua exemplos claros de quando usar cada ferramenta
+
+2. **Melhore as descrições das Tools**:
+   - Use emojis e formatação para destacar quando usar cada tool
+   - Seja muito explícito e imperativo nas instruções
+   - Inclua exemplos de cenários específicos
+
+3. **Configure as Tools para usar `$fromAI` quando necessário**:
+   - Para "Cria Evento", use `$fromAI` para que a IA forneça `start_at` e `end_at`
+   - Isso permite que a IA forneça a data baseada na conversa
+
+### Exemplo de System Message melhorado:
+
+```markdown
+# ⚠️ REGRAS OBRIGATÓRIAS PARA FERRAMENTAS DE AGENDAMENTO ⚠️
+
+## REGRA 1: SEMPRE USAR "Busca Disponibilidades" QUANDO:
+- O cliente perguntar sobre horários disponíveis
+- O cliente mencionar interesse em agendar
+- ANTES de criar qualquer evento
+
+## REGRA 2: SEMPRE USAR "Cria Evento" QUANDO:
+- O cliente confirmar uma data/hora
+- Após verificar disponibilidade e o horário estiver livre
+```
+
+---
+
 ## Outros Problemas
 
 Se você encontrar outros problemas, verifique:

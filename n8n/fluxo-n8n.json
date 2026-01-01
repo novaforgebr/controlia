@@ -12,7 +12,7 @@
       "typeVersion": 2.1,
       "position": [
         2704,
-        144
+        128
       ],
       "id": "94d8922a-d802-42f6-9fd2-9e492fc6f9d9",
       "name": "Webhook",
@@ -46,9 +46,9 @@
       "typeVersion": 4.7,
       "position": [
         5280,
-        336
+        320
       ],
-      "id": "98f5be10-db11-43b0-b2b6-868c78adbb6e",
+      "id": "9ee5b3c2-7e33-4dbc-bc26-476e7af390b0",
       "name": "Tabela de Preços"
     },
     {
@@ -169,9 +169,9 @@
       "typeVersion": 1,
       "position": [
         3104,
-        144
+        128
       ],
-      "id": "e9366b21-c9af-4f45-aae3-85908332dd6a",
+      "id": "ae27e9d2-dc49-4abb-9c1f-93b23ef42bc4",
       "name": "Criar/atualizar sessionId"
     },
     {
@@ -198,9 +198,9 @@
       "typeVersion": 1,
       "position": [
         3280,
-        144
+        128
       ],
-      "id": "5d7fa56d-69a6-4e04-a33d-32da2f834b8b",
+      "id": "f07d3e8b-dd00-48b4-b832-935a1469f42b",
       "name": "Get row(s)",
       "alwaysOutputData": true
     },
@@ -322,9 +322,9 @@
       "typeVersion": 1,
       "position": [
         4368,
-        144
+        128
       ],
-      "id": "092e176a-8046-4848-8b50-8e6f9a9f8bd2",
+      "id": "c35d49fd-7610-4204-9937-f5f249fb7802",
       "name": "AtualizaVariaveisExtrator"
     },
     {
@@ -443,9 +443,9 @@
       "typeVersion": 1,
       "position": [
         5056,
-        144
+        128
       ],
-      "id": "a71d0682-1058-449b-a9fe-e085bb6199d9",
+      "id": "ce02c9bd-7100-4877-a6cf-5c6151701fa8",
       "name": "AtualizaPerguntaResposta"
     },
     {
@@ -470,7 +470,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "agendamento_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('agendamento_id', `Atualiza o campo \"agendamento_id\" com  o id obtido da criação do evento.`, 'string') }}",
-            "data_agendamento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('data_agendamento', `Insere a Data de Agendamento criada no formato ISO 8601 (ex: 2026-01-15T10:00:00Z). Deve ser uma data futura.`, 'dateTime') }}"
+            "data_agendamento": "={{ $fromAI('data_agendamento', `...`, 'string') }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -520,7 +520,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "type": "dateTime",
+              "type": "string",
               "readOnly": false,
               "removed": false
             },
@@ -564,9 +564,9 @@
       "typeVersion": 1,
       "position": [
         4704,
-        352
+        336
       ],
-      "id": "5036361a-584c-4671-9905-b10e55a6fafd",
+      "id": "1c82e7e4-cb73-4f34-bcce-9046ffa1c48e",
       "name": "Data table Update",
       "notesInFlow": false,
       "notes": "ESSENCIAL: Use esta ferramenta IMEDIATAMENTE após usar 'Cria Evento' para salvar o ID do agendamento. Sem isso, o sistema perderá o agendamento. Parâmetros: agendamento_id (o ID retornado pela criação) e data_agendamento."
@@ -595,26 +595,11 @@
       "typeVersion": 1,
       "position": [
         4880,
-        144
+        128
       ],
-      "id": "a0f21d41-f946-4c26-8080-1081eb6a6449",
+      "id": "23261cfc-4ce0-4157-b3e2-941162f767e7",
       "name": "Get row(s)1",
       "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Webhook').first().json.body.controlia.conversation_id }}_assistente",
-        "contextWindowLength": 10
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.3,
-      "position": [
-        3936,
-        352
-      ],
-      "id": "ba83366a-f704-4549-be5a-07906011c1d1",
-      "name": "Simple Memory2"
     },
     {
       "parameters": {
@@ -648,9 +633,9 @@
       "typeVersion": 1.2,
       "position": [
         4048,
-        144
+        128
       ],
-      "id": "b4d2940c-c7fb-49c5-b4fe-85901fc1abb0",
+      "id": "95aefb30-0d7b-4f4c-b58a-314ec5f1cb89",
       "name": "Information Extractor",
       "executeOnce": false,
       "alwaysOutputData": true
@@ -668,9 +653,9 @@
       "typeVersion": 4.3,
       "position": [
         5472,
-        144
+        128
       ],
-      "id": "864cdb5b-a831-4e42-8cd0-d9466fac742f",
+      "id": "cafc7974-0f84-470f-973c-0310243da305",
       "name": "HTTP Request (Enviar Resposta)"
     },
     {
@@ -697,9 +682,9 @@
       "typeVersion": 3.4,
       "position": [
         2896,
-        144
+        128
       ],
-      "id": "dcc541b0-0ab6-4826-b187-c91b0a2e1c2b",
+      "id": "7a3e0d5c-73dc-4e85-ae97-9931717ff95d",
       "name": "Define:Mensagem e Session_id"
     },
     {
@@ -720,9 +705,9 @@
       "typeVersion": 1,
       "position": [
         3472,
-        144
+        128
       ],
-      "id": "b33b7ff6-a24b-41b9-919b-bf07ed670f83",
+      "id": "cb585654-fbf4-41a8-9170-92864b452945",
       "name": "#Prompt IA de Atendimento e Triagem",
       "credentials": {
         "supabaseApi": {
@@ -739,9 +724,9 @@
       "typeVersion": 2,
       "position": [
         3664,
-        144
+        128
       ],
-      "id": "df8f13f7-173c-486a-bf3f-142e936b308c",
+      "id": "cfdd8bc7-24c4-4248-88eb-ef171ef7f687",
       "name": "Concatenador #IA de Atendimento e Triagem"
     },
     {
@@ -763,9 +748,9 @@
       "typeVersion": 1,
       "position": [
         3856,
-        144
+        128
       ],
-      "id": "3be53a98-3065-4b6f-b864-2d59d9e8819c",
+      "id": "cc4e6ae8-c832-4f48-9310-ecd82c2f5658",
       "name": "#Prompt Extração de Dados",
       "credentials": {
         "supabaseApi": {
@@ -776,31 +761,31 @@
     },
     {
       "parameters": {
-        "jsCode": "// Obter dados do webhook original\nconst webhookData = $('Webhook1').first().json.body || $('Webhook1').first().json;\nconst controlia = webhookData.controlia || {};\nconst message = webhookData.message || {};\n\n// Obter resposta da IA\nconst output = $('AI Agent - Respostas').first().json.output;\n\n// Obter dados da linha do DataTable\nconst rowData = $('Get row(s)1').first().json || {};\n\n// Preparar campos customizados para atualizar (só incluir se não forem null/undefined)\nconst customFields = {};\nif (rowData.interesse) customFields.interesse = rowData.interesse;\nif (rowData.historico_tratamento) customFields.historico_tratamento = rowData.historico_tratamento;\nif (rowData.data_agendamento) customFields.data_agendamento = rowData.data_agendamento;\n\n// Retornar payload completo\nreturn {\n  // Resposta da IA que será enviada ao canal (Telegram, WhatsApp, etc.)\n  output: output,\n  \n  // Dados do Controlia (obrigatórios - já vêm do webhook original)\n  controlia: {\n    company_id: controlia.company_id,\n    contact_id: controlia.contact_id,\n    conversation_id: controlia.conversation_id,\n    message_id: controlia.message_id,\n    channel: controlia.channel || 'telegram',\n    channel_id: controlia.channel_id || message.chat?.id?.toString()\n  },\n  \n  // Dados da mensagem original (opcional, mas recomendado)\n  message: {\n    from: message.from || controlia.message?.from,\n    chat: message.chat || controlia.message?.chat\n  },\n  \n  // ✅ Campos customizados para atualizar no contato (só se houver valores)\n  ...(Object.keys(customFields).length > 0 ? { custom_fields: customFields } : {})\n};"
+        "jsCode": "// Obter dados do webhook original\nconst webhookData = $('Webhook').first().json.body || $('Webhook').first().json;\nconst controlia = webhookData.controlia || {};\nconst message = webhookData.message || {};\n\n// Obter resposta da IA\nconst output = $('AI Agent - Respostas').first().json.output;\n\n// Obter dados da linha do DataTable\nconst rowData = $('Get row(s)1').first().json || {};\n\n// Preparar campos customizados para atualizar (só incluir se não forem null/undefined)\nconst customFields = {};\nif (rowData.interesse) customFields.interesse = rowData.interesse;\nif (rowData.historico_tratamento) customFields.historico_tratamento = rowData.historico_tratamento;\nif (rowData.data_agendamento) customFields.data_agendamento = rowData.data_agendamento;\n\n// Retornar payload completo\nreturn {\n  // Resposta da IA que será enviada ao canal (Telegram, WhatsApp, etc.)\n  output: output,\n  \n  // Dados do Controlia (obrigatórios - já vêm do webhook original)\n  controlia: {\n    company_id: controlia.company_id,\n    contact_id: controlia.contact_id,\n    conversation_id: controlia.conversation_id,\n    message_id: controlia.message_id,\n    channel: controlia.channel || 'telegram',\n    channel_id: controlia.channel_id || message.chat?.id?.toString()\n  },\n  \n  // Dados da mensagem original (opcional, mas recomendado)\n  message: {\n    from: message.from || controlia.message?.from,\n    chat: message.chat || controlia.message?.chat\n  },\n  \n  // ✅ Campos customizados para atualizar no contato (só se houver valores)\n  ...(Object.keys(customFields).length > 0 ? { custom_fields: customFields } : {})\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         5264,
-        144
+        128
       ],
-      "id": "5e2cdb0b-f6cd-40e2-bc94-a0c6adfca709",
+      "id": "ac7b00f7-0ff7-41d5-ab58-ccd0b7448d7c",
       "name": "Prepare Response Data"
     },
     {
       "parameters": {
-        "toolDescription": "Verifica a disponibilidade da agenda em um período específico. \nRetorna todos os eventos agendados no intervalo de datas informado.\nUse esta ferramenta ANTES de criar ou atualizar qualquer evento para garantir que não haja conflitos de horário.\n\nIMPORTANTE: \n- Se o usuário mencionar uma data/hora específica, a ferramenta usará essa data.\n- Se o usuário não mencionar uma data, a ferramenta usará automaticamente a data/hora atual de São Paulo (fuso horário America/Sao_Paulo).\n- A ferramenta busca eventos nos próximos 360 horas (15 dias) a partir da data de referência.",
+        "toolDescription": "🔍 VERIFICA HORÁRIOS DISPONÍVEIS na agenda. Use esta ferramenta:\n- SEMPRE quando o cliente perguntar sobre horários disponíveis (ex: \"quais horários você tem\", \"verifique disponibilidade\")\n- SEMPRE antes de criar um novo evento\n- A ferramenta busca automaticamente os próximos 15 dias a partir de agora\n- Retorna todos os eventos já agendados para que você possa informar horários livres ao cliente\n\n⚠️ É OBRIGATÓRIO usar esta ferramenta quando o cliente mencionar interesse em agendar ou perguntar sobre disponibilidade.",
         "url": "https://controliaa.vercel.app/api/calendar/events",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
               "name": "start",
-              "value": "={{ ($('Get row(s)1').first().json.data_agendamento || $('AtualizaVariaveisExtrator').first().json.data_agendamento) ? DateTime.fromISO($('Get row(s)1').first().json.data_agendamento || $('AtualizaVariaveisExtrator').first().json.data_agendamento).toUTC().toISO() : $now.setZone('America/Sao_Paulo').toUTC().toISO() }}"
+              "value": "={{ $now.setZone('America/Sao_Paulo').toUTC().toISO() }}"
             },
             {
               "name": "end",
-              "value": "={{ ($('Get row(s)1').first().json.data_agendamento || $('AtualizaVariaveisExtrator').first().json.data_agendamento) ? DateTime.fromISO($('Get row(s)1').first().json.data_agendamento || $('AtualizaVariaveisExtrator').first().json.data_agendamento).plus({ hours: 360 }).toUTC().toISO() : $now.setZone('America/Sao_Paulo').plus({ hours: 360 }).toUTC().toISO() }}"
+              "value": "={{ $now.setZone('America/Sao_Paulo').plus({ hours: 360 }).toUTC().toISO() }}"
             },
             {
               "name": "status",
@@ -808,7 +793,7 @@
             },
             {
               "name": "company_id",
-              "value": "={{ $('Webhook1').first().json.body.controlia.company_id }}"
+              "value": "={{ $('Webhook').first().json.body.controlia.company_id }}"
             }
           ]
         },
@@ -825,11 +810,7 @@
             },
             {
               "name": "x-company-id",
-              "value": "={{ $('Webhook1').first().json.body.controlia.company_id }}"
-            },
-            {
-              "name": "x-company-id",
-              "value": "={{ $('Webhook1').first().json.body.controlia.company_id }}"
+              "value": "={{ $('Webhook').first().json.body.controlia.company_id }}"
             }
           ]
         },
@@ -839,9 +820,9 @@
       "typeVersion": 4.3,
       "position": [
         4080,
-        352
+        336
       ],
-      "id": "850fa2d6-c0a3-4ba8-9889-09ae1a090c57",
+      "id": "c1d7d08f-d966-46fd-89dc-15f5b634c61f",
       "name": "Busca Disponibilidades",
       "rewireOutputLogTo": "ai_tool"
     },
@@ -849,7 +830,7 @@
       "parameters": {
         "toolDescription": "Atualiza um evento existente no calendário.\nIMPORTANTE: \n1. Sempre use \"Busca Disponibilidades\" ANTES de atualizar para verificar se o novo horário está disponível.\n2. Você precisa do ID do evento (agendamento_id) que está armazenado na DataTable.\n3. Você precisa ter uma nova data de agendamento (campo data_agendamento da DataTable).\n4. Se não houver agendamento_id ou data_agendamento, informe ao usuário e ofereça criar um novo evento.\n5. O evento terá duração de 1 hora a partir da nova data de início.",
         "method": "PATCH",
-        "url": "=https://controliaa.vercel.app/api/calendar/events/{{ $('Get row(s)1').first().json.agendamento_id || $('AtualizaVariaveisExtrator').first().json.agendamento_id }}",
+        "url": "=https://controliaa.vercel.app/api/calendar/events/{{ /*n8n-auto-generated-fromAI*/ $fromAI('event_id', `ID do evento que deseja atualizar. Obtenha este ID do campo agendamento_id da DataTable ou do resultado anterior de criação de evento.`, 'string') }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -863,27 +844,27 @@
             },
             {
               "name": "x-company-id",
-              "value": "={{ $('Webhook1').first().json.body.controlia.company_id }}"
+              "value": "={{ $('Webhook').first().json.body.controlia.company_id }}"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"company_id\": \"{{ $('Webhook1').first().json.body.controlia.company_id }}\",\n  \"title\": \"Consulta com {{ $('Get row(s)1').first().json.nome_completo || 'Cliente' }}\",\n  \"description\": \"Para tratar sobre {{ $('Get row(s)1').first().json.interesse || 'consulta' }}\",\n  \"start_at\": \"{{ $('Get row(s)1').first().json.data_agendamento }}\",\n  \"end_at\": \"{{ ($('Get row(s)1').first().json.data_agendamento) ? DateTime.fromISO($('Get row(s)1').first().json.data_agendamento).plus({ hours: 1 }).toUTC().toISO() : DateTime.now().setZone('America/Sao_Paulo').plus({ hours: 1 }).toUTC().toISO() }}\",\n  \"is_all_day\": false,\n  \"location\": \"Clínica\",\n  \"contact_id\": \"{{ $('Webhook1').first().json.body.controlia.contact_id }}\",\n  \"visibility\": \"company\"\n}",
+        "jsonBody": "={\n  \"company_id\": \"{{ $('Webhook').first().json.body.controlia.company_id }}\",\n  \"title\": \"Consulta com {{ $('Webhook').first().json.body.message.from.first_name || 'Cliente' }}\",\n  \"description\": \"Consulta atualizada via atendimento\",\n  \"start_at\": \"{{ /*n8n-auto-generated-fromAI*/ $fromAI('start_at', `Nova data e hora de início do evento no formato ISO 8601 (ex: 2026-01-15T10:00:00Z). Deve ser uma data futura.`, 'string') }}\",\n  \"end_at\": \"{{ /*n8n-auto-generated-fromAI*/ $fromAI('end_at', `Nova data e hora de término do evento no formato ISO 8601 (ex: 2026-01-15T11:00:00Z). Deve ser 1 hora após o start_at.`, 'string') }}\",\n  \"is_all_day\": false,\n  \"location\": \"Online/Telefone\",\n  \"contact_id\": \"{{ $('Webhook').first().json.body.controlia.contact_id }}\",\n  \"visibility\": \"company\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
         4400,
-        352
+        336
       ],
-      "id": "fa5bdc36-03b1-44ef-9643-0ca03c3ed44c",
+      "id": "f2e7d5f1-5617-4b22-a5c6-dc8f70f4da54",
       "name": "Atualiza Eventos"
     },
     {
       "parameters": {
-        "toolDescription": "Cria um novo evento no calendário da empresa.\nIMPORTANTE: \n1. Sempre use \"Busca Disponibilidades\" ANTES de criar um evento para verificar se o horário está livre.\n2. Você precisa ter uma data de agendamento válida (campo data_agendamento da DataTable).\n3. Se não houver data_agendamento, pergunte ao usuário quando deseja agendar.\n4. Após criar o evento com sucesso, salve o ID retornado no campo \"agendamento_id\" da DataTable usando a tool \"Data table Update\".\n5. O evento terá duração de 1 hora a partir da data de início.",
+        "toolDescription": "✅ CRIA UM NOVO AGENDAMENTO no calendário.\n\n⚠️ USE ESTA FERRAMENTA QUANDO:\n- O cliente confirmar uma data/hora para agendamento (ex: \"sim, quero\", \"confirmo\", \"está bom\", \"pode ser\")\n- Após você verificar disponibilidade e o horário estiver livre\n- O cliente mencionar diretamente uma data/hora que deseja agendar\n\n📋 FLUXO OBRIGATÓRIO:\n1. Após criar o evento com esta ferramenta\n2. Você DEVE usar imediatamente \"Data table Update\" para salvar o ID retornado\n3. Confirme com o cliente a data, hora e duração (1 hora)\n\n💡 A ferramenta cria automaticamente um evento de 1 hora a partir da data de início. O evento terá o nome do cliente e descrição baseada no interesse.",
         "method": "POST",
         "url": "https://controliaa.vercel.app/api/calendar/events",
         "sendHeaders": true,
@@ -899,29 +880,29 @@
             },
             {
               "name": "x-company-id",
-              "value": "={{ $('Webhook1').first().json.body.controlia.company_id }}"
+              "value": "={{ $('Webhook').first().json.body.controlia.company_id }}"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"company_id\": \"{{ $('Webhook1').first().json.body.controlia.company_id }}\",\n  \"title\": \"Consulta com {{ $('Get row(s)1').first().json.nome_completo || $json.nome_completo || 'Cliente' }}\",\n  \"description\": \"Para tratar sobre {{ $('Get row(s)1').first().json.interesse || $json.interesse || 'consulta' }}\",\n  \"start_at\": \"{{ $('Get row(s)1').first().json.data_agendamento || $json.data_agendamento }}\",\n  \"end_at\": \"{{ ($('Get row(s)1').first().json.data_agendamento || $json.data_agendamento) ? DateTime.fromISO($('Get row(s)1').first().json.data_agendamento || $json.data_agendamento).plus({ hours: 1 }).toUTC().toISO() : DateTime.now().setZone('America/Sao_Paulo').plus({ hours: 1 }).toUTC().toISO() }}\",\n  \"is_all_day\": false,\n  \"location\": \"Clínica\",\n  \"contact_id\": \"{{ $('Webhook1').first().json.body.controlia.contact_id }}\",\n  \"visibility\": \"company\"\n}\n",
+        "jsonBody": "={\n  \"company_id\": \"{{ $('Webhook').first().json.body.controlia.company_id }}\",\n  \"title\": \"Consulta com {{ $('Webhook').first().json.body.message.from.first_name || 'Cliente' }}\",\n  \"description\": \"Consulta agendada via atendimento\",\n  \"start_at\": \"{{ /*n8n-auto-generated-fromAI*/ $fromAI('start_at', `Data e hora de início do evento no formato ISO 8601 (ex: 2026-01-15T10:00:00Z). Deve ser uma data futura no horário de São Paulo.`, 'string') }}\",\n  \"end_at\": \"{{ /*n8n-auto-generated-fromAI*/ $fromAI('end_at', `Data e hora de término do evento no formato ISO 8601 (ex: 2026-01-15T11:00:00Z). Deve ser 1 hora após o start_at.`, 'string') }}\",\n  \"is_all_day\": false,\n  \"location\": \"Online/Telefone\",\n  \"contact_id\": \"{{ $('Webhook').first().json.body.controlia.contact_id }}\",\n  \"visibility\": \"company\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
         4256,
-        352
+        336
       ],
-      "id": "67ec8c78-2422-4551-806c-b12481cfd1d3",
+      "id": "b2617753-09c0-43b4-a5b1-08b350cb8071",
       "name": "Cria Evento"
     },
     {
       "parameters": {
         "toolDescription": "Exclui um evento do calendário.\nIMPORTANTE: \n1. Você precisa do ID do evento (agendamento_id) que está armazenado na DataTable.\n2. Sempre confirme com o usuário antes de excluir um agendamento.\n3. Após excluir, atualize a DataTable removendo o agendamento_id (defina como vazio ou null).",
         "method": "DELETE",
-        "url": "=https://controliaa.vercel.app/api/calendar/events/{{ $('Get row(s)1').first().json.agendamento_id || $('AtualizaVariaveisExtrator').first().json.agendamento_id }}",
+        "url": "=https://controliaa.vercel.app/api/calendar/events/{{ /*n8n-auto-generated-fromAI*/ $fromAI('event_id', `ID do evento que deseja atualizar. Obtenha este ID do campo agendamento_id da DataTable ou do resultado anterior de criação de evento.`, 'string') }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -931,7 +912,7 @@
             },
             {
               "name": "x-company-id",
-              "value": "={{ $('Webhook1').first().json.body.controlia.company_id }}"
+              "value": "={{ $('Webhook').first().json.body.controlia.company_id }}"
             }
           ]
         },
@@ -941,9 +922,9 @@
       "typeVersion": 4.3,
       "position": [
         4544,
-        352
+        336
       ],
-      "id": "ed9be585-566f-47f4-8942-f378ff27e835",
+      "id": "db906bab-99db-4fb8-b618-9ce967732a45",
       "name": "Exclui Eventos"
     },
     {
@@ -951,16 +932,16 @@
         "promptType": "define",
         "text": "={{ $('Webhook').first().json.body.message.text }}",
         "options": {
-          "systemMessage": "={{ $('Concatenador #IA de Atendimento e Triagem').first().json.content_prompt_concatenado }}\n\n# CONTEXTO ATUAL (REAL-TIME)\n- Data/Hora Agora: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy, HH:mm\") }}\n- Fuso Horário da Empresa: América/São Paulo (UTC-3).\n\n# STATUS DA TRIAGEM (MEMÓRIA)\nAnalise o que já sabemos sobre o contato atual:\n- Nome: {{ $('Get row(s)').first().json.nome_completo || \"Não informado\" }}\n- Interesse (O que busca): {{ $('Get row(s)').first().json.interesse || \"Não informado\" }}\n- Contexto do Projeto (Já tem sistema ou é novo?): {{ $('Get row(s)').first().json.historico_tratamento || \"Não informado\" }}\n- Data da Reunião: {{ $('Get row(s)').first().json.data_agendamento || \"Não agendado\" }}\n- ID do Agendamento (Sistema): {{ $('Get row(s)').first().json.agendamento_id || \"null\" }}\n\nContexto da Conversa:\n\nData/Hora Atual da conversa: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat('cccc') }}, {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"dd 'de' LLLL 'de' yyyy HH:mm'hrs'\") }}\n\nIdentifique o gênero através do nome: {{ $('Webhook').first().json.body.message.from.first_name }}. De acordo com esse nome utilize artigos e pronomes adequados (Ex: \"Seja bem-vindo, Sr.\" ou \"Seja bem-vinda, Sra.\").\n\nÚltima interação:\n\nA última pergunta do usuário foi: {{ $('Get row(s)').first().json.ultima_pergunta_contato || \"Nenhuma\" }}.\nSua última resposta foi: {{ $('Get row(s)').first().json.ultima_resposta_ia || \"Nenhuma\" }}."
+          "systemMessage": "={{ $('Concatenador #IA de Atendimento e Triagem').first().json.content_prompt_concatenado }}\n\n# CONTEXTO ATUAL (REAL-TIME)\n- Data/Hora Agora: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy, HH:mm\") }}\n- Fuso Horário da Empresa: América/São Paulo (UTC-3).\n\n# STATUS DA TRIAGEM (MEMÓRIA)\nAnalise o que já sabemos sobre o contato atual:\n- Nome: {{ $('Get row(s)').first().json.nome_completo || \"Não informado\" }}\n- Interesse (O que busca): {{ $('Get row(s)').first().json.interesse || \"Não informado\" }}\n- Contexto do Projeto (Já tem sistema ou é novo?): {{ $('Get row(s)').first().json.historico_tratamento || \"Não informado\" }}\n- Data da Reunião: {{ $('Get row(s)').first().json.data_agendamento || \"Não agendado\" }}\n- ID do Agendamento (Sistema): {{ $('Get row(s)').first().json.agendamento_id || \"null\" }}\n\nContexto da Conversa:\n\nData/Hora Atual da conversa: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat('cccc') }}, {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"dd 'de' LLLL 'de' yyyy HH:mm'hrs'\") }}\n\nIdentifique o gênero através do nome: {{ $('Webhook').first().json.body.message.from.first_name }}. De acordo com esse nome utilize artigos e pronomes adequados (Ex: \"Seja bem-vindo, Sr.\" ou \"Seja bem-vinda, Sra.\").\n\nÚltima interação:\n\nA última pergunta do usuário foi: {{ $('Get row(s)').first().json.ultima_pergunta_contato || \"Nenhuma\" }}.\nSua última resposta foi: {{ $('Get row(s)').first().json.ultima_resposta_ia || \"Nenhuma\" }}.\n\n# ⚠️ REGRAS OBRIGATÓRIAS PARA FERRAMENTAS DE AGENDAMENTO ⚠️\n\n## REGRA 1: SEMPRE USAR \"Busca Disponibilidades\" QUANDO:\n- O cliente perguntar sobre horários disponíveis (ex: \"quais horários você tem disponíveis\", \"verifique disponibilidade\", \"tem horário livre\")\n- O cliente mencionar interesse em agendar uma data/hora específica\n- ANTES de criar ou atualizar QUALQUER evento\n\n**AÇÃO OBRIGATÓRIA**: Se o cliente pedir horários disponíveis ou mencionar interesse em agendar, você DEVE usar \"Busca Disponibilidades\" IMEDIATAMENTE.\n\n## REGRA 2: SEMPRE USAR \"Cria Evento\" QUANDO:\n- O cliente confirmar uma data/hora para agendamento (ex: \"sim, quero agendar\", \"confirmo\", \"está bom\", \"pode ser nesse horário\")\n- Após você ter verificado disponibilidade e o horário estiver livre\n- O campo data_agendamento estiver preenchido na DataTable (mesmo que você precise inferir do contexto)\n\n**AÇÃO OBRIGATÓRIA**: Se o cliente confirmar uma data OU se você já verificou disponibilidade e o horário está livre, você DEVE usar \"Cria Evento\" para criar o agendamento.\n\n## REGRA 3: FLUXO OBRIGATÓRIO DE AGENDAMENTO:\n\n1. Cliente menciona interesse em agendar OU pergunta sobre horários\n   → **VOCÊ DEVE USAR \"Busca Disponibilidades\"**\n\n2. Após verificar disponibilidade:\n   - Se livre: **VOCÊ DEVE USAR \"Cria Evento\"** imediatamente\n   - Se ocupado: Informe ao cliente e sugira alternativas\n\n3. Após criar evento com sucesso:\n   → **VOCÊ DEVE USAR \"Data table Update\"** para salvar o ID do agendamento\n\n## REGRA 4: INTERPRETAÇÃO DE CONFIRMAÇÃO:\n\nConsidere como CONFIRMAÇÃO de agendamento:\n- \"Sim\", \"Confirmo\", \"Pode ser\", \"Está bom\", \"Perfeito\", \"Ótimo\"\n- \"Quero agendar para [data/hora]\"\n- \"Pode ser amanhã às 10h\"\n- Qualquer resposta positiva após você sugerir um horário\n\nQuando houver confirmação, você DEVE usar \"Cria Evento\" mesmo que precise inferir a data do contexto da conversa.\n\n## REGRA 5: NÃO PULE ETAPAS\n\nNUNCA crie um evento sem antes verificar disponibilidade (exceto em situações especiais onde o cliente já confirmou diretamente uma data específica após você ter verificado).\n\n## EXEMPLOS DE USO CORRETO:\n\n**Cenário 1 - Cliente pergunta horários:**\nCliente: \"verifique quais horários você tem disponíveis\"\n→ Você DEVE usar \"Busca Disponibilidades\" AGORA\n→ Informe os horários livres\n→ Se o cliente confirmar, use \"Cria Evento\"\n\n**Cenário 2 - Cliente menciona data específica:**\nCliente: \"quero agendar para amanhã às 10h\"\n→ Você DEVE usar \"Busca Disponibilidades\" primeiro para verificar\n→ Se livre, use \"Cria Evento\" imediatamente\n→ Use \"Data table Update\" para salvar o ID\n\n**Cenário 3 - Cliente confirma após verificação:**\nVocê: \"Tenho disponibilidade amanhã às 10h, 14h ou 16h\"\nCliente: \"Pode ser às 14h\"\n→ Você DEVE usar \"Cria Evento\" AGORA (já verificou disponibilidade anteriormente)\n→ Use \"Data table Update\" para salvar o ID\n\n## LEMBRE-SE:\n- Não espere o cliente pedir explicitamente - use as ferramentas proativamente quando apropriado\n- Se o cliente confirmar, crie o evento imediatamente\n- Sempre salve o ID do agendamento após criar"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
         4560,
-        144
+        128
       ],
-      "id": "122db297-5330-4df8-8583-53c4b5bcddef",
+      "id": "f1ec667f-19d1-45dc-bbb4-90fc777da22d",
       "name": "AI Agent - Respostas"
     },
     {
@@ -972,9 +953,9 @@
       "typeVersion": 1,
       "position": [
         3456,
-        352
+        336
       ],
-      "id": "25e0b4c6-dc98-4948-a763-eb9877db0b19",
+      "id": "9d6ce7eb-fe58-4461-b96c-47f4dbb11b4f",
       "name": "OpenRouter Chat Model",
       "executeOnce": true,
       "credentials": {
@@ -993,9 +974,9 @@
       "typeVersion": 1,
       "position": [
         3776,
-        352
+        336
       ],
-      "id": "7795298c-7be3-41ed-ae8e-0f86d097dfe6",
+      "id": "63330f17-2062-40ac-bd06-886c997a6325",
       "name": "OpenRouter Chat Model1",
       "credentials": {
         "openRouterApi": {
@@ -1019,9 +1000,9 @@
       "typeVersion": 1.3,
       "position": [
         3296,
-        352
+        336
       ],
-      "id": "d9011125-ba56-443b-b63b-207311e202ea",
+      "id": "02bf6293-e75a-4cfc-bf5d-9804e4a5fba1",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -1045,9 +1026,9 @@
       "typeVersion": 1.3,
       "position": [
         3616,
-        352
+        336
       ],
-      "id": "169d3157-65e4-454c-85f8-90194e37a5d4",
+      "id": "247a9a8c-5e4f-4379-96a7-7875e6e93032",
       "name": "OpenAI Chat Model1",
       "credentials": {
         "openAiApi": {
@@ -1065,9 +1046,9 @@
       "typeVersion": 1,
       "position": [
         4848,
-        352
+        336
       ],
-      "id": "20224042-77e6-44ec-b97d-b716c7ecc0cb",
+      "id": "32894f68-2d20-4391-a946-40982a3475f6",
       "name": "Embeddings OpenAI1",
       "rewireOutputLogTo": "ai_tool",
       "credentials": {
@@ -1092,9 +1073,9 @@
       "typeVersion": 1.3,
       "position": [
         4992,
-        336
+        320
       ],
-      "id": "fd6c6537-a5ac-41bb-9308-1d846953a3f7",
+      "id": "26c14327-8a75-40a6-8c7b-5fd860aa80d6",
       "name": "Supabase Vector Store",
       "credentials": {
         "supabaseApi": {
@@ -1102,6 +1083,21 @@
           "name": "Supabase account"
         }
       }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').first().json.body.controlia.conversation_id }}_assistente",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        3936,
+        336
+      ],
+      "id": "9eefd503-f87c-47ba-98b7-69e53c5c4447",
+      "name": "Simple Memory"
     }
   ],
   "connections": {
@@ -1114,11 +1110,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Tabela de Preços": {
-      "ai_tool": [
-        []
       ]
     },
     "Criar/atualizar sessionId": {
@@ -1182,17 +1173,6 @@
           {
             "node": "AtualizaPerguntaResposta",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Memory2": {
-      "ai_memory": [
-        [
-          {
-            "node": "AI Agent - Respostas",
-            "type": "ai_memory",
             "index": 0
           }
         ]
@@ -1341,16 +1321,6 @@
         ]
       ]
     },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
-        []
-      ]
-    },
-    "OpenAI Chat Model1": {
-      "ai_languageModel": [
-        []
-      ]
-    },
     "Embeddings OpenAI1": {
       "ai_embedding": [
         [
@@ -1364,7 +1334,24 @@
     },
     "Supabase Vector Store": {
       "ai_tool": [
-        []
+        [
+          {
+            "node": "AI Agent - Respostas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Respostas",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -1374,28 +1361,28 @@
         "headers": {
           "host": "controlia.up.railway.app",
           "user-agent": "node",
-          "content-length": "1172",
+          "content-length": "1189",
           "accept": "*/*",
           "accept-encoding": "br, gzip, deflate",
           "accept-language": "*",
           "content-type": "application/json",
           "sec-fetch-mode": "cors",
-          "x-forwarded-for": "100.31.189.240",
+          "x-forwarded-for": "3.236.245.67",
           "x-forwarded-host": "controlia.up.railway.app",
           "x-forwarded-proto": "https",
           "x-railway-edge": "railway/us-east4-eqdc4a",
-          "x-railway-request-id": "E7Vc3w6zR6u5PE1tg4a9AQ",
-          "x-real-ip": "100.31.189.240",
-          "x-request-start": "1767122167821",
-          "x-vercel-id": "fra1::fzsxx-1767122166216-30d63503cfac",
+          "x-railway-request-id": "GBmYn0TASBGJdR-TwoOzXw",
+          "x-real-ip": "3.236.245.67",
+          "x-request-start": "1767183050847",
+          "x-vercel-id": "fra1::kqbvj-1767183048024-c4f57cf04695",
           "x-webhook-secret": "N0v4F0rg3@2025"
         },
         "params": {},
         "query": {},
         "body": {
-          "update_id": 906310977,
+          "update_id": 906310987,
           "message": {
-            "message_id": 528,
+            "message_id": 547,
             "from": {
               "id": 7772641515,
               "is_bot": false,
@@ -1409,14 +1396,14 @@
               "last_name": "Silva",
               "type": "private"
             },
-            "date": 1767122166,
-            "text": "verifique quais horários você tem disponíveis"
+            "date": 1767183047,
+            "text": "Sim agende para essa data"
           },
           "controlia": {
             "company_id": "cae292bd-2cc7-42b9-9254-779ed011989e",
             "contact_id": "19742309-a940-45b8-8db4-fa09d872db1b",
             "conversation_id": "fdd21e73-1409-4957-b421-38389bcd554a",
-            "message_id": "59bba0cb-0707-482d-818b-bbf848b5af08",
+            "message_id": "c72fbefa-5863-4730-9961-e9219ff14c9d",
             "channel": "telegram",
             "callback_url": "https://controliaa.vercel.app/api/webhooks/n8n/channel-response",
             "contact": {
@@ -1433,15 +1420,15 @@
               "tags": null,
               "ai_enabled": true,
               "custom_fields": {
-                "interesse": "App",
+                "interesse": "Sistema Web",
                 "telegram_id": "7772641515",
-                "data_agendamento": null,
+                "data_agendamento": "2023-12-15T05:00:00.000Z",
                 "telegram_username": null,
-                "historico_tratamento": "Ideia do zero"
+                "historico_tratamento": "Primeira vez contratando"
               },
               "created_at": "2025-12-29T19:20:18.864928+00:00",
-              "updated_at": "2025-12-30T19:16:07.487321+00:00",
-              "last_interaction_at": "2025-12-30T19:16:06+00:00"
+              "updated_at": "2025-12-31T12:10:50.23266+00:00",
+              "last_interaction_at": "2025-12-31T12:10:47+00:00"
             }
           }
         },
