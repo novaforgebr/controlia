@@ -493,6 +493,56 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    // ✅ IDEMPOTÊNCIA: Verificar se mensagem já foi processada ANTES de criar
+    // Isso evita duplicação quando o Telegram reenvia o mesmo webhook
+    const channelMessageId = message_id.toString()
+    console.log('🔍 Verificando se mensagem já foi processada (idempotência)...')
+    console.log('   - channel_message_id:', channelMessageId)
+    console.log('   - conversation_id:', conversation.id)
+    
+    const { data: existingMessage, error: checkError } = await serviceClient
+      .from('messages')
+      .select('id, created_at, direction, sender_type, content')
+      .eq('company_id', contact.company_id)
+      .eq('conversation_id', conversation.id)
+      .eq('channel_message_id', channelMessageId)
+      .maybeSingle()
+    
+    if (checkError) {
+      console.warn('⚠️ Erro ao verificar mensagem existente (continuando):', checkError.message)
+      // Continuar normalmente se houver erro na verificação
+    } else if (existingMessage) {
+      console.log('✅ Mensagem já foi processada anteriormente (idempotência)')
+      console.log('   - Mensagem ID:', existingMessage.id)
+      console.log('   - Criada em:', existingMessage.created_at)
+      console.log('   - Content:', existingMessage.content?.substring(0, 50))
+      console.log('   - Direction:', existingMessage.direction)
+      console.log('   - Sender Type:', existingMessage.sender_type)
+      console.log('')
+      console.log('🚫 ==========================================')
+      console.log('🚫 DUPLICAÇÃO PREVENIDA - Mensagem já existe')
+      console.log('🚫 ==========================================')
+      console.log('✅ Retornando sucesso SEM criar duplicata')
+      console.log('✅ Retornando sucesso SEM enviar para n8n novamente')
+      console.log('🚫 ==========================================')
+      console.log('')
+      
+      // Retornar sucesso imediatamente - mensagem já foi processada
+      // Isso evita que o Telegram continue reenviando o webhook
+      return NextResponse.json({
+        success: true,
+        message_id: existingMessage.id,
+        conversation_id: conversation.id,
+        direction: existingMessage.direction,
+        sender_type: existingMessage.sender_type,
+        already_processed: true, // ✅ Indicar que já foi processada
+        duplicate_prevented: true, // ✅ Indicar que duplicação foi prevenida
+        saved_to_controlia: true,
+      })
+    } else {
+      console.log('✅ Mensagem não encontrada - pode ser processada normalmente')
+    }
     
     // Criar mensagem (usando service client para bypass RLS)
     // IMPORTANTE: Garantir que company_id seja o mesmo da conversa para consistência
@@ -540,6 +590,37 @@ export async function POST(request: NextRequest) {
       console.error('❌ Detalhes completos:', JSON.stringify(msgError, null, 2))
       console.error('❌ Dados que tentaram ser inseridos:', JSON.stringify(messageData, null, 2))
       
+      // ✅ Verificar se o erro é de duplicação (pode acontecer em race conditions)
+      // Código de erro do PostgreSQL para unique constraint violation
+      if (msgError.code === '23505' || msgError.message?.includes('duplicate') || msgError.message?.includes('unique')) {
+        console.log('⚠️ Erro de duplicação detectado - verificando se mensagem já existe...')
+        
+        // Tentar buscar a mensagem que já existe
+        const { data: duplicateMessage } = await serviceClient
+          .from('messages')
+          .select('id, created_at, direction, sender_type')
+          .eq('company_id', contact.company_id)
+          .eq('conversation_id', conversation.id)
+          .eq('channel_message_id', channelMessageId)
+          .maybeSingle()
+        
+        if (duplicateMessage) {
+          console.log('✅ Mensagem duplicada encontrada - retornando sucesso')
+          console.log('   - Mensagem ID:', duplicateMessage.id)
+          console.log('   - Criada em:', duplicateMessage.created_at)
+          return NextResponse.json({
+            success: true,
+            message_id: duplicateMessage.id,
+            conversation_id: conversation.id,
+            direction: duplicateMessage.direction,
+            sender_type: duplicateMessage.sender_type,
+            already_processed: true,
+            duplicate_prevented: true,
+            saved_to_controlia: true,
+          })
+        }
+      }
+      
       // Tentar novamente sem created_at (pode ser problema de timezone)
       console.log('🔄 Tentando novamente sem created_at customizado...')
       const { created_at, ...messageDataRetry } = messageData
@@ -551,6 +632,32 @@ export async function POST(request: NextRequest) {
         .single()
       
       if (retryResult.error) {
+        // ✅ Verificar novamente se é duplicação na segunda tentativa
+        if (retryResult.error.code === '23505' || retryResult.error.message?.includes('duplicate') || retryResult.error.message?.includes('unique')) {
+          console.log('⚠️ Erro de duplicação na segunda tentativa - verificando...')
+          const { data: duplicateMessage2 } = await serviceClient
+            .from('messages')
+            .select('id, created_at, direction, sender_type')
+            .eq('company_id', contact.company_id)
+            .eq('conversation_id', conversation.id)
+            .eq('channel_message_id', channelMessageId)
+            .maybeSingle()
+          
+          if (duplicateMessage2) {
+            console.log('✅ Mensagem duplicada encontrada na segunda tentativa - retornando sucesso')
+            return NextResponse.json({
+              success: true,
+              message_id: duplicateMessage2.id,
+              conversation_id: conversation.id,
+              direction: duplicateMessage2.direction,
+              sender_type: duplicateMessage2.sender_type,
+              already_processed: true,
+              duplicate_prevented: true,
+              saved_to_controlia: true,
+            })
+          }
+        }
+        
         console.error('❌ Erro na segunda tentativa:', retryResult.error)
         // Retornar 500 para Telegram reenviar (a mensagem é importante)
         return NextResponse.json(
@@ -734,6 +841,24 @@ export async function POST(request: NextRequest) {
     
     console.log('✅ IA está habilitada - continuando para buscar automações...')
     
+    // ✅ VERIFICAÇÃO ADICIONAL: Garantir que não estamos processando mensagem duplicada
+    // Verificar novamente antes de enviar para n8n (pode haver race condition)
+    if (newMessage && newMessage.id) {
+      const { data: verifyNewMessage } = await serviceClient
+        .from('messages')
+        .select('id')
+        .eq('id', newMessage.id)
+        .single()
+      
+      if (!verifyNewMessage) {
+        console.error('❌ Mensagem não encontrada após criar - possível race condition')
+        return NextResponse.json(
+          { error: 'Erro: mensagem não encontrada após criação' },
+          { status: 500 }
+        )
+      }
+    }
+
     // ✅ PASSO 3: Buscar automações ativas para processar mensagens
     // IMPORTANTE: Só chegamos aqui se a IA estiver habilitada
     console.log('📋 PASSO 3: Buscando automações para company_id:', contact.company_id)
@@ -790,8 +915,17 @@ export async function POST(request: NextRequest) {
       // NÃO falhar o webhook, mas logar o erro crítico
     }
 
-    // Se houver automações configuradas, enviar para n8n
+    // ✅ IMPORTANTE: Processar apenas UMA automação por mensagem
+    // Isso evita que a mesma mensagem seja enviada múltiplas vezes para o n8n
     if (automations && automations.length > 0) {
+      console.log(`🔍 Encontradas ${automations.length} automação(ões) ativa(s)`)
+      
+      // ✅ VALIDAÇÃO: Logar todas as automações encontradas para debug
+      automations.forEach((a, index) => {
+        console.log(`   ${index + 1}. ${a.name} (ID: ${a.id}, URL: ${a.n8n_webhook_url ? '✅ configurada' : '❌ não configurada'})`)
+      })
+      
+      // ✅ IMPORTANTE: Processar apenas UMA automação para evitar duplicações
       // Priorizar automação na seguinte ordem:
       // 1. "Atendimento com IA - Mensagens Recebidas" (nome exato ou similar)
       // 2. Qualquer automação com "Atendimento com IA" no nome
@@ -806,6 +940,14 @@ export async function POST(request: NextRequest) {
       ) || automations.find(a => 
         a.n8n_webhook_url && a.n8n_webhook_url.includes('secret=')
       ) || automations[0] // Fallback para primeira se não encontrar
+      
+      // ✅ VALIDAÇÃO: Se há múltiplas automações, logar aviso
+      if (automations.length > 1) {
+        console.warn('⚠️ AVISO: Múltiplas automações encontradas!')
+        console.warn(`⚠️ Processando apenas a primeira/priorizada: ${automation.name} (ID: ${automation.id})`)
+        console.warn('⚠️ As outras automações serão IGNORADAS para evitar duplicações')
+        console.warn('⚠️ Se você precisa processar em múltiplas automações, configure isso no n8n ou use um workflow único')
+      }
       
       console.log('🎯 Automação selecionada:', {
         id: automation.id,
@@ -1011,17 +1153,45 @@ export async function POST(request: NextRequest) {
             },
           }
 
+          // ✅ VERIFICAÇÃO FINAL: Garantir que a mensagem ainda existe antes de enviar para n8n
+          // Isso previne enviar mensagem duplicada se houve algum problema
+          if (newMessage && newMessage.id) {
+            const { data: finalCheck } = await serviceClient
+              .from('messages')
+              .select('id, direction, sender_type')
+              .eq('id', newMessage.id)
+              .eq('direction', 'inbound')
+              .eq('sender_type', 'human')
+              .single()
+            
+            if (!finalCheck) {
+              console.error('❌ Mensagem não encontrada na verificação final - não enviando para n8n')
+              return NextResponse.json({
+                success: true,
+                message_id: newMessage.id,
+                conversation_id: conversation.id,
+                saved_to_controlia: true,
+                ai_processing: false,
+                reason: 'Mensagem não encontrada na verificação final'
+              })
+            }
+          }
+
           console.log('📤 ENVIANDO para n8n:')
           console.log('   URL:', webhookUrl)
           console.log('   Headers:', JSON.stringify(headers, null, 2))
           console.log('   Payload (resumo):', {
             update_id: n8nPayload.update_id,
-            message_text: n8nPayload.message?.text,
+            message_id: n8nPayload.message?.message_id,
+            message_text: n8nPayload.message?.text?.substring(0, 50),
             controlia_company_id: n8nPayload.controlia?.company_id,
             controlia_contact_id: n8nPayload.controlia?.contact_id,
             controlia_conversation_id: n8nPayload.controlia?.conversation_id,
+            controlia_message_id: n8nPayload.controlia?.message_id,
             controlia_callback_url: n8nPayload.controlia?.callback_url
           })
+          console.log('   ✅ VALIDAÇÃO: Mensagem existe e está pronta para envio')
+          console.log('   ✅ VALIDAÇÃO: Enviando apenas UMA vez para UMA automação')
 
           // Enviar para o n8n no formato que seu workflow espera
           console.log('🚀 Fazendo requisição HTTP POST para n8n...')

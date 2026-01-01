@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
 
-// Inicializar cliente OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Função para obter cliente OpenAI (lazy initialization)
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY não configurada')
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  })
+}
 
 /**
  * POST /api/rag/search
@@ -59,14 +64,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar OpenAI API Key
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY não configurada')
-      return NextResponse.json(
-        { error: 'Configuração de IA não disponível' },
-        { status: 500 }
-      )
-    }
+    // OpenAI API Key será validada ao criar o cliente
 
     // Criar cliente Supabase com service role (bypass RLS)
     const supabase = createServiceRoleClient()
@@ -90,6 +88,7 @@ export async function POST(request: NextRequest) {
     console.log('Gerando embedding para query:', query.substring(0, 100))
     let queryEmbedding: number[]
     try {
+      const openai = getOpenAIClient()
       const embeddingResponse = await openai.embeddings.create({
         model: 'text-embedding-3-small', // Modelo mais barato e rápido (1536 dimensões)
         input: query.trim(),
@@ -241,19 +240,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Redirecionar para POST com body
-    const body = {
-      query,
-      company_id: companyId,
-      limit,
-      similarity_threshold: similarityThreshold,
-    }
-
-    // Criar uma nova requisição POST
-    const postRequest = new Request(request.url, {
+    // Criar uma nova requisição POST usando NextRequest
+    const postRequest = new NextRequest(request.nextUrl, {
       method: 'POST',
       headers: request.headers,
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        query,
+        company_id: companyId,
+        limit,
+        similarity_threshold: similarityThreshold,
+      }),
     })
 
     return POST(postRequest)
