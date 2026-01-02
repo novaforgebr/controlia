@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        2704,
-        128
+        2960,
+        96
       ],
       "id": "94d8922a-d802-42f6-9fd2-9e492fc6f9d9",
       "name": "Webhook",
@@ -45,10 +45,10 @@
       "type": "n8n-nodes-base.googleSheetsTool",
       "typeVersion": 4.7,
       "position": [
-        5280,
-        320
+        5536,
+        288
       ],
-      "id": "9ee5b3c2-7e33-4dbc-bc26-476e7af390b0",
+      "id": "a99ba21b-011d-4bb7-b0e4-0f105146dc1e",
       "name": "Tabela de Preços"
     },
     {
@@ -125,7 +125,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "type": "dateTime",
+              "type": "string",
               "readOnly": false,
               "removed": true
             },
@@ -168,10 +168,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        3104,
-        128
+        3360,
+        96
       ],
-      "id": "ae27e9d2-dc49-4abb-9c1f-93b23ef42bc4",
+      "id": "7e594b28-794b-42b5-8f83-b9ef4f00ed5e",
       "name": "Criar/atualizar sessionId"
     },
     {
@@ -197,10 +197,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        3280,
-        128
+        3536,
+        96
       ],
-      "id": "f07d3e8b-dd00-48b4-b832-935a1469f42b",
+      "id": "0db62fef-b993-414d-a4c2-773c33a9e6fa",
       "name": "Get row(s)",
       "alwaysOutputData": true
     },
@@ -278,7 +278,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "type": "dateTime",
+              "type": "string",
               "readOnly": false,
               "removed": false
             },
@@ -321,10 +321,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        4368,
-        128
+        4624,
+        96
       ],
-      "id": "c35d49fd-7610-4204-9937-f5f249fb7802",
+      "id": "6bbde10a-b40f-444d-b000-6ca8e5d24b62",
       "name": "AtualizaVariaveisExtrator"
     },
     {
@@ -399,7 +399,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "type": "dateTime",
+              "type": "string",
               "readOnly": false,
               "removed": true
             },
@@ -442,10 +442,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        5056,
-        128
+        5312,
+        96
       ],
-      "id": "ce02c9bd-7100-4877-a6cf-5c6151701fa8",
+      "id": "6e365810-c787-4340-bcb1-9f6942f8f2f8",
       "name": "AtualizaPerguntaResposta"
     },
     {
@@ -563,10 +563,10 @@
       "type": "n8n-nodes-base.dataTableTool",
       "typeVersion": 1,
       "position": [
-        4704,
-        336
+        4960,
+        304
       ],
-      "id": "1c82e7e4-cb73-4f34-bcce-9046ffa1c48e",
+      "id": "fd78a940-424d-43e9-9a97-d12711b05658",
       "name": "Data table Update",
       "notesInFlow": false,
       "notes": "ESSENCIAL: Use esta ferramenta IMEDIATAMENTE após usar 'Cria Evento' para salvar o ID do agendamento. Sem isso, o sistema perderá o agendamento. Parâmetros: agendamento_id (o ID retornado pela criação) e data_agendamento."
@@ -594,10 +594,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        4880,
-        128
+        5136,
+        96
       ],
-      "id": "23261cfc-4ce0-4157-b3e2-941162f767e7",
+      "id": "fcb27830-7229-4569-99bc-0c3695beff35",
       "name": "Get row(s)1",
       "alwaysOutputData": true
     },
@@ -626,16 +626,16 @@
           ]
         },
         "options": {
-          "systemPromptTemplate": "={{ $json.prompt_text }}\n\n## Dados Atuais do Contato\n\nNome do contato: {{ $('Webhook').first().json.body.message.from.first_name }}\n\n### Status atual de cada informação:\n\n- Nome Completo: {{ $('Get row(s)').first().json.nome_completo }}\n- Histórico de Tratamento: {{ $('Get row(s)').first().json.historico_tratamento }}\n- Interesse: {{ $('Get row(s)').first().json.interesse }}\n- Data de Agendamento: {{ $('Get row(s)').first().json.data_agendamento }}\n\n## Contexto da Conversa:\n\n### REFERÊNCIA TEMPORAL (IMPORTANTE):\nHoje é: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy\") }}\nUse esta data como base para calcular qualquer termo relativo (ex: \"amanhã\", \"segunda-feira\").\n\n- Última pergunta feita: {{ $('Get row(s)').first().json.ultima_pergunta_contato }}\n- Última resposta dada ao paciente: {{ $('Get row(s)').first().json.ultima_resposta_ia }}\n\n- Data/Hora Atual da conversa: {{ $now.setLocale('pt-BR').toFormat('cccc') }}, {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"dd 'de' LLLL 'de' yyyy HH:mm'hrs'\") }}\n\n### INSTRUÇÃO CRÍTICA DE OUTPUT:\nRetorne APENAS o objeto JSON válido, sem markdown, sem code blocks (```), sem explicações adicionais.\nApenas o objeto JSON puro, diretamente, sem formatação markdown.\n\nPara o campo data_agendamento, sempre retorne no formato ISO 8601 (ex: 2026-01-15T10:00:00Z) se houver uma data mencionada.\nSe não houver data mencionada, não inclua o campo ou retorne null."
+          "systemPromptTemplate": "={{ $json.prompt_text }}\n\n## Dados Atuais do Contato\n\nNome do contato: {{ $('Webhook').first().json.body.message.from.first_name }}\n\n### Status atual de cada informação:\n\n- Nome Completo: {{ $('Get row(s)').first().json.nome_completo }}\n- Histórico de Tratamento: {{ $('Get row(s)').first().json.historico_tratamento }}\n- Interesse: {{ $('Get row(s)').first().json.interesse }}\n- Data de Agendamento: {{ $('Get row(s)').first().json.data_agendamento }}\n\n## Contexto da Conversa:\n\n### REFERÊNCIA TEMPORAL (IMPORTANTE):\nHoje é: {{ $now.setLocale('pt-BR').toFormat('cccc') }}, {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"dd 'de' LLLL 'de' yyyy HH:mm'hrs'\") }}\nUse esta data como base para calcular qualquer termo relativo (ex: \"amanhã\", \"segunda-feira\").\n\n- Última pergunta feita: {{ $('Get row(s)').first().json.ultima_pergunta_contato }}\n- Última resposta dada ao paciente: {{ $('Get row(s)').first().json.ultima_resposta_ia }}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
       "typeVersion": 1.2,
       "position": [
-        4048,
-        128
+        4304,
+        96
       ],
-      "id": "95aefb30-0d7b-4f4c-b58a-314ec5f1cb89",
+      "id": "e1340334-2ea0-445b-ac8f-2c2f8157a092",
       "name": "Information Extractor",
       "executeOnce": false,
       "alwaysOutputData": true
@@ -652,10 +652,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        5472,
-        128
+        5728,
+        96
       ],
-      "id": "cafc7974-0f84-470f-973c-0310243da305",
+      "id": "ad1aaecb-487b-414f-819e-8f8a859acb8d",
       "name": "HTTP Request (Enviar Resposta)"
     },
     {
@@ -681,10 +681,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2896,
-        128
+        3152,
+        96
       ],
-      "id": "7a3e0d5c-73dc-4e85-ae97-9931717ff95d",
+      "id": "73eb109c-434a-4088-b25c-3296f9785c41",
       "name": "Define:Mensagem e Session_id"
     },
     {
@@ -704,10 +704,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        3472,
-        128
+        3728,
+        96
       ],
-      "id": "cb585654-fbf4-41a8-9170-92864b452945",
+      "id": "0739dbc6-6d4c-4a92-8361-fd65b2a24f8b",
       "name": "#Prompt IA de Atendimento e Triagem",
       "credentials": {
         "supabaseApi": {
@@ -723,10 +723,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3664,
-        128
+        3920,
+        96
       ],
-      "id": "cfdd8bc7-24c4-4248-88eb-ef171ef7f687",
+      "id": "7e68dc7b-2b64-4dd3-bc37-7f4619256376",
       "name": "Concatenador #IA de Atendimento e Triagem"
     },
     {
@@ -747,10 +747,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        3856,
-        128
+        4112,
+        96
       ],
-      "id": "cc4e6ae8-c832-4f48-9310-ecd82c2f5658",
+      "id": "e43cc270-e25f-4f1e-ba5a-056d4d69d8f5",
       "name": "#Prompt Extração de Dados",
       "credentials": {
         "supabaseApi": {
@@ -766,10 +766,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5264,
-        128
+        5520,
+        96
       ],
-      "id": "ac7b00f7-0ff7-41d5-ab58-ccd0b7448d7c",
+      "id": "adbeb062-e1ee-4674-88c5-ddff8b5babdd",
       "name": "Prepare Response Data"
     },
     {
@@ -819,10 +819,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
-        4080,
-        336
+        4336,
+        304
       ],
-      "id": "c1d7d08f-d966-46fd-89dc-15f5b634c61f",
+      "id": "0f9c8ea5-4b5e-477d-aead-496e402be87f",
       "name": "Busca Disponibilidades",
       "rewireOutputLogTo": "ai_tool"
     },
@@ -856,10 +856,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
-        4400,
-        336
+        4656,
+        304
       ],
-      "id": "f2e7d5f1-5617-4b22-a5c6-dc8f70f4da54",
+      "id": "93553126-c0d7-40b2-9f69-0c0a6f75e5b0",
       "name": "Atualiza Eventos"
     },
     {
@@ -892,10 +892,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
-        4256,
-        336
+        4512,
+        304
       ],
-      "id": "b2617753-09c0-43b4-a5b1-08b350cb8071",
+      "id": "84c58842-c144-4f85-bdfd-774306f627ef",
       "name": "Cria Evento"
     },
     {
@@ -921,10 +921,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
-        4544,
-        336
+        4800,
+        304
       ],
-      "id": "db906bab-99db-4fb8-b618-9ce967732a45",
+      "id": "dbe3b440-f4cd-42cc-a726-b9774c0c05c6",
       "name": "Exclui Eventos"
     },
     {
@@ -938,24 +938,24 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        4560,
-        128
+        4816,
+        96
       ],
-      "id": "f1ec667f-19d1-45dc-bbb4-90fc777da22d",
+      "id": "8e2954c1-887e-4e8a-9eeb-8c0bff5fd1e0",
       "name": "AI Agent - Respostas"
     },
     {
       "parameters": {
-        "model": "deepseek/deepseek-r1-0528:free",
+        "model": "meta-llama/llama-3.1-405b-instruct:free",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        3456,
-        336
+        3712,
+        304
       ],
-      "id": "9d6ce7eb-fe58-4461-b96c-47f4dbb11b4f",
+      "id": "db72daef-143f-481c-be0a-94233f5928cc",
       "name": "OpenRouter Chat Model",
       "executeOnce": true,
       "credentials": {
@@ -973,10 +973,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        3776,
-        336
+        4032,
+        304
       ],
-      "id": "63330f17-2062-40ac-bd06-886c997a6325",
+      "id": "44840bd5-7ff6-4f64-854a-f92f25c8f3be",
       "name": "OpenRouter Chat Model1",
       "credentials": {
         "openRouterApi": {
@@ -989,9 +989,9 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "o4-mini-2025-04-16",
+          "value": "gpt-4o-mini",
           "mode": "list",
-          "cachedResultName": "o4-mini-2025-04-16"
+          "cachedResultName": "gpt-4o-mini"
         },
         "builtInTools": {},
         "options": {}
@@ -999,10 +999,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        3296,
-        336
+        3552,
+        304
       ],
-      "id": "02bf6293-e75a-4cfc-bf5d-9804e4a5fba1",
+      "id": "a5bd79c5-5fcf-484e-882e-a64283aa2e1a",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -1015,9 +1015,9 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "gpt-4.1-nano-2025-04-14",
+          "value": "gpt-4o-mini",
           "mode": "list",
-          "cachedResultName": "gpt-4.1-nano-2025-04-14"
+          "cachedResultName": "gpt-4o-mini"
         },
         "builtInTools": {},
         "options": {}
@@ -1025,11 +1025,12 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        3616,
-        336
+        3872,
+        304
       ],
-      "id": "247a9a8c-5e4f-4379-96a7-7875e6e93032",
+      "id": "96cf36f7-08ea-447d-832c-6ba59a870fef",
       "name": "OpenAI Chat Model1",
+      "executeOnce": true,
       "credentials": {
         "openAiApi": {
           "id": "KKcz58kOwzIUk1WI",
@@ -1045,10 +1046,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1,
       "position": [
-        4848,
-        336
+        5104,
+        304
       ],
-      "id": "32894f68-2d20-4391-a946-40982a3475f6",
+      "id": "61d98a80-3065-4faa-ab30-de9ce92ab265",
       "name": "Embeddings OpenAI1",
       "rewireOutputLogTo": "ai_tool",
       "credentials": {
@@ -1061,6 +1062,7 @@
     {
       "parameters": {
         "mode": "retrieve-as-tool",
+        "toolDescription": "=Buscar arquivos de conhecimento da empresa {{ $('Webhook').first().json.body.controlia.company_id }}",
         "tableName": {
           "__rl": true,
           "value": "files",
@@ -1072,10 +1074,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
       "typeVersion": 1.3,
       "position": [
-        4992,
-        320
+        5248,
+        288
       ],
-      "id": "26c14327-8a75-40a6-8c7b-5fd860aa80d6",
+      "id": "c7af89e4-2131-4532-b6d6-bacc487d27f3",
       "name": "Supabase Vector Store",
       "credentials": {
         "supabaseApi": {
@@ -1093,11 +1095,51 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        3936,
-        336
+        4192,
+        304
       ],
-      "id": "9eefd503-f87c-47ba-98b7-69e53c5c4447",
+      "id": "7fc6022a-247f-441d-955a-dfc9313f5597",
       "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3664,
+        512
+      ],
+      "id": "cbc71614-186e-4363-b8f2-3eaecc0b34c5",
+      "name": "Google Gemini Chat Model",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZSPWkeAGgSAH48EB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3904,
+        512
+      ],
+      "id": "ed0eaf07-4703-4551-bdd8-3fbd96bae9af",
+      "name": "Google Gemini Chat Model1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZSPWkeAGgSAH48EB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     }
   ],
   "connections": {
@@ -1301,24 +1343,22 @@
     },
     "OpenRouter Chat Model": {
       "ai_languageModel": [
-        [
-          {
-            "node": "Information Extractor",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "OpenRouter Chat Model1": {
       "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent - Respostas",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        []
       ]
     },
     "Embeddings OpenAI1": {
@@ -1353,6 +1393,28 @@
           }
         ]
       ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Respostas",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "pinData": {
@@ -1361,28 +1423,28 @@
         "headers": {
           "host": "controlia.up.railway.app",
           "user-agent": "node",
-          "content-length": "1189",
+          "content-length": "1205",
           "accept": "*/*",
           "accept-encoding": "br, gzip, deflate",
           "accept-language": "*",
           "content-type": "application/json",
           "sec-fetch-mode": "cors",
-          "x-forwarded-for": "3.236.245.67",
+          "x-forwarded-for": "3.234.216.137",
           "x-forwarded-host": "controlia.up.railway.app",
           "x-forwarded-proto": "https",
           "x-railway-edge": "railway/us-east4-eqdc4a",
-          "x-railway-request-id": "GBmYn0TASBGJdR-TwoOzXw",
-          "x-real-ip": "3.236.245.67",
-          "x-request-start": "1767183050847",
-          "x-vercel-id": "fra1::kqbvj-1767183048024-c4f57cf04695",
+          "x-railway-request-id": "qAKzhpFKQsiaJW78g4a9AQ",
+          "x-real-ip": "3.234.216.137",
+          "x-request-start": "1767312190733",
+          "x-vercel-id": "fra1::bh7ll-1767312187860-79fb83e76690",
           "x-webhook-secret": "N0v4F0rg3@2025"
         },
         "params": {},
         "query": {},
         "body": {
-          "update_id": 906310987,
+          "update_id": 906311000,
           "message": {
-            "message_id": 547,
+            "message_id": 566,
             "from": {
               "id": 7772641515,
               "is_bot": false,
@@ -1396,18 +1458,18 @@
               "last_name": "Silva",
               "type": "private"
             },
-            "date": 1767183047,
-            "text": "Sim agende para essa data"
+            "date": 1767312187,
+            "text": "quais horários diponíveis tem no dia 8?"
           },
           "controlia": {
             "company_id": "cae292bd-2cc7-42b9-9254-779ed011989e",
-            "contact_id": "19742309-a940-45b8-8db4-fa09d872db1b",
-            "conversation_id": "fdd21e73-1409-4957-b421-38389bcd554a",
-            "message_id": "c72fbefa-5863-4730-9961-e9219ff14c9d",
+            "contact_id": "9cd516cf-c011-4d98-92c8-3830a6c2ac83",
+            "conversation_id": "53bc9d7a-8bb3-492f-8042-1f5cdb64f297",
+            "message_id": "495f536d-694d-4266-818e-0cd24a2f82e7",
             "channel": "telegram",
             "callback_url": "https://controliaa.vercel.app/api/webhooks/n8n/channel-response",
             "contact": {
-              "id": "19742309-a940-45b8-8db4-fa09d872db1b",
+              "id": "9cd516cf-c011-4d98-92c8-3830a6c2ac83",
               "name": "Jailton Silva",
               "email": null,
               "phone": null,
@@ -1422,13 +1484,13 @@
               "custom_fields": {
                 "interesse": "Sistema Web",
                 "telegram_id": "7772641515",
-                "data_agendamento": "2023-12-15T05:00:00.000Z",
+                "data_agendamento": "2023-12-15T00:00:00.000Z",
                 "telegram_username": null,
                 "historico_tratamento": "Primeira vez contratando"
               },
-              "created_at": "2025-12-29T19:20:18.864928+00:00",
-              "updated_at": "2025-12-31T12:10:50.23266+00:00",
-              "last_interaction_at": "2025-12-31T12:10:47+00:00"
+              "created_at": "2026-01-01T22:38:06.44661+00:00",
+              "updated_at": "2026-01-02T00:03:10.234114+00:00",
+              "last_interaction_at": "2026-01-02T00:03:07+00:00"
             }
           }
         },

@@ -89,8 +89,12 @@ Você tem acesso automático às seguintes informações (não precisa mencioná
    - Retorne APENAS um objeto JSON válido
    - SEM markdown code blocks (sem ```json ou ```)
    - SEM explicações ou comentários
-   - SEM campos vazios ou null (se não houver valor, não inclua o campo)
-   - Apenas os campos que têm valores válidos
+   - **REGRAS CRÍTICAS PARA CAMPOS STRING:**
+     - Campos do tipo **string** (nome_completo, historico_tratamento, interesse) **SEMPRE** devem ser strings, nunca `null`
+     - Se a informação não for encontrada, use `""` (string vazia) para campos string
+     - **NUNCA** retorne `null` para campos string, isso causará erro de parsing
+   - Para `data_agendamento`: Se não houver data mencionada, não inclua o campo ou retorne `null` apenas para este campo (ele é do tipo date)
+   - Apenas os campos que têm valores válidos (ou strings vazias para campos string)
 
 ## EXEMPLOS DE OUTPUT CORRETO
 
@@ -122,13 +126,39 @@ Você tem acesso automático às seguintes informações (não precisa mencioná
 {}
 ```
 
+**Exemplo 5 - Informações não encontradas (campos string devem retornar string vazia):**
+```json
+{
+  "nome_completo": "",
+  "historico_tratamento": "",
+  "interesse": "",
+  "data_agendamento": "2026-01-20T12:00:00Z"
+}
+```
+
+**IMPORTANTE**: Note que mesmo quando não encontra valores para campos string, eles devem estar presentes no JSON com string vazia (`""`), não `null`. Apenas `data_agendamento` pode ser omitido ou ter valor `null` se não houver data mencionada.
+
 ## INSTRUÇÃO CRÍTICA DE OUTPUT
 
 Retorne APENAS o objeto JSON válido, sem markdown, sem code blocks (```), sem explicações adicionais.
 Apenas o objeto JSON puro, diretamente, sem formatação markdown.
 
 Para o campo data_agendamento, sempre retorne no formato ISO 8601 completo com UTC (ex: 2026-01-15T10:00:00Z) se houver uma data mencionada.
-Se não houver data mencionada, NÃO inclua o campo no output.
+Se não houver data mencionada, não inclua o campo ou retorne `null` apenas para este campo.
+
+## REGRAS OBRIGATÓRIAS PARA CAMPOS STRING
+
+**CRÍTICO**: Campos do tipo string (nome_completo, historico_tratamento, interesse) **SEMPRE** devem retornar strings válidas, nunca `null`.
+
+- Se a informação não for encontrada, retorne `""` (string vazia) para campos string
+- **NUNCA** retorne `null` para campos string - isso causará erro de parsing no n8n
+- Se você retornar `null` para campos string, o n8n falhará com erro: "Expected string, received null"
+
+**Resumo**:
+- `nome_completo`: String (use `""` se não encontrar, nunca `null`)
+- `historico_tratamento`: String (use `""` se não encontrar, nunca `null`)
+- `interesse`: String (use `""` se não encontrar, nunca `null`)
+- `data_agendamento`: Date ou `null` ou omitir (único campo que pode ser `null`)
 
 Lembre-se: A IA já tem acesso a todas as informações de contexto (data atual, status dos campos, etc.). Você só precisa extrair o que está na mensagem atual.
 ```
