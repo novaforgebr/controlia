@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        2960,
-        96
+        9856,
+        784
       ],
-      "id": "94d8922a-d802-42f6-9fd2-9e492fc6f9d9",
+      "id": "4dd03e91-9894-41f4-b0f4-c4dae191e31b",
       "name": "Webhook",
       "webhookId": "202e25de-310d-4001-bdbd-2520da68de5c",
       "credentials": {
@@ -45,10 +45,10 @@
       "type": "n8n-nodes-base.googleSheetsTool",
       "typeVersion": 4.7,
       "position": [
-        5536,
-        288
+        12432,
+        976
       ],
-      "id": "a99ba21b-011d-4bb7-b0e4-0f105146dc1e",
+      "id": "9d0d20be-d7ec-4a59-a8ac-3230da4acd01",
       "name": "Tabela de Preços"
     },
     {
@@ -168,10 +168,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        3360,
-        96
+        10256,
+        784
       ],
-      "id": "7e594b28-794b-42b5-8f83-b9ef4f00ed5e",
+      "id": "7f4890a2-f961-491b-8888-a463f9a265a9",
       "name": "Criar/atualizar sessionId"
     },
     {
@@ -197,10 +197,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        3536,
-        96
+        10432,
+        784
       ],
-      "id": "0db62fef-b993-414d-a4c2-773c33a9e6fa",
+      "id": "a12877e0-6f94-4d0f-b1cf-eae93136ec11",
       "name": "Get row(s)",
       "alwaysOutputData": true
     },
@@ -225,9 +225,9 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "nome_completo": "={{ $('Information Extractor').first().json.output.nome_completo || $('Get row(s)').first().json.nome_completo }}",
-            "interesse": "={{ $('Information Extractor').first().json.output.interesse || $('Get row(s)').first().json.interesse }}",
-            "historico_tratamento": "={{ $('Information Extractor').first().json.output.historico_tratamento || $('Get row(s)').first().json.historico_tratamento }}",
+            "nome_completo": "={{ ($('Information Extractor').first().json.output.nome_completo || $('Get row(s)').first().json.nome_completo || '') }}",
+            "interesse": "={{ ($('Information Extractor').first().json.output.interesse || $('Get row(s)').first().json.interesse || '') }}",
+            "historico_tratamento": "={{ ($('Information Extractor').first().json.output.historico_tratamento || $('Get row(s)').first().json.historico_tratamento || '') }}",
             "data_agendamento": "={{ $('Information Extractor').first().json.output.data_agendamento || $('Get row(s)').first().json.data_agendamento || null }}"
           },
           "matchingColumns": [],
@@ -321,10 +321,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        4624,
-        96
+        11520,
+        784
       ],
-      "id": "6bbde10a-b40f-444d-b000-6ca8e5d24b62",
+      "id": "8d4e600e-99dd-40ec-8a79-f486e053c0d9",
       "name": "AtualizaVariaveisExtrator"
     },
     {
@@ -442,10 +442,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        5312,
-        96
+        12208,
+        784
       ],
-      "id": "6e365810-c787-4340-bcb1-9f6942f8f2f8",
+      "id": "4264ed73-2f85-41a3-9f5f-c3531039104c",
       "name": "AtualizaPerguntaResposta"
     },
     {
@@ -469,8 +469,8 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "agendamento_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('agendamento_id', `Atualiza o campo \"agendamento_id\" com  o id obtido da criação do evento.`, 'string') }}",
-            "data_agendamento": "={{ $fromAI('data_agendamento', `...`, 'string') }}"
+            "agendamento_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('agendamento_id', `Atualiza o campo \"agendamento_id\" com o ID obtido da criação do evento. Este ID vem do resultado da ferramenta \"Cria Evento\" no campo \"id\" ou \"data.id\" ou na resposta JSON. Use este ID para referenciar o evento criado.`, 'string') }}",
+            "data_agendamento": "={{ $fromAI('data_agendamento', `Atualiza o campo \"data_agendamento\" com a data de início do evento criado. Use o campo \"start_at\" do resultado da ferramenta \"Cria Evento\" (pode estar em \"data.start_at\" ou diretamente em \"start_at\") no formato ISO 8601 (ex: 2026-01-15T10:00:00Z). Esta é a data de início do evento que foi criado com sucesso.`, 'string') }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -563,10 +563,10 @@
       "type": "n8n-nodes-base.dataTableTool",
       "typeVersion": 1,
       "position": [
-        4960,
-        304
+        11856,
+        992
       ],
-      "id": "fd78a940-424d-43e9-9a97-d12711b05658",
+      "id": "50a547ed-45d5-489b-8a91-a096352274b5",
       "name": "Data table Update",
       "notesInFlow": false,
       "notes": "ESSENCIAL: Use esta ferramenta IMEDIATAMENTE após usar 'Cria Evento' para salvar o ID do agendamento. Sem isso, o sistema perderá o agendamento. Parâmetros: agendamento_id (o ID retornado pela criação) e data_agendamento."
@@ -594,12 +594,25 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        5136,
-        96
+        12032,
+        784
       ],
-      "id": "fcb27830-7229-4569-99bc-0c3695beff35",
+      "id": "2575e12d-f8f0-47f2-825f-8130275435fa",
       "name": "Get row(s)1",
       "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obter o prompt_text do nó '#Prompt Extração de Dados'\nconst promptText = $json.prompt_text || '';\n\n// Função para escapar chaves simples, mas preservar chaves duplas (n8n expressions)\nfunction escapeCurlyBraces(text) {\n  if (!text) return '';\n  // Substitui { por [ e } por ] para evitar conflito com f-strings do LangChain\n  // Mas não afeta {{...}} que são expressões do n8n\n  return text.replace(/\\{\\{/g, 'TEMP_DOUBLE_OPEN').replace(/\\}\\}/g, 'TEMP_DOUBLE_CLOSE').replace(/\\{/g, '[').replace(/\\}/g, ']').replace(/TEMP_DOUBLE_OPEN/g, '{{').replace(/TEMP_DOUBLE_CLOSE/g, '}}');\n}\n\nconst escapedPromptText = escapeCurlyBraces(promptText);\n\nreturn [\n  {\n    json: {\n      prompt_text_escaped: escapedPromptText,\n      prompt_text: promptText\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11200,
+        784
+      ],
+      "id": "1b081780-dadc-4831-be42-26d68e42b1f2",
+      "name": "Processar Prompt Extractor"
     },
     {
       "parameters": {
@@ -620,22 +633,21 @@
             },
             {
               "name": "data_agendamento",
-              "type": "date",
               "description": "Extraia datas futuras mencionadas para reunião."
             }
           ]
         },
         "options": {
-          "systemPromptTemplate": "={{ $json.prompt_text }}\n\n## Dados Atuais do Contato\n\nNome do contato: {{ $('Webhook').first().json.body.message.from.first_name }}\n\n### Status atual de cada informação:\n\n- Nome Completo: {{ $('Get row(s)').first().json.nome_completo }}\n- Histórico de Tratamento: {{ $('Get row(s)').first().json.historico_tratamento }}\n- Interesse: {{ $('Get row(s)').first().json.interesse }}\n- Data de Agendamento: {{ $('Get row(s)').first().json.data_agendamento }}\n\n## Contexto da Conversa:\n\n### REFERÊNCIA TEMPORAL (IMPORTANTE):\nHoje é: {{ $now.setLocale('pt-BR').toFormat('cccc') }}, {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"dd 'de' LLLL 'de' yyyy HH:mm'hrs'\") }}\nUse esta data como base para calcular qualquer termo relativo (ex: \"amanhã\", \"segunda-feira\").\n\n- Última pergunta feita: {{ $('Get row(s)').first().json.ultima_pergunta_contato }}\n- Última resposta dada ao paciente: {{ $('Get row(s)').first().json.ultima_resposta_ia }}"
+          "systemPromptTemplate": "={{ $('Processar Prompt Extractor').first().json.prompt_text_escaped || $('Concatenador #IA de Atendimento e Triagem').first().json.prompt_text_escaped || '' }}\n\n## Dados Atuais do Contato\n\nNome do contato: {{ $('Webhook').first().json.body.message.from.first_name || 'Não informado' }}\n\n### Status atual de cada informação:\n\n- Nome Completo: {{ $('Get row(s)').first().json.nome_completo || 'Não informado' }}\n- Histórico de Tratamento: {{ $('Get row(s)').first().json.historico_tratamento || 'Não informado' }}\n- Interesse: {{ $('Get row(s)').first().json.interesse || 'Não informado' }}\n- Data de Agendamento: {{ $('Get row(s)').first().json.data_agendamento || 'Não agendado' }}\n\n## Contexto da Conversa:\n\n### REFERÊNCIA TEMPORAL (IMPORTANTE):\nHoje é: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy\") }}\nUse esta data como base para calcular qualquer termo relativo (ex: \"amanhã\", \"segunda-feira\").\n\n- Última pergunta feita: {{ $('Get row(s)').first().json.ultima_pergunta_contato || 'Nenhuma' }}\n- Última resposta dada ao paciente: {{ $('Get row(s)').first().json.ultima_resposta_ia || 'Nenhuma' }}\n\n- Data/Hora Atual da conversa: {{ $now.setLocale('pt-BR').toFormat('cccc') }}, {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"dd 'de' LLLL 'de' yyyy HH:mm'hrs'\") }}\n\n### REGRA ABSOLUTA: NÃO INVENTE VALORES\n\n⚠️ CRÍTICO: Você DEVE retornar APENAS informações que foram mencionadas EXPLICITAMENTE na mensagem do usuário ou que podem ser inferidas com 100% de CERTEZA do contexto.\n\n❌ NUNCA FAÇA:\n- Inventar nome completo se o usuário mencionou apenas primeiro nome (ex: se mencionar \"João\", NÃO retorne \"João Silva\")\n- Inferir interesse se não foi mencionado diretamente na mensagem\n- Criar data de agendamento se o usuário não mencionou data/hora futura explicitamente\n- Assumir histórico de tratamento sem contexto claro e explícito\n- Preencher campos baseado em suposições ou inferências não garantidas\n\n✅ SEMPRE FAÇA:\n- Se a informação não foi mencionada, retorne string vazia (\"\") para campos string (nome_completo, historico_tratamento, interesse)\n- Se não houver data mencionada explicitamente, omita o campo data_agendamento ou retorne null\n- Extraia APENAS o que está claramente presente na mensagem atual\n- Se houver dúvida se uma informação foi mencionada, NÃO extraia - é melhor retornar vazio\n\n### INSTRUÇÃO CRÍTICA DE OUTPUT:\nRetorne APENAS o objeto JSON válido, sem markdown, sem code blocks (```), sem explicações adicionais.\nApenas o objeto JSON puro, diretamente, sem formatação markdown.\n\n### REGRAS OBRIGATÓRIAS PARA OS CAMPOS:\n\n1. **nome_completo** (string): \n   - Extraia APENAS se o usuário mencionar nome completo (2+ palavras)\n   - Se mencionar apenas primeiro nome, retorne string vazia \"\" (NUNCA invente sobrenome)\n   - Se não encontrar, retorne string vazia \"\" (NUNCA null)\n\n2. **historico_tratamento** (string): \n   - Extraia APENAS se houver menção clara à situação do projeto\n   - Valores válidos: \"Ideia do zero\", \"Sistema legado\", \"Refatoração\", \"Primeira vez contratando\"\n   - Se não houver contexto suficiente, retorne string vazia \"\" (NUNCA null)\n\n3. **interesse** (string): \n   - Extraia APENAS se o cliente mencionar explicitamente o tipo de solução (App, Sistema Web, etc.)\n   - Se não mencionar, retorne string vazia \"\" (NUNCA null)\n\n4. **data_agendamento** (string): \n   - Extraia APENAS se o usuário mencionar EXPLICITAMENTE uma data/hora futura\n   - Se não houver menção clara a data/hora, omita o campo ou retorne null\n   - Sempre retorne no formato ISO 8601 UTC (ex: 2026-01-15T10:00:00Z)\n   - NUNCA invente datas ou horários não mencionados\n\nIMPORTANTE: Campos do tipo string (nome_completo, historico_tratamento, interesse) SEMPRE devem ser strings, nunca null. Use \"\" (string vazia) se a informação não for encontrada ou não foi mencionada explicitamente.\n\nPara o campo data_agendamento, sempre retorne no formato ISO 8601 (ex: 2026-01-15T10:00:00Z) se houver uma data mencionada explicitamente.\nSe não houver data mencionada, não inclua o campo ou retorne null."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
       "typeVersion": 1.2,
       "position": [
-        4304,
-        96
+        11200,
+        784
       ],
-      "id": "e1340334-2ea0-445b-ac8f-2c2f8157a092",
+      "id": "8f964953-aa8a-4099-8990-d07395cfdbe0",
       "name": "Information Extractor",
       "executeOnce": false,
       "alwaysOutputData": true
@@ -652,10 +664,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        5728,
-        96
+        12624,
+        784
       ],
-      "id": "ad1aaecb-487b-414f-819e-8f8a859acb8d",
+      "id": "4b4e7b46-b554-4031-86f4-1ec0f90f9ae7",
       "name": "HTTP Request (Enviar Resposta)"
     },
     {
@@ -681,10 +693,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3152,
-        96
+        10048,
+        784
       ],
-      "id": "73eb109c-434a-4088-b25c-3296f9785c41",
+      "id": "34a9de49-5560-43bf-a59a-dee8c732cff2",
       "name": "Define:Mensagem e Session_id"
     },
     {
@@ -704,10 +716,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        3728,
-        96
+        10624,
+        784
       ],
-      "id": "0739dbc6-6d4c-4a92-8361-fd65b2a24f8b",
+      "id": "5830efa3-d75a-480b-a6fa-e8d17910444c",
       "name": "#Prompt IA de Atendimento e Triagem",
       "credentials": {
         "supabaseApi": {
@@ -718,15 +730,15 @@
     },
     {
       "parameters": {
-        "jsCode": "// Defina aqui a ordem desejada dos IDs\nconst ordemDesejada = ['fe5c1cb7-bc87-4922-9736-8ca6b83ae613'];\n\nconst concatenado = ordemDesejada\n  .map(id => {\n    const item = items.find(i => i.json.id === id);\n    // CORREÇÃO AQUI: Mudamos de .content_prompt para .prompt_text\n    return item ? item.json.prompt_text : null;\n  })\n  .filter(Boolean) // remove nulos\n  .join('\\n');\n\nreturn [\n  {\n    json: {\n      content_prompt_concatenado: concatenado\n    }\n  }\n];"
+        "jsCode": "// Defina aqui a ordem desejada dos IDs\nconst ordemDesejada = ['fe5c1cb7-bc87-4922-9736-8ca6b83ae613'];\n\nconst concatenado = ordemDesejada\n  .map(id => {\n    const item = items.find(i => i.json.id === id);\n    // CORREÇÃO AQUI: Mudamos de .content_prompt para .prompt_text\n    return item ? item.json.prompt_text : null;\n  })\n  .filter(Boolean) // remove nulos\n  .join('\\n');\n\n// Escapar chaves simples do prompt para evitar interpretação como variáveis de template pelo LangChain\n// Substitui { por [ e } por ] para evitar conflito com templates do n8n ({{ }}) e LangChain\nconst promptEscapado = concatenado\n  .replace(/\\{\\{/g, 'TEMP_DOUBLE_OPEN')  // Salva chaves duplas temporariamente\n  .replace(/\\}\\}/g, 'TEMP_DOUBLE_CLOSE')\n  .replace(/\\{/g, '[')  // Substitui chaves simples por colchetes\n  .replace(/\\}/g, ']')\n  .replace(/TEMP_DOUBLE_OPEN/g, '{{')  // Restaura chaves duplas\n  .replace(/TEMP_DOUBLE_CLOSE/g, '}}');\n\nreturn [\n  {\n    json: {\n      content_prompt_concatenado: concatenado,\n      prompt_text_escaped: promptEscapado\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3920,
-        96
+        10816,
+        784
       ],
-      "id": "7e68dc7b-2b64-4dd3-bc37-7f4619256376",
+      "id": "1754d437-f448-4c0a-9e41-7b604cde2983",
       "name": "Concatenador #IA de Atendimento e Triagem"
     },
     {
@@ -747,10 +759,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        4112,
-        96
+        11008,
+        784
       ],
-      "id": "e43cc270-e25f-4f1e-ba5a-056d4d69d8f5",
+      "id": "70438d01-544a-49ec-ac82-feaaa9473a45",
       "name": "#Prompt Extração de Dados",
       "credentials": {
         "supabaseApi": {
@@ -766,15 +778,15 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5520,
-        96
+        12416,
+        784
       ],
-      "id": "adbeb062-e1ee-4674-88c5-ddff8b5babdd",
+      "id": "21661a51-b0a4-45d6-85e2-63fd4fc1bcc9",
       "name": "Prepare Response Data"
     },
     {
       "parameters": {
-        "toolDescription": "🔍 VERIFICA HORÁRIOS DISPONÍVEIS na agenda. Use esta ferramenta:\n- SEMPRE quando o cliente perguntar sobre horários disponíveis (ex: \"quais horários você tem\", \"verifique disponibilidade\")\n- SEMPRE antes de criar um novo evento\n- A ferramenta busca automaticamente os próximos 15 dias a partir de agora\n- Retorna todos os eventos já agendados para que você possa informar horários livres ao cliente\n\n⚠️ É OBRIGATÓRIO usar esta ferramenta quando o cliente mencionar interesse em agendar ou perguntar sobre disponibilidade.",
+        "toolDescription": "🔍 VERIFICA HORÁRIOS DISPONÍVEIS na agenda da empresa no Controlia.\n\n⚠️ USE ESTA FERRAMENTA SEMPRE (OBRIGATÓRIO):\n- Quando o cliente perguntar sobre horários disponíveis (OBRIGATÓRIO)\n- ANTES de criar qualquer evento (OBRIGATÓRIO)\n- ANTES de atualizar qualquer evento (OBRIGATÓRIO)\n- Quando o cliente mencionar interesse em agendar (OBRIGATÓRIO)\n\n📊 COMO INTERPRETAR OS RESULTADOS:\n- Se retornar array vazio []: Não há eventos agendados nos próximos 15 dias = AMPLA DISPONIBILIDADE\n- Se retornar eventos: Analise os horários (start_at e end_at) para identificar:\n  * Horários ocupados (evitar sugerir)\n  * Janelas de tempo livres (pode sugerir)\n\n🎯 O QUE FAZER COM OS RESULTADOS:\n1. Se vazio: Informe ao cliente que há ampla disponibilidade e sugira horários padrão (9h, 10h, 14h, 15h, 16h)\n2. Se houver eventos: Liste os horários ocupados e sugira alternativas livres\n3. NUNCA invente horários - use apenas os dados retornados pela ferramenta\n\nA ferramenta busca automaticamente os próximos 15 dias a partir de agora.\n\n⚠️ REGRA ABSOLUTA: NUNCA responda sobre disponibilidade SEM usar esta ferramenta primeiro.",
         "url": "https://controliaa.vercel.app/api/calendar/events",
         "sendQuery": true,
         "queryParameters": {
@@ -819,16 +831,16 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
-        4336,
-        304
+        11232,
+        992
       ],
-      "id": "0f9c8ea5-4b5e-477d-aead-496e402be87f",
+      "id": "1098e88a-b94f-4c68-b0d8-326ad858997b",
       "name": "Busca Disponibilidades",
       "rewireOutputLogTo": "ai_tool"
     },
     {
       "parameters": {
-        "toolDescription": "Atualiza um evento existente no calendário.\nIMPORTANTE: \n1. Sempre use \"Busca Disponibilidades\" ANTES de atualizar para verificar se o novo horário está disponível.\n2. Você precisa do ID do evento (agendamento_id) que está armazenado na DataTable.\n3. Você precisa ter uma nova data de agendamento (campo data_agendamento da DataTable).\n4. Se não houver agendamento_id ou data_agendamento, informe ao usuário e ofereça criar um novo evento.\n5. O evento terá duração de 1 hora a partir da nova data de início.",
+        "toolDescription": "🔄 ATUALIZA um evento existente no calendário da empresa no Controlia.\n\n⚠️ REGRAS OBRIGATÓRIAS ANTES DE USAR:\n\n1. **OBRIGATÓRIO**: Você DEVE ter usado \"Busca Disponibilidades\" ANTES desta ferramenta\n2. **OBRIGATÓRIO**: Verifique que o novo horário desejado NÃO está na lista de eventos retornados\n3. **OBRIGATÓRIO**: Confirme com o cliente a nova data/hora antes de atualizar\n4. **OBRIGATÓRIO**: Você precisa do ID do evento (agendamento_id) que está armazenado na DataTable\n5. **OBRIGATÓRIO**: Você precisa ter uma nova data de agendamento (campo data_agendamento da DataTable ou mencionada pelo cliente)\n\n📋 QUANDO USAR:\n- Cliente solicitou alteração de data/hora de um agendamento existente\n- Novo horário está livre (confirmado pela \"Busca Disponibilidades\")\n- Cliente confirmou a nova data/hora\n- Você tem o agendamento_id do evento que deseja atualizar\n\n❌ NÃO USE SE:\n- Não verificou disponibilidade do novo horário primeiro\n- Novo horário está ocupado\n- Não tem agendamento_id (informe ao cliente e ofereça criar novo evento)\n- Cliente não confirmou a mudança\n\n🔴 PARÂMETROS:\n- event_id: ID do evento a atualizar (use o agendamento_id da DataTable)\n- start_at: Nova data/hora de início no formato ISO 8601 UTC\n- end_at: Nova data/hora de término (1 hora após start_at) no formato ISO 8601 UTC\n\n💡 IMPORTANTE:\n- O evento terá duração de 1 hora a partir da nova data de início\n- Sempre verifique disponibilidade antes de atualizar\n- Confirme com o cliente antes de fazer qualquer alteração",
         "method": "PATCH",
         "url": "=https://controliaa.vercel.app/api/calendar/events/{{ /*n8n-auto-generated-fromAI*/ $fromAI('event_id', `ID do evento que deseja atualizar. Obtenha este ID do campo agendamento_id da DataTable ou do resultado anterior de criação de evento.`, 'string') }}",
         "sendHeaders": true,
@@ -856,10 +868,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
-        4656,
-        304
+        11552,
+        992
       ],
-      "id": "93553126-c0d7-40b2-9f69-0c0a6f75e5b0",
+      "id": "e64d00ff-dc11-44a9-bd9e-2ac693a937e1",
       "name": "Atualiza Eventos"
     },
     {
@@ -892,15 +904,15 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
-        4512,
-        304
+        11408,
+        992
       ],
-      "id": "84c58842-c144-4f85-bdfd-774306f627ef",
+      "id": "91130f50-306f-4975-b6a0-6d3ee26665d0",
       "name": "Cria Evento"
     },
     {
       "parameters": {
-        "toolDescription": "Exclui um evento do calendário.\nIMPORTANTE: \n1. Você precisa do ID do evento (agendamento_id) que está armazenado na DataTable.\n2. Sempre confirme com o usuário antes de excluir um agendamento.\n3. Após excluir, atualize a DataTable removendo o agendamento_id (defina como vazio ou null).",
+        "toolDescription": "🗑️ EXCLUI um evento do calendário da empresa no Controlia.\n\n⚠️ REGRAS OBRIGATÓRIAS ANTES DE USAR:\n\n1. **OBRIGATÓRIO**: SEMPRE confirme com o cliente ANTES de excluir o agendamento\n2. **OBRIGATÓRIO**: Você precisa do ID do evento (agendamento_id) que está armazenado na DataTable\n3. **OBRIGATÓRIO**: Garanta que o cliente confirmou explicitamente a exclusão\n\n📋 QUANDO USAR:\n- Cliente solicitou cancelamento de um agendamento existente\n- Cliente confirmou explicitamente que deseja excluir (\"sim, cancela\", \"pode cancelar\", \"quero excluir\")\n- Você tem o agendamento_id do evento que deseja excluir\n\n❌ NÃO USE SE:\n- Cliente não confirmou explicitamente a exclusão\n- Não tem agendamento_id (informe ao cliente que não há agendamento para excluir)\n- Há dúvida sobre a intenção do cliente (sempre confirme primeiro)\n\n🔴 PARÂMETROS:\n- event_id: ID do evento a excluir (use o agendamento_id da DataTable)\n\n💡 IMPORTANTE:\n- SEMPRE confirme com o cliente antes de excluir\n- Após excluir, informe ao cliente que o agendamento foi cancelado\n- O agendamento_id será removido automaticamente ou você pode atualizar a DataTable",
         "method": "DELETE",
         "url": "=https://controliaa.vercel.app/api/calendar/events/{{ /*n8n-auto-generated-fromAI*/ $fromAI('event_id', `ID do evento que deseja atualizar. Obtenha este ID do campo agendamento_id da DataTable ou do resultado anterior de criação de evento.`, 'string') }}",
         "sendHeaders": true,
@@ -921,10 +933,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.3,
       "position": [
-        4800,
-        304
+        11696,
+        992
       ],
-      "id": "dbe3b440-f4cd-42cc-a726-b9774c0c05c6",
+      "id": "72cfb0a3-6433-4918-8f43-4d697142614a",
       "name": "Exclui Eventos"
     },
     {
@@ -932,30 +944,30 @@
         "promptType": "define",
         "text": "={{ $('Webhook').first().json.body.message.text }}",
         "options": {
-          "systemMessage": "={{ $('Concatenador #IA de Atendimento e Triagem').first().json.content_prompt_concatenado }}\n\n# CONTEXTO ATUAL (REAL-TIME)\n- Data/Hora Agora: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy, HH:mm\") }}\n- Fuso Horário da Empresa: América/São Paulo (UTC-3).\n\n# STATUS DA TRIAGEM (MEMÓRIA)\nAnalise o que já sabemos sobre o contato atual:\n- Nome: {{ $('Get row(s)').first().json.nome_completo || \"Não informado\" }}\n- Interesse (O que busca): {{ $('Get row(s)').first().json.interesse || \"Não informado\" }}\n- Contexto do Projeto (Já tem sistema ou é novo?): {{ $('Get row(s)').first().json.historico_tratamento || \"Não informado\" }}\n- Data da Reunião: {{ $('Get row(s)').first().json.data_agendamento || \"Não agendado\" }}\n- ID do Agendamento (Sistema): {{ $('Get row(s)').first().json.agendamento_id || \"null\" }}\n\nContexto da Conversa:\n\nData/Hora Atual da conversa: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat('cccc') }}, {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"dd 'de' LLLL 'de' yyyy HH:mm'hrs'\") }}\n\nIdentifique o gênero através do nome: {{ $('Webhook').first().json.body.message.from.first_name }}. De acordo com esse nome utilize artigos e pronomes adequados (Ex: \"Seja bem-vindo, Sr.\" ou \"Seja bem-vinda, Sra.\").\n\nÚltima interação:\n\nA última pergunta do usuário foi: {{ $('Get row(s)').first().json.ultima_pergunta_contato || \"Nenhuma\" }}.\nSua última resposta foi: {{ $('Get row(s)').first().json.ultima_resposta_ia || \"Nenhuma\" }}.\n\n# ⚠️ REGRAS OBRIGATÓRIAS PARA FERRAMENTAS DE AGENDAMENTO ⚠️\n\n## REGRA 1: SEMPRE USAR \"Busca Disponibilidades\" QUANDO:\n- O cliente perguntar sobre horários disponíveis (ex: \"quais horários você tem disponíveis\", \"verifique disponibilidade\", \"tem horário livre\")\n- O cliente mencionar interesse em agendar uma data/hora específica\n- ANTES de criar ou atualizar QUALQUER evento\n\n**AÇÃO OBRIGATÓRIA**: Se o cliente pedir horários disponíveis ou mencionar interesse em agendar, você DEVE usar \"Busca Disponibilidades\" IMEDIATAMENTE.\n\n## REGRA 2: SEMPRE USAR \"Cria Evento\" QUANDO:\n- O cliente confirmar uma data/hora para agendamento (ex: \"sim, quero agendar\", \"confirmo\", \"está bom\", \"pode ser nesse horário\")\n- Após você ter verificado disponibilidade e o horário estiver livre\n- O campo data_agendamento estiver preenchido na DataTable (mesmo que você precise inferir do contexto)\n\n**AÇÃO OBRIGATÓRIA**: Se o cliente confirmar uma data OU se você já verificou disponibilidade e o horário está livre, você DEVE usar \"Cria Evento\" para criar o agendamento.\n\n## REGRA 3: FLUXO OBRIGATÓRIO DE AGENDAMENTO:\n\n1. Cliente menciona interesse em agendar OU pergunta sobre horários\n   → **VOCÊ DEVE USAR \"Busca Disponibilidades\"**\n\n2. Após verificar disponibilidade:\n   - Se livre: **VOCÊ DEVE USAR \"Cria Evento\"** imediatamente\n   - Se ocupado: Informe ao cliente e sugira alternativas\n\n3. Após criar evento com sucesso:\n   → **VOCÊ DEVE USAR \"Data table Update\"** para salvar o ID do agendamento\n\n## REGRA 4: INTERPRETAÇÃO DE CONFIRMAÇÃO:\n\nConsidere como CONFIRMAÇÃO de agendamento:\n- \"Sim\", \"Confirmo\", \"Pode ser\", \"Está bom\", \"Perfeito\", \"Ótimo\"\n- \"Quero agendar para [data/hora]\"\n- \"Pode ser amanhã às 10h\"\n- Qualquer resposta positiva após você sugerir um horário\n\nQuando houver confirmação, você DEVE usar \"Cria Evento\" mesmo que precise inferir a data do contexto da conversa.\n\n## REGRA 5: NÃO PULE ETAPAS\n\nNUNCA crie um evento sem antes verificar disponibilidade (exceto em situações especiais onde o cliente já confirmou diretamente uma data específica após você ter verificado).\n\n## EXEMPLOS DE USO CORRETO:\n\n**Cenário 1 - Cliente pergunta horários:**\nCliente: \"verifique quais horários você tem disponíveis\"\n→ Você DEVE usar \"Busca Disponibilidades\" AGORA\n→ Informe os horários livres\n→ Se o cliente confirmar, use \"Cria Evento\"\n\n**Cenário 2 - Cliente menciona data específica:**\nCliente: \"quero agendar para amanhã às 10h\"\n→ Você DEVE usar \"Busca Disponibilidades\" primeiro para verificar\n→ Se livre, use \"Cria Evento\" imediatamente\n→ Use \"Data table Update\" para salvar o ID\n\n**Cenário 3 - Cliente confirma após verificação:**\nVocê: \"Tenho disponibilidade amanhã às 10h, 14h ou 16h\"\nCliente: \"Pode ser às 14h\"\n→ Você DEVE usar \"Cria Evento\" AGORA (já verificou disponibilidade anteriormente)\n→ Use \"Data table Update\" para salvar o ID\n\n## LEMBRE-SE:\n- Não espere o cliente pedir explicitamente - use as ferramentas proativamente quando apropriado\n- Se o cliente confirmar, crie o evento imediatamente\n- Sempre salve o ID do agendamento após criar"
+          "systemMessage": "={{ $('Concatenador #IA de Atendimento e Triagem').first().json.content_prompt_concatenado }}\n\n# CONTEXTO ATUAL (REAL-TIME)\n- Data/Hora Agora: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy, HH:mm\") }}\n- Fuso Horário da Empresa: América/São Paulo (UTC-3).\n\n# STATUS DA TRIAGEM (MEMÓRIA)\nAnalise o que já sabemos sobre o contato atual:\n- Nome: {{ $('Get row(s)').first().json.nome_completo || \"Não informado\" }}\n- Interesse (O que busca): {{ $('Get row(s)').first().json.interesse || \"Não informado\" }}\n- Contexto do Projeto (Já tem sistema ou é novo?): {{ $('Get row(s)').first().json.historico_tratamento || \"Não informado\" }}\n- Data da Reunião: {{ $('Get row(s)').first().json.data_agendamento || \"Não agendado\" }}\n- ID do Agendamento (Sistema): {{ $('Get row(s)').first().json.agendamento_id || \"null\" }}\n\nContexto da Conversa:\n\nData/Hora Atual da conversa: {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat('cccc') }}, {{ $now.setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat(\"dd 'de' LLLL 'de' yyyy HH:mm'hrs'\") }}\n\nIdentifique o gênero através do nome: {{ $('Webhook').first().json.body.message.from.first_name }}. De acordo com esse nome utilize artigos e pronomes adequados (Ex: \"Seja bem-vindo, Sr.\" ou \"Seja bem-vinda, Sra.\").\n\nÚltima interação:\n\nA última pergunta do usuário foi: {{ $('Get row(s)').first().json.ultima_pergunta_contato || \"Nenhuma\" }}.\nSua última resposta foi: {{ $('Get row(s)').first().json.ultima_resposta_ia || \"Nenhuma\" }}.\n\n# ⚠️ REGRA ABSOLUTA: SEMPRE CONSULTE A AGENDA ⚠️\n\n## QUANDO USAR \"Busca Disponibilidades\" (OBRIGATÓRIO):\n\nVocê DEVE usar \"Busca Disponibilidades\" SEMPRE que:\n\n1. **Cliente pergunta sobre horários disponíveis:**\n   - \"Quais horários você tem disponíveis?\"\n   - \"Tem horário livre?\"\n   - \"Quando você pode me atender?\"\n   - \"Qual sua disponibilidade?\"\n   - \"Quais dias você está livre?\"\n   - Qualquer pergunta similar sobre horários ou disponibilidade\n   \n2. **Cliente menciona interesse em agendar:**\n   - \"Quero agendar uma reunião\"\n   - \"Posso marcar uma consulta?\"\n   - \"Gostaria de agendar\"\n   - \"Quero marcar um horário\"\n   \n3. **ANTES de criar QUALQUER evento:**\n   - Mesmo que o cliente já tenha confirmado uma data/hora\n   - Mesmo que você já tenha consultado anteriormente na mesma conversa\n   - Esta é uma regra OBRIGATÓRIA de segurança\n\n4. **ANTES de atualizar um evento existente:**\n   - Verifique se o novo horário está disponível\n\n**IMPORTANTE**: \n- NUNCA responda sobre disponibilidade de horários SEM usar \"Busca Disponibilidades\" primeiro\n- NUNCA assuma que um horário está livre sem consultar\n- NUNCA invente horários disponíveis - use APENAS os resultados da ferramenta\n- Se \"Busca Disponibilidades\" retornar vazio (nenhum evento), informe que há disponibilidade ampla\n- Se retornar eventos, informe os horários ocupados e sugira alternativas livres\n\n# ⚠️ REGRAS OBRIGATÓRIAS PARA FERRAMENTAS DE AGENDAMENTO ⚠️\n\n## REGRA 1: SEMPRE USAR \"Busca Disponibilidades\" QUANDO:\n- O cliente perguntar sobre horários disponíveis (OBRIGATÓRIO)\n- O cliente mencionar interesse em agendar uma data/hora específica (OBRIGATÓRIO)\n- ANTES de criar QUALQUER evento (OBRIGATÓRIO)\n- ANTES de atualizar QUALQUER evento (OBRIGATÓRIO)\n\n**AÇÃO OBRIGATÓRIA**: Se o cliente pedir horários disponíveis ou mencionar interesse em agendar, você DEVE usar \"Busca Disponibilidades\" IMEDIATAMENTE, SEM EXCEÇÃO.\n\n## REGRA 2: SEMPRE USAR \"Cria Evento\" QUANDO:\n- O cliente confirmar uma data/hora para agendamento (ex: \"sim, quero agendar\", \"confirmo\", \"está bom\", \"pode ser nesse horário\")\n- Após você ter verificado disponibilidade e o horário estiver livre (confirmado por \"Busca Disponibilidades\")\n- Cliente deu consentimento explícito\n\n**AÇÃO OBRIGATÓRIA**: Se o cliente confirmar uma data APÓS você ter verificado disponibilidade, você DEVE usar \"Cria Evento\" para criar o agendamento.\n\n## REGRA 3: FLUXO OBRIGATÓRIO DE AGENDAMENTO:\n\n1. Cliente menciona interesse em agendar OU pergunta sobre horários\n   → **VOCÊ DEVE USAR \"Busca Disponibilidades\"** (OBRIGATÓRIO)\n\n2. Após verificar disponibilidade:\n   - Se livre (array vazio ou horário não está na lista): **VOCÊ DEVE USAR \"Cria Evento\"** se cliente confirmar\n   - Se ocupado: Informe ao cliente e sugira alternativas livres\n\n3. Após criar evento com sucesso:\n   → **VOCÊ DEVE USAR \"Data table Update\"** para salvar o ID do agendamento (OBRIGATÓRIO)\n\n## REGRA 4: INTERPRETAÇÃO DE CONFIRMAÇÃO:\n\nConsidere como CONFIRMAÇÃO de agendamento:\n- \"Sim\", \"Confirmo\", \"Pode ser\", \"Está bom\", \"Perfeito\", \"Ótimo\"\n- \"Quero agendar para [data/hora]\"\n- \"Pode ser amanhã às 10h\"\n- Qualquer resposta positiva após você sugerir um horário\n\nQuando houver confirmação, você DEVE usar \"Cria Evento\" APENAS se já verificou disponibilidade primeiro.\n\n## REGRA 5: NÃO PULE ETAPAS\n\nNUNCA crie um evento sem antes verificar disponibilidade. Esta é uma regra ABSOLUTA.\n\n## EXEMPLOS DE USO CORRETO:\n\n**Cenário 1 - Cliente pergunta horários:**\nCliente: \"quais horários você tem disponíveis?\"\n→ Você DEVE usar \"Busca Disponibilidades\" AGORA (OBRIGATÓRIO)\n→ Analise os resultados\n→ Se vazio: informe ampla disponibilidade e sugira horários\n→ Se houver eventos: liste ocupados e sugira livres\n→ Se o cliente confirmar, use \"Cria Evento\"\n\n**Cenário 2 - Cliente menciona data específica:**\nCliente: \"quero agendar para amanhã às 10h\"\n→ Você DEVE usar \"Busca Disponibilidades\" primeiro para verificar (OBRIGATÓRIO)\n→ Se livre (horário não está na lista), use \"Cria Evento\" imediatamente\n→ Use \"Data table Update\" para salvar o ID\n\n**Cenário 3 - Cliente confirma após verificação:**\nVocê: \"Tenho disponibilidade amanhã às 10h, 14h ou 16h\" (baseado em \"Busca Disponibilidades\")\nCliente: \"Pode ser às 14h\"\n→ Você DEVE usar \"Cria Evento\" AGORA (já verificou disponibilidade anteriormente)\n→ Use \"Data table Update\" para salvar o ID\n\n## LEMBRE-SE:\n- NUNCA responda sobre horários sem consultar \"Busca Disponibilidades\" primeiro\n- NUNCA invente horários disponíveis - use apenas os dados da ferramenta\n- Sempre verifique disponibilidade antes de criar qualquer evento\n- Se o cliente confirmar, crie o evento imediatamente (após verificação)\n- Sempre salve o ID do agendamento após criar"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        4816,
-        96
+        11712,
+        784
       ],
-      "id": "8e2954c1-887e-4e8a-9eeb-8c0bff5fd1e0",
+      "id": "618b7f3c-6dee-4953-8574-55e2e61bdac8",
       "name": "AI Agent - Respostas"
     },
     {
       "parameters": {
-        "model": "meta-llama/llama-3.1-405b-instruct:free",
+        "model": "mistralai/mistral-7b-instruct:free",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        3712,
-        304
+        10608,
+        992
       ],
-      "id": "db72daef-143f-481c-be0a-94233f5928cc",
+      "id": "2f561187-e5ec-407e-85ac-06c234f1429f",
       "name": "OpenRouter Chat Model",
       "executeOnce": true,
       "credentials": {
@@ -967,16 +979,16 @@
     },
     {
       "parameters": {
-        "model": "mistralai/devstral-2512:free",
+        "model": "mistralai/mistral-7b-instruct",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        4032,
-        304
+        10928,
+        992
       ],
-      "id": "44840bd5-7ff6-4f64-854a-f92f25c8f3be",
+      "id": "07cb6d03-79b9-4941-9297-a1baf69cfc44",
       "name": "OpenRouter Chat Model1",
       "credentials": {
         "openRouterApi": {
@@ -999,10 +1011,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        3552,
-        304
+        10448,
+        992
       ],
-      "id": "a5bd79c5-5fcf-484e-882e-a64283aa2e1a",
+      "id": "29e15938-bca7-4a4c-a53d-24fc0a60d1b4",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -1025,10 +1037,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        3872,
-        304
+        10768,
+        992
       ],
-      "id": "96cf36f7-08ea-447d-832c-6ba59a870fef",
+      "id": "5bf372e9-9793-42c7-9fdc-13549ccf4dad",
       "name": "OpenAI Chat Model1",
       "executeOnce": true,
       "credentials": {
@@ -1046,10 +1058,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1,
       "position": [
-        5104,
-        304
+        12000,
+        992
       ],
-      "id": "61d98a80-3065-4faa-ab30-de9ce92ab265",
+      "id": "c53f087f-41cd-4a9b-aef5-c9a2ba5b10fc",
       "name": "Embeddings OpenAI1",
       "rewireOutputLogTo": "ai_tool",
       "credentials": {
@@ -1062,22 +1074,41 @@
     {
       "parameters": {
         "mode": "retrieve-as-tool",
-        "toolDescription": "=Buscar arquivos de conhecimento da empresa {{ $('Webhook').first().json.body.controlia.company_id }}",
+        "toolDescription": "Busca informações relevantes na base de conhecimento da empresa para responder a perguntas do cliente. Use esta ferramenta quando o cliente fizer perguntas sobre produtos, serviços, políticas, procedimentos ou qualquer informação específica da empresa que você não tenha certeza. Retorna trechos de documentos relevantes.",
         "tableName": {
           "__rl": true,
-          "value": "files",
+          "value": "document_chunks",
           "mode": "list",
-          "cachedResultName": "files"
+          "cachedResultName": "document_chunks"
         },
-        "options": {}
+        "filters": {
+          "filterType": "manual",
+          "matchType": "allMatch",
+          "conditions": [
+            {
+              "keyName": "company_id",
+              "condition": "equal",
+              "keyValue": "={{ $('Webhook').first().json.body.controlia.company_id }}"
+            },
+            {
+              "keyName": "is_indexed",
+              "condition": "equal",
+              "keyValue": "true"
+            }
+          ]
+        },
+        "options": {
+          "topK": 5,
+          "similarityThreshold": 0.7
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
       "typeVersion": 1.3,
       "position": [
-        5248,
-        288
+        12144,
+        976
       ],
-      "id": "c7af89e4-2131-4532-b6d6-bacc487d27f3",
+      "id": "341a3a32-4bbb-4983-b3ec-b2b8a0c8d6d2",
       "name": "Supabase Vector Store",
       "credentials": {
         "supabaseApi": {
@@ -1095,23 +1126,24 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        4192,
-        304
+        11088,
+        992
       ],
-      "id": "7fc6022a-247f-441d-955a-dfc9313f5597",
+      "id": "483d6058-d78b-48f8-8990-f09107dab01d",
       "name": "Simple Memory"
     },
     {
       "parameters": {
+        "modelName": "models/gemma-3-4b-it",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        3664,
-        512
+        10448,
+        1152
       ],
-      "id": "cbc71614-186e-4363-b8f2-3eaecc0b34c5",
+      "id": "ef818f33-c0eb-4008-912b-35db40ce8ed1",
       "name": "Google Gemini Chat Model",
       "alwaysOutputData": true,
       "credentials": {
@@ -1128,10 +1160,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        3904,
-        512
+        10608,
+        1152
       ],
-      "id": "ed0eaf07-4703-4551-bdd8-3fbd96bae9af",
+      "id": "e7257fc4-7620-48ad-9d74-bd4ca19be734",
       "name": "Google Gemini Chat Model1",
       "alwaysOutputData": true,
       "credentials": {
@@ -1220,6 +1252,17 @@
         ]
       ]
     },
+    "Processar Prompt Extractor": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Information Extractor": {
       "main": [
         [
@@ -1268,7 +1311,7 @@
       "main": [
         [
           {
-            "node": "Information Extractor",
+            "node": "Processar Prompt Extractor",
             "type": "main",
             "index": 0
           }
@@ -1343,22 +1386,24 @@
     },
     "OpenRouter Chat Model": {
       "ai_languageModel": [
-        []
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     },
     "OpenRouter Chat Model1": {
       "ai_languageModel": [
-        []
-      ]
-    },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
-        []
-      ]
-    },
-    "OpenAI Chat Model1": {
-      "ai_languageModel": [
-        []
+        [
+          {
+            "node": "AI Agent - Respostas",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     },
     "Embeddings OpenAI1": {
@@ -1396,24 +1441,12 @@
     },
     "Google Gemini Chat Model": {
       "ai_languageModel": [
-        [
-          {
-            "node": "Information Extractor",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Google Gemini Chat Model1": {
       "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent - Respostas",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     }
   },
@@ -1423,28 +1456,28 @@
         "headers": {
           "host": "controlia.up.railway.app",
           "user-agent": "node",
-          "content-length": "1205",
+          "content-length": "1183",
           "accept": "*/*",
           "accept-encoding": "br, gzip, deflate",
           "accept-language": "*",
           "content-type": "application/json",
           "sec-fetch-mode": "cors",
-          "x-forwarded-for": "3.234.216.137",
+          "x-forwarded-for": "35.153.144.228",
           "x-forwarded-host": "controlia.up.railway.app",
           "x-forwarded-proto": "https",
           "x-railway-edge": "railway/us-east4-eqdc4a",
-          "x-railway-request-id": "qAKzhpFKQsiaJW78g4a9AQ",
-          "x-real-ip": "3.234.216.137",
-          "x-request-start": "1767312190733",
-          "x-vercel-id": "fra1::bh7ll-1767312187860-79fb83e76690",
+          "x-railway-request-id": "vkaFwG_KQumyamWqg4a9AQ",
+          "x-real-ip": "35.153.144.228",
+          "x-request-start": "1767314704789",
+          "x-vercel-id": "fra1::h24dn-1767314702861-00d6d47da9f1",
           "x-webhook-secret": "N0v4F0rg3@2025"
         },
         "params": {},
         "query": {},
         "body": {
-          "update_id": 906311000,
+          "update_id": 906311006,
           "message": {
-            "message_id": 566,
+            "message_id": 574,
             "from": {
               "id": 7772641515,
               "is_bot": false,
@@ -1458,14 +1491,14 @@
               "last_name": "Silva",
               "type": "private"
             },
-            "date": 1767312187,
-            "text": "quais horários diponíveis tem no dia 8?"
+            "date": 1767314702,
+            "text": "vreifique novamente"
           },
           "controlia": {
             "company_id": "cae292bd-2cc7-42b9-9254-779ed011989e",
             "contact_id": "9cd516cf-c011-4d98-92c8-3830a6c2ac83",
             "conversation_id": "53bc9d7a-8bb3-492f-8042-1f5cdb64f297",
-            "message_id": "495f536d-694d-4266-818e-0cd24a2f82e7",
+            "message_id": "1afc1624-37d7-44aa-8119-02a3fa90aeb9",
             "channel": "telegram",
             "callback_url": "https://controliaa.vercel.app/api/webhooks/n8n/channel-response",
             "contact": {
@@ -1484,13 +1517,13 @@
               "custom_fields": {
                 "interesse": "Sistema Web",
                 "telegram_id": "7772641515",
-                "data_agendamento": "2023-12-15T00:00:00.000Z",
+                "data_agendamento": "2026-01-08T18:00:00.000Z",
                 "telegram_username": null,
                 "historico_tratamento": "Primeira vez contratando"
               },
               "created_at": "2026-01-01T22:38:06.44661+00:00",
-              "updated_at": "2026-01-02T00:03:10.234114+00:00",
-              "last_interaction_at": "2026-01-02T00:03:07+00:00"
+              "updated_at": "2026-01-02T00:45:03.362931+00:00",
+              "last_interaction_at": "2026-01-02T00:45:02+00:00"
             }
           }
         },
